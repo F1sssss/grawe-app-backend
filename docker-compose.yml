@@ -1,22 +1,48 @@
 version: '3'
 
+
+
 services:
   server:
-    build: .     # Specify the path to your Node.js server's Dockerfile
-    #dockerfile: dockerfile
+    build:     # Specify the path to your Node.js server's Dockerfile
+      context: .
+      dockerfile: Dockerfile
     ports:
       - '3000:3000'                 # Map the server container's port 8080 to the host's port 8080
     environment:
-      - DB_HOST=localhost       # Specify the hostname of the MSSQL database container
-      - DB_USER=SA              # Set the database username
-      - DB_PASSWORD=Grawe123$     # Set the database password
+      - DB_HOST=localhost           # Specify the hostname of the MSSQL database container
+      - DB_USER=SA                  # Set the database username
+      - DB_PASSWORD=Grawe123$       # Set the database password
+    volumes:
+      - .:/usr/src/app       # Mount the server code into the container
+      - /usr/src/app/node_modules
+    restart: on-failure
     depends_on:
       - mssql-server
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.21
 
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
-      - ACCEPT_EULA=Y              # Accept the MSSQL EULA
-      - SA_PASSWORD=Grawe123$     # Set the database SA password
+      - ACCEPT_EULA=Y               # Accept the MSSQL EULA
+      - SA_PASSWORD=Grawe123$       # Set the database SA password
     ports:
-      - '1433:1433'            # Map the MSSQL container's port 1433 to the host's port 1433
+      - '1433:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
+    volumes:
+      - ./mssql-data/data:/var/opt/mssql/data
+      - ./mssql-data/log:/var/opt/mssql/log
+      - ./mssql-data/secrets:/var/opt/mssql/secrets
+      #- ./mssql-data/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.23
+
+networks:
+  mynetwork:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.23.0.0/24"
+

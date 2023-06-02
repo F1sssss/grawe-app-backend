@@ -1,20 +1,47 @@
 const express = require('express');
+const cors= require('cors');
+const helmet= require('helmet');
+const cookieParser= require('cookie-parser');
+const xss = require('xss-clean');
+const compression = require('compression');
+
+
+//start express app
 const app = express();
 
 
-const port = 3000;
-
-process.on('uncaughtException', err => {
-    console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-    console.log(err.name, err.message);
-    process.exit(1);
-});
+app.enable('trust proxy');
 
 
-app.get('/', (req, res) => {
-    res.send('Hello, world!');
-});
+//Global Middlewares
 
-const server = app.listen(port, () => {
-    console.log(`App running on port ${port}...`);
-});  
+//Implement CORS
+app.use(cors())
+app.options('*', cors());
+
+//Set security HTTP headers
+app.use(helmet());
+
+//Body parser, reading data from body into req.body
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+//Data sanitization against XSS
+app.use(xss())
+
+//Optimizing the sent data
+app.use(compression());
+
+//test middleware
+
+app.use((req,res,next)=>{
+
+    req.requestTime=new Date().toISOString();
+    next();
+})
+
+
+
+module.exports= app;
