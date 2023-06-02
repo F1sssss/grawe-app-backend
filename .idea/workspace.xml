@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd1e28b8-6565-4e50-89f5-a1f59bae6693" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
@@ -25,7 +26,7 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectId" id="2QVxnkzdBgpvKu3SBmxUVFbjqUj" />
   <component name="ProjectViewState">
@@ -37,7 +38,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "test-setup-branch",
+    "git-widget-placeholder": "functionality/docker__compose",
     "ignore.virus.scanning.warn.message": "true",
     "javascript.nodejs.core.library.configured.version": "19.3.0",
     "javascript.nodejs.core.library.typings.version": "20.2.5",
@@ -63,7 +64,7 @@
       <workItem from="1685456660063" duration="6718000" />
       <workItem from="1685470956059" duration="1920000" />
       <workItem from="1685623477930" duration="357000" />
-      <workItem from="1685623852269" duration="3353000" />
+      <workItem from="1685623852269" duration="7558000" />
     </task>
     <servers />
   </component>

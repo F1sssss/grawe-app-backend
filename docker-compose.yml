@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  server:
+    build: .     # Specify the path to your Node.js server's Dockerfile
+    #dockerfile: dockerfile
+    ports:
+      - '3000:3000'                 # Map the server container's port 8080 to the host's port 8080
+    environment:
+      - DB_HOST=localhost       # Specify the hostname of the MSSQL database container
+      - DB_USER=SA              # Set the database username
+      - DB_PASSWORD=Grawe123$     # Set the database password
+    depends_on:
+      - mssql-server
+
+  mssql-server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y              # Accept the MSSQL EULA
+      - SA_PASSWORD=Grawe123$     # Set the database SA password
+    ports:
+      - '1433:1433'            # Map the MSSQL container's port 1433 to the host's port 1433
