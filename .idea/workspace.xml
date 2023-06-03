@@ -5,7 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd1e28b8-6565-4e50-89f5-a1f59bae6693" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/sql/DBConnect.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sql/queries/test.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/excecuteQuery.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/loadSQL.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/DBconfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/sql/DBconfig.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,7 +33,7 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectId" id="2QVxnkzdBgpvKu3SBmxUVFbjqUj" />
   <component name="ProjectLevelVcsManager">
@@ -51,7 +60,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_interpreter_path": "node",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "preferences.fileTypes",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -79,7 +88,10 @@
       <workItem from="1685470956059" duration="1920000" />
       <workItem from="1685623477930" duration="357000" />
       <workItem from="1685623852269" duration="23339000" />
-      <workItem from="1685719701176" duration="11542000" />
+      <workItem from="1685719701176" duration="12236000" />
+      <workItem from="1685801939774" duration="1444000" />
+      <workItem from="1685808744111" duration="8523000" />
+      <workItem from="1685817418359" duration="4868000" />
     </task>
     <servers />
   </component>
