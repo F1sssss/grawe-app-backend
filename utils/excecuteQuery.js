@@ -1,32 +1,27 @@
-const DBConfig= require('../sql/DBconfig');
+const DBConfig = require('../sql/DBconfig');
 const sql = require('mssql');
-const DBConnection= require('../sql/DBConnect');
-const {request} = require("express");
+const DBConnection = require('../sql/DBConnect');
+const { request } = require('express');
 
+async function executeQuery(query, params = []) {
+  try {
+    const { pool } = await DBConnection.DBConnection(DBConfig.sql);
 
-async function executeQuery(query,params=[]) {
+    const request = new sql.Request(pool);
 
-    try {
+    params.forEach((param) => {
+      request.input(param.name, param.type, param.value);
+    });
 
-        const {pool}=await DBConnection.DBConnection(DBConfig.sql);
+    const result = await request.query(query);
 
-        const request = new sql.Request(pool);
+    pool.release();
 
-        params.forEach(param => {
-            request.input(param.name, param.type, param.value);
-        });
-
-        const result = await request.query(query);
-
-        pool.release();
-
-        return result.recordset;
-
-    }catch (err){
-        console.log("Error executing query");
-        console.log(err);
-    }
-
+    return result.recordset;
+  } catch (err) {
+    console.log('Error executing query');
+    console.log(err);
+  }
 }
 
-module.exports= executeQuery;
+module.exports = executeQuery;
