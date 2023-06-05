@@ -1,8 +1,8 @@
 // Description: Main entry point for the application. Starts the server and connects to the database.
 
-const app = require("./app");
-const DB_CONFIG = require("./src/sql/DBconfig");
-const DBConnection = require("./src/sql/DBConnect");
+const app = require('./app');
+const DB_CONFIG = require('./src/sql/DBconfig');
+const DBConnection = require('./src/sql/DBConnect');
 
 //Test connection to MSSQL database and start server
 
@@ -15,7 +15,7 @@ const server = app.listen(DB_CONFIG.port, async () => {
     await connection.connect();
     await connection.close();
   } catch (err) {
-    console.log("Error connecting to MSSQL database server.js");
+    console.log('Error connecting to MSSQL database server.js');
     console.log(err);
     process.exit(1);
   }
@@ -23,17 +23,17 @@ const server = app.listen(DB_CONFIG.port, async () => {
 
 //Error handling
 
-process.on("unhandledRejection", (err) => {
-  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
   console.log(err.name, err.message);
   server.close(() => {
     process.exit(1);
   });
 });
 
-process.on("SIGTERM", () => {
-  console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
   server.close(() => {
-    console.log("💥 Process terminated!");
+    console.log('💥 Process terminated!');
   });
 });
