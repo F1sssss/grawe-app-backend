@@ -5,21 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd1e28b8-6565-4e50-89f5-a1f59bae6693" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/sql/DBConnect.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/sql/DBconfig.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/loadSQL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/DBConnect.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/DBconfig.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/queries/test.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/queries/test.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/excecuteQuery.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/loadSQL.js" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.prettierrc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +46,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "functionality/mssql__connection",
+    "git-widget-placeholder": "Merging functionality/mssql__connection",
     "ignore.virus.scanning.warn.message": "true",
     "javascript.nodejs.core.library.configured.version": "19.3.0",
     "javascript.nodejs.core.library.typings.version": "20.2.5",
