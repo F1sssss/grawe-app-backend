@@ -1,48 +1,39 @@
-const app=require('./app');
-const sql = require('mssql');
-const DBconfig = require('./sql/DBconfig');
-const {config} = require("dotenv");
-const db= require('./sql/DBConnect');
-const loadSqlQueries= require('./utils/loadSQL');
-const ExecuteQuery= require('./utils/excecuteQuery');
+// Description: Main entry point for the application. Starts the server and connects to the database.
 
+const app = require("./app");
+const DB_CONFIG = require("./src/sql/DBconfig");
+const DBConnection = require("./src/sql/DBConnect");
 
-const server = app.listen(DBconfig.port, () => {
-    console.log(`App running on port  ${DBconfig.port}...`);
+//Test connection to MSSQL database and start server
+
+const server = app.listen(DB_CONFIG.port, async () => {
+  console.log(`App running on port  ${DB_CONFIG.port}...`);
+
+  const connection = new DBConnection(DB_CONFIG.sql);
+
+  try {
+    await connection.connect();
+    await connection.close();
+  } catch (err) {
+    console.log("Error connecting to MSSQL database server.js");
+    console.log(err);
+    process.exit(1);
+  }
 });
-
-
-//Connect to the database
-(async function connectToDatabase() {
-    try{
-        const conn= await db.DBConnection(DBconfig.sql);
-        const query= await loadSqlQueries.loadSqlQueries();
-
-        const result=await ExecuteQuery(query.test);
-        console.log(result);
-    }catch(err){
-        console.log("Error connecting to MSSQL database server.js");
-        console.log(err);
-    }
-})();
-app.get('/', (req, res) => {
-    res.send('Hello, world!');
-});
-
 
 //Error handling
 
-process.on('unhandledRejection', err => {
-    console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-    console.log(err.name, err.message);
-    server.close(() => {
-        process.exit(1);
-    });
+process.on("unhandledRejection", (err) => {
+  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
 });
 
-process.on('SIGTERM', () => {
-    console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
-    server.close(() => {
-        console.log('💥 Process terminated!');
-    });
+process.on("SIGTERM", () => {
+  console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
+  server.close(() => {
+    console.log("💥 Process terminated!");
+  });
 });
