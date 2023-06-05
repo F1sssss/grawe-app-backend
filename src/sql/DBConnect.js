@@ -27,10 +27,17 @@ module.exports = class DBConnection {
     }
   }
 
-  async executeQuery(query) {
+  async executeQuery(query, params = []) {
     try {
       await this.connect();
-      const result = await this.pool.request().query(query);
+
+      const request = await this.pool.request();
+      // Add parameters to the request
+      params.forEach((param) => {
+        request.input(param.name, param.value);
+      });
+
+      const result = await request.query(query);
       console.log('Query executed successfully');
       //console.log(result.recordset);
       await this.close();

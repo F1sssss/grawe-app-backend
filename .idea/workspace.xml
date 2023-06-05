@@ -5,22 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd1e28b8-6565-4e50-89f5-a1f59bae6693" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/controllers/authController.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/routes/userRouter.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/services/userService.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/sql/queries/login.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/grawe_backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/grawe_backend.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/authServices.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/sql/queries/signup.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.env" beforeDir="false" afterPath="$PROJECT_DIR$/config.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/authController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/authController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/userRouter.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/userRouter.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/userService.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/sql/DBConnect.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/DBConnect.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/DBconfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/DBconfig.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/loadSQL.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/loadSQL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sql/queries/login.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/queries/login.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,7 +100,7 @@
       <workItem from="1685719701176" duration="11542000" />
       <workItem from="1685952654592" duration="8785000" />
       <workItem from="1685970432533" duration="654000" />
-      <workItem from="1685971089026" duration="9251000" />
+      <workItem from="1685971089026" duration="15015000" />
     </task>
     <servers />
   </component>
