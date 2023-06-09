@@ -5,31 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd1e28b8-6565-4e50-89f5-a1f59bae6693" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/sql/SQLParam.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/sql/UserQueries.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/AppError.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/CatchAsync.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/Email.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/EmailTemplates/emailRegister.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/PDFCreation/Grawe.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/PDFCreation/createInvoice.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/PDFCreation/invoice.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/grawe_backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/grawe_backend.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.env" beforeDir="false" afterPath="$PROJECT_DIR$/config.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controllers/authController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/authController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/userRouter.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/userRouter.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/authServices.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/authServices.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/DBConnect.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/DBConnection.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/DBconfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/DBconfig.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/queries/login.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/sql_queries/login.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/queries/signup.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/sql_queries/signup.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/queries/test.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/loadSQL.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/sql_queries/loadSQL.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +50,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "functionality/mssql__connection",
+    "git-widget-placeholder": "functionality/authentication__pdfCreation",
     "ignore.virus.scanning.warn.message": "true",
     "javascript.nodejs.core.library.configured.version": "19.3.0",
     "javascript.nodejs.core.library.typings.version": "20.2.5",
@@ -123,7 +101,7 @@
       <workItem from="1685970432533" duration="654000" />
       <workItem from="1685971089026" duration="25796000" />
       <workItem from="1686079029550" duration="33070000" />
-      <workItem from="1686297454559" duration="27956000" />
+      <workItem from="1686297454559" duration="28726000" />
     </task>
     <servers />
   </component>
