@@ -1,10 +1,10 @@
-// Load all the SQL queries from the queries folder
+// Load all the SQL sql_queries from the sql_queries folder
 
 const fse = require('fs-extra');
 const { join } = require('path');
 
 module.exports = loadSqlQueries = async (QueryFileName) => {
-  const queriesDirPath = join(process.cwd(), 'src', 'sql', 'queries');
+  const queriesDirPath = join(process.cwd(), 'src', 'sql', 'sql_queries');
 
   if (QueryFileName) {
     return fse.readFileSync(join(queriesDirPath, QueryFileName), {

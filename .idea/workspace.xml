@@ -5,15 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd1e28b8-6565-4e50-89f5-a1f59bae6693" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/services/authServices.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/sql/queries/signup.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/sql/SQLParam.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/sql/UserQueries.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/AppError.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/CatchAsync.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/Email.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/EmailTemplates/emailRegister.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/PDFCreation/Grawe.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/PDFCreation/createInvoice.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/PDFCreation/invoice.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.env" beforeDir="false" afterPath="$PROJECT_DIR$/config.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/controllers/authController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/authController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/routes/userRouter.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/userRouter.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/userService.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/DBConnect.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/DBConnect.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sql/queries/login.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/queries/login.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/authServices.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/authServices.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sql/DBConnect.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/DBConnection.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sql/DBconfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/DBconfig.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sql/queries/login.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/sql_queries/login.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sql/queries/signup.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/sql_queries/signup.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sql/queries/test.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/loadSQL.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/sql/sql_queries/loadSQL.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,8 +46,9 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/app.js" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/node_modules/@sendgrid/mail/src/classes/mail-service.js" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/server.js" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/sql/DBConnect.js" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/sql/DBConnection.js" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/sql/DBconfig.js" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/utils/loadSQL.js" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -49,37 +66,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;functionality/mssql__connection&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;19.3.0&quot;,
-    &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;20.2.5&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/filip/WebstormProjects/grawe_backend/sql&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;C:\\Users\\filip\\WebstormProjects\\grawe_backend\\node_modules\\prettier&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.prettier&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "functionality/mssql__connection",
+    "ignore.virus.scanning.warn.message": "true",
+    "javascript.nodejs.core.library.configured.version": "19.3.0",
+    "javascript.nodejs.core.library.typings.version": "20.2.5",
+    "last_opened_file_path": "C:/Users/filip/WebstormProjects/grawe_backend/src/utils/PDFCreation",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "node",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "C:\\Users\\filip\\WebstormProjects\\grawe_backend\\node_modules\\prettier",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "settings.javascript.prettier",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\filip\WebstormProjects\grawe_backend\src\utils\PDFCreation" />
       <recent name="C:\Users\filip\WebstormProjects\grawe_backend\sql" />
       <recent name="C:\Users\filip\WebstormProjects\grawe_backend\mssql-data\data" />
       <recent name="C:\Users\filip\WebstormProjects\grawe_backend\mssql-data\init-scripts" />
       <recent name="C:\Users\filip\WebstormProjects\grawe_backend\mssql-data" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\filip\WebstormProjects\grawe_backend\src\utils\PDFCreation" />
+      <recent name="C:\Users\filip\WebstormProjects\grawe_backend\src\sql\queries" />
       <recent name="C:\Users\filip\WebstormProjects\grawe_backend\src" />
       <recent name="C:\Users\filip\WebstormProjects\grawe_backend\mssql-data\data" />
     </key>
@@ -100,7 +121,9 @@
       <workItem from="1685719701176" duration="11542000" />
       <workItem from="1685952654592" duration="8785000" />
       <workItem from="1685970432533" duration="654000" />
-      <workItem from="1685971089026" duration="15015000" />
+      <workItem from="1685971089026" duration="25796000" />
+      <workItem from="1686079029550" duration="33070000" />
+      <workItem from="1686297454559" duration="27956000" />
     </task>
     <servers />
   </component>

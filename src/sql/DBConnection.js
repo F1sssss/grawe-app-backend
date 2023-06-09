@@ -1,17 +1,15 @@
-const sql = require('mssql');
+/** @namespace result.recordset**/
+const { ConnectionPool } = require('mssql');
 
 module.exports = class DBConnection {
   constructor(config) {
-    this.config = config;
-    this.pool = new sql.ConnectionPool(this.config);
+    this.pool = new ConnectionPool(config);
   }
 
   async connect() {
     try {
       await this.pool.connect();
-      console.log('Connected to MSSQL database');
     } catch (err) {
-      console.log('Error connecting to MSSQL database (DBConnect.js))');
       console.log(err);
       throw err;
     }
@@ -19,9 +17,10 @@ module.exports = class DBConnection {
   async close() {
     try {
       await this.pool.close();
-      console.log('Connection to MSSQL database closed');
     } catch (err) {
-      console.log('Error closing connection to MSSQL database (DBConnect.js)');
+      console.log(
+        'Error closing connection to MSSQL database (DBConnection.js)'
+      );
       console.log(err);
       throw err;
     }
@@ -37,11 +36,10 @@ module.exports = class DBConnection {
         request.input(param.name, param.value);
       });
 
-      const result = await request.query(query);
-      console.log('Query executed successfully');
-      //console.log(result.recordset);
+      let result = await request.query(query);
       await this.close();
-      return result.recordset;
+      result = result.recordset;
+      return result[0];
     } catch (err) {
       console.log('Error executing query');
       console.log(err);

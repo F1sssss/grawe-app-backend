@@ -18,7 +18,8 @@ const {
   SQL_USER,
   SQL_PASSWORD,
   JWT_ENCRYPT_PWD,
-  JWT_EXPIRES_IN
+  JWT_EXPIRES_IN,
+  SENDGRID_API_KEY
 } = process.env;
 
 const isEncrypt = process.env.SQL_ENCRYPT === 'true';
@@ -45,6 +46,7 @@ module.exports = {
   cookiePwd: COOKIE_ENCRYPT_PWD,
   encrypt: JWT_ENCRYPT_PWD,
   expiresIn: JWT_EXPIRES_IN,
+  mailAPI: SENDGRID_API_KEY,
   sql: {
     server: SQL_SERVER,
     database: SQL_DATABASE,

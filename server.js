@@ -1,8 +1,7 @@
 // Description: Main entry point for the application. Starts the server and connects to the database.
-
 const app = require('./app');
 const DB_CONFIG = require('./src/sql/DBconfig');
-const DBConnection = require('./src/sql/DBConnect');
+const DBConnection = require('./src/sql/DBConnection');
 
 //Test connection to MSSQL database and start server
 
