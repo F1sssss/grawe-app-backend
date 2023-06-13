@@ -1,0 +1,49 @@
+version: '3'
+
+
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'                 # Map the server container's port 3000 to the host's port 3000
+    environment:
+      - DB_HOST=localhost
+      - DB_USER=SA
+      - DB_PASSWORD=Grawe123$
+    volumes:
+      - .:/usr/src/app
+      - ./node_modules:/usr/src/app/node_modules
+
+    restart: on-failure
+    depends_on:
+      - mssql-server
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.21
+
+  mssql-server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y               # Accept the MSSQL EULA
+      - SA_PASSWORD=Grawe123$
+    ports:
+      - '1433:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
+    volumes:
+      - ./mssql-data/data:/var/opt/mssql/data
+      - ./mssql-data/log:/var/opt/mssql/log
+      - ./mssql-data/secrets:/var/opt/mssql/secrets
+      #- ./mssql-data/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.23
+
+networks:
+  mynetwork:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.23.0.0/24"
+
