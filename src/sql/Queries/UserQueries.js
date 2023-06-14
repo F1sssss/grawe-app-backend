@@ -8,78 +8,54 @@ const AppError = require('../../utils/AppError');
 
 const getUserById = async (id) => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  const user = await connection.executeQuery(
-    'select * from users where id = @id',
-    [new SQLParam('id', id, sql.Int)]
-  );
+  const user = await connection.executeQuery('select * from users where id = @id', [new SQLParam('id', id, sql.Int)]);
 
   if (!user) {
     throw new AppError('User not found by id!', 404, 'error-user-not-found');
   }
 
-  user.password = null;
+  user.password = undefined;
   return { user, statusCode: 200 };
 };
 
 const getUserByUsername = async (username) => {
   const connection = new DBConnection(DB_CONFIG.sql);
 
-  const user = await connection.executeQuery(
-    'select * from users where username = @username and verified = 1',
-    [new SQLParam('username', username, sql.VarChar)]
-  );
+  const user = await connection.executeQuery('select * from users where username = @username and verified = 1', [new SQLParam('username', username, sql.VarChar)]);
   if (!user) {
-    throw new AppError(
-      'User not found by username!',
-      404,
-      'error-user-not-found'
-    );
+    throw new AppError('User not found by username!', 404, 'error-user-not-found');
   }
-  user.password = null;
+  user.password = undefined;
   return { user, statusCode: 200 };
 };
 
 const getUserByEmail = async (email) => {
   const connection = new DBConnection(DB_CONFIG.sql);
 
-  const user = await connection.executeQuery(
-    'select * from users where email = @email and verified = 1',
-    [new SQLParam('email', email, sql.VarChar)]
-  );
+  const user = await connection.executeQuery('select * from users where email = @email and verified = 1', [new SQLParam('email', email, sql.VarChar)]);
   if (!user) {
-    throw new AppError(
-      'User not found by username!',
-      404,
-      'error-user-not-found'
-    );
+    throw new AppError('User not found by username!', 404, 'error-user-not-found');
   }
   user.password = null;
   return { user, statusCode: 200 };
 };
 
-const getUserByUsernameOrEmail = async (username, email, type) => {
+const getUserByUsernameOrEmail = async (username, email, requesttype) => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  const user = await connection.executeQuery(
-    'select * from users where username = @username or email = @email',
-    [
-      new SQLParam('username', username, sql.VarChar),
-      new SQLParam('email', email, sql.VarChar)
-    ]
-  );
+  const user = await connection.executeQuery('select * from users where username = @username or email = @email', [
+    new SQLParam('username', username, sql.VarChar),
+    new SQLParam('email', email, sql.VarChar)
+  ]);
 
-  if (!user.username) {
-    throw new AppError(
-      'User not found by username or email!',
-      404,
-      'error-user-not-found'
-    );
+  if (!user.username && requesttype !== 'signup') {
+    throw new AppError('User not found by username or email!', 404, 'error-user-not-found');
   }
 
-  if (type === 'login' && user.verified !== 1) {
+  if (requesttype === 'login' && user.verified !== 1) {
     throw new AppError('Email not verified', 401, 'not-verified');
   }
 
-  user.password = type === 'login' ? user.password : undefined;
+  user.password = requesttype === 'login' ? user.password : undefined;
   return { user, statusCode: 200 };
 };
 
@@ -129,11 +105,7 @@ const updateUserPassword = async (id, field, value) => {
   );
 
   if (password !== value) {
-    throw new AppError(
-      'Error updating user!',
-      401,
-      'error-updating-user-password'
-    );
+    throw new AppError('Error updating user!', 401, 'error-updating-user-password');
   }
 
   return { new_value: password, statusCode: 200 };

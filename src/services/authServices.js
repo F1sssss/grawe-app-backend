@@ -23,11 +23,7 @@ const signJWT = (username) => {
 const loginService = async (req) => {
   const { username, password } = req;
 
-  const { user } = await SQLQueries.getUserByUsernameOrEmail(
-    username,
-    username,
-    'login'
-  );
+  const { user } = await SQLQueries.getUserByUsernameOrEmail(username, username, 'login');
 
   if (!(await bcrypt.compare(password, user.password))) {
     throw new AppError('Invalid Password', 401, 'error-invalid-password');
@@ -48,20 +44,11 @@ const signupService = async (req) => {
 
   const { user } = await SQLQueries.createUser(req);
 
-  const Email = new EmailValidator(
-    email,
-    username,
-    user.ID,
-    user.email_verification_token
-  );
+  const Email = new EmailValidator(email, username, user.ID, user.email_verification_token);
   const emailsent = await Email.sendEmailVerification();
 
   if (!emailsent) {
-    throw new AppError(
-      'Error during sending email',
-      401,
-      'error-email-sending-verification'
-    );
+    throw new AppError('Error during sending email', 401, 'error-email-sending-verification');
   }
 
   return { user, statusCode: 200 };
@@ -69,15 +56,10 @@ const signupService = async (req) => {
 
 const signupValidationService = async (req) => {
   const { username, email, password } = req;
-  const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email); // This one will throw and return 404 if user not found :( So no one can get registered
-
+  const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email, 'signup');
   if (user) {
     if (username === user.username) {
-      throw new AppError(
-        'Username already exists',
-        401,
-        'error-username-exists'
-      );
+      throw new AppError('Username already exists', 401, 'error-username-exists');
     }
 
     if (email === user.email) {
@@ -87,11 +69,7 @@ const signupValidationService = async (req) => {
 
   // Would have never been reached in its previous location
   if (!ValidationRegex.usernameRegex.test(username)) {
-    throw new AppError(
-      'Invalid Username! Please insure it contains only letters and numbers and minimum 6 characters',
-      401,
-      'error-invalid-username'
-    );
+    throw new AppError('Invalid Username! Please insure it contains only letters and numbers and minimum 6 characters', 401, 'error-invalid-username');
   }
 
   if (!ValidationRegex.emailRegex.test(email)) {
@@ -103,11 +81,7 @@ const signupValidationService = async (req) => {
   }
 
   if (!ValidationRegex.passwordRegex.test(password)) {
-    throw new AppError(
-      'Invalid Password! Please insure there is at least one digit, one capital letter and one sign',
-      401,
-      'error-invalid-password'
-    );
+    throw new AppError('Invalid Password! Please insure there is at least one digit, one capital letter and one sign', 401, 'error-invalid-password');
   }
   return { message: 'Valid parameters!', statusCode: 200 };
 };
@@ -115,21 +89,12 @@ const signupValidationService = async (req) => {
 const forgotPasswordService = async (id) => {
   const { user, statusCode } = await SQLQueries.getUserByUsernameOrEmail(id);
 
-  const Email = new EmailValidator(
-    user.email,
-    user.username,
-    user.id,
-    user.email_verification_token
-  );
+  const Email = new EmailValidator(user.email, user.username, user.id, user.email_verification_token);
 
   const emailsent = await Email.sendEmailRetrievingPassword();
 
   if (!emailsent || statusCode !== 200) {
-    throw new AppError(
-      'Error during sending email',
-      401,
-      'error-email-sending-forgotpassword'
-    );
+    throw new AppError('Error during sending email', 401, 'error-email-sending-forgotpassword');
   }
 
   return { user, statusCode };
@@ -140,19 +105,11 @@ const checkEmailVerification = async (id, email_verification_token) => {
 
   //Date.now() returns an integer,number of ms since 1970, and time to verify was a Date object, new Date() returns current time, via Date object
   if (user.time_to_varify < new Date()) {
-    throw new AppError(
-      'Email verification token expired!',
-      400,
-      'error-expired-email-verification-token'
-    );
+    throw new AppError('Email verification token expired!', 400, 'error-expired-email-verification-token');
   }
 
   if (email_verification_token !== user.email_verification_token) {
-    throw new AppError(
-      'Invalid email verification token!',
-      400,
-      'error-invalid-email-verification-token'
-    );
+    throw new AppError('Invalid email verification token!', 400, 'error-invalid-email-verification-token');
   }
 
   return { user, statusCode: 200 };
@@ -174,11 +131,7 @@ const verifyUserService = async (req) => {
 const setNewPasswordService = async (newPassword, id) => {
   newPassword = await bcrypt.hash(newPassword, 12);
 
-  const { new_value } = await SQLQueries.updateUserPassword(
-    id,
-    'password',
-    newPassword
-  );
+  const { new_value } = await SQLQueries.updateUserPassword(id, 'password', newPassword);
 
   return { new_value, statusCode: 200 };
 };
@@ -186,21 +139,14 @@ const setNewPasswordService = async (newPassword, id) => {
 const protectService = async (req) => {
   let token;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   } else if (req.cookies.token) {
     token = req.cookies.token;
   }
 
   if (!token) {
-    throw new AppError(
-      'You are not logged in! Please log in to get access.',
-      401,
-      'error-not-logged-in'
-    );
+    throw new AppError('You are not logged in! Please log in to get access.', 401, 'error-not-logged-in');
   }
 
   const decoded = await promisify(jwt.verify)(token, DB_CONFIG.encrypt);
@@ -208,11 +154,7 @@ const protectService = async (req) => {
   const { user } = await SQLQueries.getUserById(decoded.ID);
 
   if (!user) {
-    throw new AppError(
-      'The user belonging to this token does no longer exist.',
-      401,
-      'error-user-no-longer-exist'
-    );
+    throw new AppError('The user belonging to this token does no longer exist.', 401, 'error-user-no-longer-exist');
   }
 
   return { token, user, statusCode: 200 };
