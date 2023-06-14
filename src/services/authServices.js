@@ -29,7 +29,7 @@ const loginService = async (req) => {
     'login'
   );
 
-  if (!(await bcrypt.compare(password, user.password))) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     throw new AppError('Invalid Password', 401, 'error-invalid-password');
   }
 
@@ -68,7 +68,7 @@ const signupService = async (req) => {
 
 const signupValidationService = async (req) => {
   const { username, email, password } = req;
-  const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email);
+  const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email); // This one will throw and return 404 if user not found :( So no one can get registered
 
   if (user) {
     if (username === user.username) {
@@ -82,14 +82,15 @@ const signupValidationService = async (req) => {
     if (email === user.email) {
       throw new AppError('Email already exists', 401, 'error-email-exists');
     }
+  }
 
-    if (!ValidationRegex.usernameRegex.test(username)) {
-      throw new AppError(
-        'Invalid Username! Please insure it contains only letters and numbers and minimum 6 characters',
-        401,
-        'error-invalid-username'
-      );
-    }
+  // Would have never been reached in its previous location
+  if (!ValidationRegex.usernameRegex.test(username)) {
+    throw new AppError(
+      'Invalid Username! Please insure it contains only letters and numbers and minimum 6 characters',
+      401,
+      'error-invalid-username'
+    );
   }
 
   if (!ValidationRegex.emailRegex.test(email)) {
@@ -136,7 +137,8 @@ const forgotPasswordService = async (id) => {
 const checkEmailVerification = async (id, email_verification_token) => {
   const { user } = await SQLQueries.getUserById(id);
 
-  if (user.time_to_varify < Date.now()) {
+  //Date.now() returns an integer,number of ms since 1970, and time to verify was a Date object, new Date() returns current time, via Date object
+  if (user.time_to_varify < new Date()) {
     throw new AppError(
       'Email verification token expired!',
       400,

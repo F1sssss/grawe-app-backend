@@ -67,7 +67,7 @@ const getUserByUsernameOrEmail = async (username, email, type) => {
     ]
   );
 
-  if (!user) {
+  if (!user.username) {
     throw new AppError(
       'User not found by username or email!',
       404,
@@ -75,11 +75,11 @@ const getUserByUsernameOrEmail = async (username, email, type) => {
     );
   }
 
-  if (type !== 'login' && user.verified === 0) {
-    throw new AppError('Email not verified', 401);
+  if (type === 'login' && user.verified !== 1) {
+    throw new AppError('Email not verified', 401, 'not-verified');
   }
 
-  user.password = type === 'login' ? user.password : null;
+  user.password = type === 'login' ? user.password : undefined;
   return { user, statusCode: 200 };
 };
 
