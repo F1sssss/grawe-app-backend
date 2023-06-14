@@ -29,12 +29,13 @@ const loginService = async (req) => {
     'login'
   );
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  if (!(await bcrypt.compare(password, user.password))) {
     throw new AppError('Invalid Password', 401, 'error-invalid-password');
   }
 
   const token = signJWT(username);
 
+  user.password = undefined;
   return { token, user, statusCode: 200 };
 };
 
