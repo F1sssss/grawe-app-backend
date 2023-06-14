@@ -3,7 +3,7 @@ const CatchAsync = require('../utils/CatchAsync');
 
 const getPolicyInfo = CatchAsync(async (req, res) => {
   const { policies, statusCode } = await policyService.getPolicyInfoService(
-    req.query.policy
+    req.params.id
   );
 
   res.status(statusCode).json({
@@ -14,7 +14,7 @@ const getPolicyInfo = CatchAsync(async (req, res) => {
 
 const getPolicyHistory = CatchAsync(async (req, res) => {
   const { policy, statusCode } = await policyService.getPolicyHistory(
-    req.query.policy
+    req.params.id
   );
 
   res.status(statusCode).json({

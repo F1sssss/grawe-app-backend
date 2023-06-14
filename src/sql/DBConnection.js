@@ -1,7 +1,6 @@
 /** @namespace result.recordset**/
 const { ConnectionPool, Request } = require('mssql');
-const xlsx = require('xlsx');
-
+const AppError = require('../utils/AppError');
 module.exports = class DBConnection {
   constructor(config) {
     if (DBConnection._instance) {
@@ -16,8 +15,11 @@ module.exports = class DBConnection {
       await this.pool.connect();
       console.log('🔒 Connected to MSSQL database');
     } catch (err) {
-      console.log(err);
-      throw err;
+      throw new AppError(
+        'Error connecting to MSSQL database' + err.message,
+        500,
+        'error-connecting-to-db'
+      );
     }
   }
   async close() {
@@ -25,11 +27,11 @@ module.exports = class DBConnection {
       await this.pool.close();
       console.log('🔒 Connection to MSSQL database closed');
     } catch (err) {
-      console.log(
-        'Error closing connection to MSSQL database (DBConnection.js)'
+      throw new AppError(
+        'Error closing database connection' + err.message,
+        500,
+        'error-closing-db-connection'
       );
-      console.log(err);
-      throw err;
     }
   }
 
@@ -45,11 +47,14 @@ module.exports = class DBConnection {
       let result = await request.query(query);
 
       result = result.recordset;
+
       return result.length === 1 ? result[0] : result;
     } catch (err) {
-      console.log('Error executing query');
-      console.log(err);
-      throw err;
+      throw new AppError(
+        'Error executing query' + err.message,
+        500,
+        'error-executing-query'
+      );
     }
   }
 
@@ -79,9 +84,11 @@ module.exports = class DBConnection {
 
       return true;
     } catch (err) {
-      console.log('Error executing query');
-      console.log(err);
-      throw err;
+      throw new AppError(
+        'Error executing query' + err.message,
+        500,
+        'error-executing-query'
+      );
     }
   }
 };

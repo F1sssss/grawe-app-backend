@@ -9,6 +9,7 @@ const compression = require('compression');
 
 const userRouter = require('./src/routes/userRouter');
 const policyRouter = require('./src/routes/policyRouter');
+const errorController = require('./src/controllers/errorController');
 
 //start express app
 const app = express();
@@ -37,7 +38,6 @@ app.use(xss());
 app.use(compression());
 
 //test middleware
-
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
@@ -47,5 +47,8 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/policies', policyRouter);
+
+//Error handling middleware
+app.use(errorController);
 
 module.exports = app;

@@ -6,12 +6,12 @@ const router = express.Router();
 
 //router.use(authController.protect);
 
-router.get('/policy-history/', policyController.getPolicyHistory);
+router.get('/:id/history', policyController.getPolicyHistory);
 router.get(
   '/policy-history/xls/download',
   policyController.getPolicyHistoryExcelDownload
 );
-router.get('/policy-info/', policyController.getPolicyInfo);
+router.get('/:id/info', policyController.getPolicyInfo);
 router.get(
   '/policy-history/pdf/download',
   policyController.getPolicyHistoryPDFDownload

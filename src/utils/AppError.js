@@ -1,9 +1,10 @@
 module.exports = class AppError extends Error {
-  constructor(message, statusCode) {
+  constructor(message, statusCode, statusMessage) {
     super(message);
 
     this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.statusMessage = statusMessage;
+    this.message = message;
     this.isOperational = true;
 
     Error.captureStackTrace(this, this.constructor);

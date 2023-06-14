@@ -1,7 +1,7 @@
 const sgMail = require('@sendgrid/mail');
 const emailRegister = require('./EmailTemplates/emailRegister');
 const emailForgotPassword = require('./EmailTemplates/emailForgotPassword');
-const { SENDGRID_API_KEY, EMAIL_FROM } = process.env;
+const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL } = process.env;
 
 module.exports = class Email {
   constructor(email, username, id, email_verification_token) {
@@ -19,12 +19,11 @@ module.exports = class Email {
         subject: '[GRAWE] Verification email',
         html: emailRegister(
           this.username,
-          `http://localhost:3000/api/v1/users/signup/verification/?id=${this.id}?token=${this.email_verification_token}`
+          `${FRONTEND_URL}/api/v1/users/signup/verification/?id=${this.id}?token=${this.email_verification_token}`
         )
       };
-
       await sgMail.send(msg);
-      console.log('Email sent successfully!');
+
       return { message: 'Email sent successfully!', statusCode: 200 };
     } catch (err) {
       console.log(err);
@@ -41,13 +40,11 @@ module.exports = class Email {
         subject: '[GRAWE] Password reset',
         html: emailForgotPassword(
           this.username,
-          `http://localhost:3000/api/v1/users/forgot-password/?id=${this.id}&&?token=${this.email_verification_token}`
+          `${FRONTEND_URL}/api/v1/users/forgot-password/?id=${this.id}&&?token=${this.email_verification_token}`
         )
       };
-
       await sgMail.send(msg);
 
-      console.log('Email sent successfully!');
       return { message: 'Email sent successfully!', statusCode: 200 };
     } catch (err) {
       console.log(err);

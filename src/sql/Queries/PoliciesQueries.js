@@ -11,14 +11,23 @@ const getPolicyInfo = async (id) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const query = await loadSQLQueries('policy.sql');
 
-  if (!query) throw new AppError('Error loading policy query', 500);
+  if (!query)
+    throw new AppError(
+      'Error loading policy query',
+      500,
+      'error-getting-policyinfo-query'
+    );
 
   const policies = await connection.executeQuery(query, [
     new SQLParam('policy', id, sql.Int)
   ]);
 
   if (!policies) {
-    throw new AppError('Policy not found by id!', 404);
+    throw new AppError(
+      'Policy not found by id!',
+      404,
+      'error-getting-policyinfo-query'
+    );
   }
 
   return { policies, statusCode: 200 };
@@ -31,7 +40,11 @@ const getPolicyHistory = async (id) => {
     new SQLParam('polisa', id, sql.Int)
   ]);
   if (!policy) {
-    throw new AppError('Error during retrieving policy history', 404);
+    throw new AppError(
+      'Error during retrieving policy history',
+      404,
+      'error-getting-policy-history-query'
+    );
   }
 
   return { policy, statusCode: 200 };

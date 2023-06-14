@@ -14,14 +14,20 @@ const login = CatchAsync(async (req, res, next) => {
   const { token, user, statusCode } = await authServices.loginService(req.body);
 
   if (!token || !user || statusCode !== 200) {
-    throw next(new AppError('Error during user login:', statusCode));
+    throw next(
+      new AppError(
+        'Error during user login:',
+        statusCode,
+        'error-could-not-login-user'
+      )
+    );
   }
 
   res.cookie('token', token, {
     httpOnly: true,
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
   });
-  res.status(200).send({
+  res.status(statusCode).send({
     message: 'Login successful!',
     token,
     user
@@ -41,10 +47,12 @@ const signUp = CatchAsync(async (req, res, next) => {
   const { user, statusCode } = await authServices.signupService(req.body);
 
   if (statusCode !== 200) {
-    throw next(new AppError('Error during user signup:', statusCode));
+    throw next(
+      new AppError('Error during user signup:', statusCode, 'error-signup-user')
+    );
   }
 
-  res.status(200).send({
+  res.status(statusCode).send({
     message: 'Signup successful!',
     user
   });
@@ -56,10 +64,16 @@ const forgotPassword = CatchAsync(async (req, res, next) => {
   );
 
   if (statusCode !== 200 || !user) {
-    throw next(new AppError('Error during resetting password', statusCode));
+    throw next(
+      new AppError(
+        'Error during resetting password',
+        statusCode,
+        'error-resetting-password'
+      )
+    );
   }
 
-  res.status(200).send({
+  res.status(statusCode).send({
     message: 'Password reset email sent!',
     user
   });
@@ -72,10 +86,16 @@ const setNewPassword = CatchAsync(async (req, res, next) => {
   );
 
   if (statusCode !== 200 || !new_value) {
-    throw next(new AppError('Error during resetting password', statusCode));
+    throw next(
+      new AppError(
+        'Error during resetting password',
+        statusCode,
+        'server-error'
+      )
+    );
   }
 
-  res.status(200).send({
+  res.status(statusCode).send({
     message: 'Password reset successful!',
     new_value
   });
@@ -85,10 +105,16 @@ const emailVerification = CatchAsync(async (req, res, next) => {
   const { user, statusCode } = await authServices.verifyUserService(req.query);
 
   if (statusCode !== 200 || !user) {
-    throw next(new AppError('Error during email verification', statusCode));
+    throw next(
+      new AppError(
+        'Error during email verification',
+        statusCode,
+        'error-email-verification'
+      )
+    );
   }
 
-  res.status(200).send({
+  res.status(statusCode).send({
     message: 'User verified!',
     user
   });
@@ -98,10 +124,17 @@ const protect = CatchAsync(async (req, res, next) => {
   const { token, user, statusCode } = await authServices.protectService(req);
 
   if (!token || !user || statusCode !== 200) {
-    throw next(new AppError('Error during user authentication!:', statusCode));
+    throw next(
+      new AppError(
+        'Error during user authentication!:',
+        statusCode,
+        'error-authentication-user'
+      )
+    );
   }
 
   req.user = user;
+  //res.local.user = user;
   next();
 });
 
@@ -109,11 +142,13 @@ const restictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       throw next(
-        new AppError('You do not have permission to perform this action', 403)
+        new AppError(
+          'You do not have permission to perform this action',
+          403,
+          'error-permission-denied'
+        )
       );
     }
-
-    next();
   };
 };
 

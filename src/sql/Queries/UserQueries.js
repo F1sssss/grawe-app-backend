@@ -14,7 +14,7 @@ const getUserById = async (id) => {
   );
 
   if (!user) {
-    throw new AppError('User not found by id!', 404);
+    throw new AppError('User not found by id!', 404, 'error-user-not-found');
   }
 
   user.password = null;
@@ -29,7 +29,11 @@ const getUserByUsername = async (username) => {
     [new SQLParam('username', username, sql.VarChar)]
   );
   if (!user) {
-    throw new AppError('User not found by username!', 404);
+    throw new AppError(
+      'User not found by username!',
+      404,
+      'error-user-not-found'
+    );
   }
   user.password = null;
   return { user, statusCode: 200 };
@@ -43,7 +47,11 @@ const getUserByEmail = async (email) => {
     [new SQLParam('email', email, sql.VarChar)]
   );
   if (!user) {
-    throw new AppError('User not found by username!', 404);
+    throw new AppError(
+      'User not found by username!',
+      404,
+      'error-user-not-found'
+    );
   }
   user.password = null;
   return { user, statusCode: 200 };
@@ -52,20 +60,25 @@ const getUserByEmail = async (email) => {
 const getUserByUsernameOrEmail = async (username, email, type) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const user = await connection.executeQuery(
-    'select * from users where (username = @username or email = @email)',
+    'select * from users where username = @username or email = @email',
     [
       new SQLParam('username', username, sql.VarChar),
       new SQLParam('email', email, sql.VarChar)
     ]
   );
 
-  if (user.verified === 0) {
+  if (!user) {
+    throw new AppError(
+      'User not found by username or email!',
+      404,
+      'error-user-not-found'
+    );
+  }
+
+  if (type !== 'login' && user.verified === 0) {
     throw new AppError('Email not verified', 401);
   }
 
-  if (!user) {
-    throw new AppError('User not found by username or email!', 404);
-  }
   user.password = type === 'login' ? user.password : null;
   return { user, statusCode: 200 };
 };
@@ -86,7 +99,7 @@ const createUser = async (req) => {
     ]
   );
   if (!user) {
-    throw new AppError('Error creating user!', 401);
+    throw new AppError('Error creating user!', 401, 'error-creating-user');
   }
   user.password = null;
   return { user, statusCode: 200 };
@@ -101,7 +114,7 @@ const updateUserVerification = async (id, field, value) => {
   );
 
   if (verified !== value) {
-    throw new AppError('Error updating user!', 401);
+    throw new AppError('Error updating user!', 401, 'error-updating-user');
   }
 
   return { new_value: verified, statusCode: 200 };
@@ -116,7 +129,11 @@ const updateUserPassword = async (id, field, value) => {
   );
 
   if (password !== value) {
-    throw new AppError('Error updating user!', 401);
+    throw new AppError(
+      'Error updating user!',
+      401,
+      'error-updating-user-password'
+    );
   }
 
   return { new_value: password, statusCode: 200 };
