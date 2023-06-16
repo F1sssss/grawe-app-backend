@@ -9,42 +9,44 @@ const loadSQLQueries = require('../sql_queries/loadSQL');
 
 const getPolicyInfo = async (id) => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  const query = await loadSQLQueries('policy.sql');
+  const query = await loadSQLQueries('policyInfo.sql');
 
-  if (!query)
-    throw new AppError(
-      'Error loading policy query',
-      500,
-      'error-getting-policyinfo-query'
-    );
+  if (!query) throw new AppError('Error loading policy query', 500, 'error-getting-policyinfo-query');
 
-  const policies = await connection.executeQuery(query, [
-    new SQLParam('policy', id, sql.Int)
-  ]);
+  const policies = await connection.executeQuery(query, [new SQLParam('policy', id, sql.Int)]);
 
   if (!policies) {
-    throw new AppError(
-      'Policy not found by id!',
-      404,
-      'error-getting-policyinfo-query'
-    );
+    throw new AppError('Policy not found by id!', 404, 'error-getting-policyinfo-query');
   }
 
   return { policies, statusCode: 200 };
 };
 
-const getPolicyHistory = async (id) => {
+const getPolicyHistory = async (id, dateFrom, dateTo) => {
   const policyHistoryQuery = await loadSQLQueries('getPolicyHistory.sql');
   const connection = new DBConnection(DB_CONFIG.sql);
   const policy = await connection.executeQuery(policyHistoryQuery, [
-    new SQLParam('polisa', id, sql.Int)
+    new SQLParam('polisa', id, sql.Int),
+    new SQLParam('dateFrom', dateFrom, sql.VarChar),
+    new SQLParam('dateTo', dateTo, sql.VarChar)
   ]);
   if (!policy) {
-    throw new AppError(
-      'Error during retrieving policy history',
-      404,
-      'error-getting-policy-history-query'
-    );
+    throw new AppError('Error during retrieving policy history', 404, 'error-getting-policy-history-query');
+  }
+
+  return { policy, statusCode: 200 };
+};
+
+const getPolicyAnalyticalInfo = async (id, dateFrom, dateTo) => {
+  const policyAnalyticalInfoQuery = await loadSQLQueries('getPolicyAnalyticalInfo.sql');
+  const connection = new DBConnection(DB_CONFIG.sql);
+  const policy = await connection.executeQuery(policyAnalyticalInfoQuery, [
+    new SQLParam('policy', id, sql.Int),
+    new SQLParam('dateFrom', dateFrom, sql.VarChar),
+    new SQLParam('dateTo', dateTo, sql.VarChar)
+  ]);
+  if (!policy) {
+    throw new AppError('Error during retrieving policy history', 404, 'error-getting-policy-history-query');
   }
 
   return { policy, statusCode: 200 };
@@ -52,5 +54,6 @@ const getPolicyHistory = async (id) => {
 
 module.exports = {
   getPolicyInfo,
-  getPolicyHistory
+  getPolicyHistory,
+  getPolicyAnalyticalInfo
 };

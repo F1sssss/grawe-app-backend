@@ -7,14 +7,11 @@ const router = express.Router();
 //router.use(authController.protect);
 
 router.get('/:id/history', policyController.getPolicyHistory);
-router.get(
-  '/policy-history/xls/download',
-  policyController.getPolicyHistoryExcelDownload
-);
 router.get('/:id/info', policyController.getPolicyInfo);
-router.get(
-  '/policy-history/pdf/download',
-  policyController.getPolicyHistoryPDFDownload
-);
 
+router.get('/:id/history/xls/download', policyController.getPolicyHistoryExcelDownload);
+router.get('/:id/history/pdf/download', policyController.getPolicyHistoryPDFDownload);
+
+router.get('/:id/AnalyticalInfo', policyController.getPolicyAnalyticalInfo);
+router.get('/:id/AllAnalytics', policyController.getAllPolicyAnalytics);
 module.exports = router;

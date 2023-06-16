@@ -1,4 +1,5 @@
 /** @namespace result.recordset**/
+/** @namespace result.recordsets**/
 const { ConnectionPool, Request } = require('mssql');
 const AppError = require('../utils/AppError');
 module.exports = class DBConnection {
@@ -15,11 +16,7 @@ module.exports = class DBConnection {
       await this.pool.connect();
       console.log('🔒 Connected to MSSQL database');
     } catch (err) {
-      throw new AppError(
-        'Error connecting to MSSQL database' + err.message,
-        500,
-        'error-connecting-to-db'
-      );
+      throw new AppError('Error connecting to MSSQL database' + err.message, 500, 'error-connecting-to-db');
     }
   }
   async close() {
@@ -27,15 +24,11 @@ module.exports = class DBConnection {
       await this.pool.close();
       console.log('🔒 Connection to MSSQL database closed');
     } catch (err) {
-      throw new AppError(
-        'Error closing database connection' + err.message,
-        500,
-        'error-closing-db-connection'
-      );
+      throw new AppError('Error closing database connection' + err.message, 500, 'error-closing-db-connection');
     }
   }
 
-  async executeQuery(query, params = []) {
+  async executeQuery(query, params = [], multipleResultSets = false) {
     try {
       const request = await this.pool.request();
 
@@ -44,17 +37,15 @@ module.exports = class DBConnection {
         request.input(param.name, param.value);
       });
 
+      request.multiple = multipleResultSets;
+
       let result = await request.query(query);
 
-      result = result.recordset;
+      result = multipleResultSets === false ? result.recordset : result.recordsets;
 
       return result.length === 1 ? result[0] : result;
     } catch (err) {
-      throw new AppError(
-        'Error executing query' + err.message,
-        500,
-        'error-executing-query'
-      );
+      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
     }
   }
 
@@ -84,11 +75,7 @@ module.exports = class DBConnection {
 
       return true;
     } catch (err) {
-      throw new AppError(
-        'Error executing query' + err.message,
-        500,
-        'error-executing-query'
-      );
+      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
     }
   }
 };

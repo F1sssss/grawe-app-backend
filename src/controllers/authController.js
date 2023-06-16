@@ -7,21 +7,12 @@
 /** @namespace req.body.newPassword, * **/
 
 const authServices = require('../services/authServices');
+const userServices = require('../services/userServices');
 const AppError = require('../utils/appError');
 const CatchAsync = require('../utils/catchAsync');
 
-const login = CatchAsync(async (req, res, next) => {
+const login = CatchAsync(async (req, res) => {
   const { token, user, statusCode } = await authServices.loginService(req.body);
-
-  if (!token || !user || statusCode !== 200) {
-    throw next(
-      new AppError(
-        'Error during user login:',
-        statusCode,
-        'error-could-not-login-user'
-      )
-    );
-  }
 
   res.cookie('token', token, {
     httpOnly: true,
@@ -43,14 +34,8 @@ const logout = CatchAsync(async (req, res) => {
   res.status(200).json({ status: 'success' });
 });
 
-const signUp = CatchAsync(async (req, res, next) => {
+const signUp = CatchAsync(async (req, res) => {
   const { user, statusCode } = await authServices.signupService(req.body);
-
-  if (statusCode !== 200) {
-    throw next(
-      new AppError('Error during user signup:', statusCode, 'error-signup-user')
-    );
-  }
 
   res.status(statusCode).send({
     message: 'Signup successful!',
@@ -58,20 +43,8 @@ const signUp = CatchAsync(async (req, res, next) => {
   });
 });
 
-const forgotPassword = CatchAsync(async (req, res, next) => {
-  const { user, statusCode } = await authServices.forgotPasswordService(
-    req.body.username
-  );
-
-  if (statusCode !== 200 || !user) {
-    throw next(
-      new AppError(
-        'Error during resetting password',
-        statusCode,
-        'error-resetting-password'
-      )
-    );
-  }
+const forgotPassword = CatchAsync(async (req, res) => {
+  const { user, statusCode } = await authServices.forgotPasswordService(req.body.username);
 
   res.status(statusCode).send({
     message: 'Password reset email sent!',
@@ -79,21 +52,8 @@ const forgotPassword = CatchAsync(async (req, res, next) => {
   });
 });
 
-const setNewPassword = CatchAsync(async (req, res, next) => {
-  const { new_value, statusCode } = await authServices.setNewPasswordService(
-    req.body.newPassword,
-    req.query.id
-  );
-
-  if (statusCode !== 200 || !new_value) {
-    throw next(
-      new AppError(
-        'Error during resetting password',
-        statusCode,
-        'server-error'
-      )
-    );
-  }
+const setNewPassword = CatchAsync(async (req, res) => {
+  const { new_value, statusCode } = await authServices.setNewPasswordService(req.body.newPassword, req.query.id);
 
   res.status(statusCode).send({
     message: 'Password reset successful!',
@@ -101,18 +61,8 @@ const setNewPassword = CatchAsync(async (req, res, next) => {
   });
 });
 
-const emailVerification = CatchAsync(async (req, res, next) => {
+const emailVerification = CatchAsync(async (req, res) => {
   const { user, statusCode } = await authServices.verifyUserService(req.query);
-
-  if (statusCode !== 200 || !user) {
-    throw next(
-      new AppError(
-        'Error during email verification',
-        statusCode,
-        'error-email-verification'
-      )
-    );
-  }
 
   res.status(statusCode).send({
     message: 'User verified!',
@@ -121,17 +71,7 @@ const emailVerification = CatchAsync(async (req, res, next) => {
 });
 
 const protect = CatchAsync(async (req, res, next) => {
-  const { token, user, statusCode } = await authServices.protectService(req);
-
-  if (!token || !user || statusCode !== 200) {
-    throw next(
-      new AppError(
-        'Error during user authentication!:',
-        statusCode,
-        'error-authentication-user'
-      )
-    );
-  }
+  const { user } = await userServices.getMeService(req);
 
   req.user = user;
   //res.local.user = user;
@@ -141,13 +81,7 @@ const protect = CatchAsync(async (req, res, next) => {
 const restictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      throw next(
-        new AppError(
-          'You do not have permission to perform this action',
-          403,
-          'error-permission-denied'
-        )
-      );
+      throw next(new AppError('You do not have permission to perform this action', 403, 'error-permission-denied'));
     }
   };
 };

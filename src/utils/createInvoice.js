@@ -2,12 +2,10 @@ const PDFDocument = require('pdfkit');
 const AppError = require('./AppError');
 const policyQueries = require('../sql/Queries/PoliciesQueries');
 
-function createInvoice(id) {
+function createInvoice(policy) {
   return new Promise(async (resolve, reject) => {
     let buffers = [];
     let doc = new PDFDocument({ size: 'A4', margin: 50 });
-
-    const { policy } = await policyQueries.getPolicyHistory(id);
 
     const invoiceData = {
       shipping: {
@@ -19,10 +17,8 @@ function createInvoice(id) {
       },
       items: policy,
       paid: 0,
-      broj_polise: id
+      broj_polise: 12346
     };
-
-    console.log(invoiceData);
 
     // Handle errors
     doc.on('error', () => {
@@ -79,21 +75,13 @@ function generateCustomerInformation(doc, invoice) {
     .text('Datum od:', 50, customerInformationTop + 15)
     .text(formatDate(new Date()), 150, customerInformationTop + 15)
     .text('Balance Due:', 50, customerInformationTop + 30)
-    .text(
-      formatCurrency(invoice.subtotal - invoice.paid),
-      150,
-      customerInformationTop + 30
-    )
+    .text(formatCurrency(invoice.subtotal - invoice.paid), 150, customerInformationTop + 30)
 
     .font('Helvetica-Bold')
     .text(invoice.shipping.name, 300, customerInformationTop)
     .font('Helvetica')
     .text(invoice.shipping.address, 300, customerInformationTop + 15)
-    .text(
-      invoice.shipping.city + ', ' + invoice.shipping.country,
-      300,
-      customerInformationTop + 30
-    )
+    .text(invoice.shipping.city + ', ' + invoice.shipping.country, 300, customerInformationTop + 30)
     .moveDown();
 
   generateHr(doc, 270);
@@ -104,18 +92,7 @@ function generateInvoiceTable(doc, invoice) {
   const invoiceTableTop = 330;
 
   doc.font('Helvetica-Bold');
-  generateTableRow(
-    doc,
-    invoiceTableTop,
-    'Datum Dokumenta',
-    'Broj Dokumenta',
-    'Broj Polise',
-    'Vid',
-    'Opis Knjizenja',
-    'Duguje',
-    'Potrazuje',
-    'Saldo'
-  );
+  generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Dokumenta', 'Broj Polise', 'Vid', 'Opis Knjizenja', 'Duguje', 'Potrazuje', 'Saldo');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('Helvetica');
 
@@ -142,62 +119,18 @@ function generateInvoiceTable(doc, invoice) {
   }
 
   const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 690;
-  generateTableRow(
-    doc,
-    subtotalPosition,
-    '',
-    '',
-    '',
-    '',
-    '',
-    'Duguje',
-    '',
-    formatCurrency(invoice.duguje)
-  );
+  generateTableRow(doc, subtotalPosition, '', '', '', '', '', 'Duguje', '', formatCurrency(invoice.duguje));
 
   const paidToDatePosition = (subtotalPosition + 20) % 690;
-  generateTableRow(
-    doc,
-    paidToDatePosition,
-    '',
-    '',
-    '',
-    '',
-    '',
-    'Potrazuje',
-    '',
-    formatCurrency(invoice.potrazuje)
-  );
+  generateTableRow(doc, paidToDatePosition, '', '', '', '', '', 'Potrazuje', '', formatCurrency(invoice.potrazuje));
 
   const duePosition = (paidToDatePosition + 25) % 690;
   doc.font('Helvetica-Bold');
-  generateTableRow(
-    doc,
-    duePosition,
-    '',
-    '',
-    '',
-    '',
-    '',
-    'Potrazuje',
-    '',
-    formatCurrency(invoice.saldo)
-  );
+  generateTableRow(doc, duePosition, '', '', '', '', '', 'Potrazuje', '', formatCurrency(invoice.saldo));
   doc.font('Helvetica');
 }
 
-function generateTableRow(
-  doc,
-  y,
-  datum_dokumenta,
-  broj_dokumenta,
-  broj_ponude,
-  vid,
-  opis_knjizenja,
-  duguje,
-  potrazuje,
-  saldo
-) {
+function generateTableRow(doc, y, datum_dokumenta, broj_dokumenta, broj_ponude, vid, opis_knjizenja, duguje, potrazuje, saldo) {
   doc
     .fontSize(10)
     .font('Helvetica')

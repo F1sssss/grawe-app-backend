@@ -6,7 +6,6 @@
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { promisify } = require('util');
 
 const DB_CONFIG = require('../sql/DBConfig');
 const EmailValidator = require('../utils/Email');
@@ -57,6 +56,7 @@ const signupService = async (req) => {
 const signupValidationService = async (req) => {
   const { username, email, password } = req;
   const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email, 'signup');
+
   if (user) {
     if (username === user.username) {
       throw new AppError('Username already exists', 401, 'error-username-exists');
@@ -136,36 +136,11 @@ const setNewPasswordService = async (newPassword, id) => {
   return { new_value, statusCode: 200 };
 };
 
-const protectService = async (req) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  } else if (req.cookies.token) {
-    token = req.cookies.token;
-  }
-
-  if (!token) {
-    throw new AppError('You are not logged in! Please log in to get access.', 401, 'error-not-logged-in');
-  }
-
-  const decoded = await promisify(jwt.verify)(token, DB_CONFIG.encrypt);
-
-  const { user } = await SQLQueries.getUserById(decoded.ID);
-
-  if (!user) {
-    throw new AppError('The user belonging to this token does no longer exist.', 401, 'error-user-no-longer-exist');
-  }
-
-  return { token, user, statusCode: 200 };
-};
-
 module.exports = {
   loginService,
   signupService,
   forgotPasswordService,
   checkEmailVerification,
   verifyUserService,
-  protectService,
   setNewPasswordService
 };
