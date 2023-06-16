@@ -26,7 +26,7 @@ client.on('connect', () => {
   console.log('💰 Connected to Redis server');
 });
 
-async function setWithTTL(key, value, ttl = 600) {
+async function setWithTTL(key, value, ttl = 6000) {
   try {
     const result = await client.set(key, value);
     await client.expire(key, ttl);

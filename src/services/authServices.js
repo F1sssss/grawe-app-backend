@@ -15,13 +15,11 @@ const ValidationRegex = require('../utils/ValidationRegex');
 
 const signJWT = (username) => {
   return jwt.sign({ username }, DB_CONFIG.encrypt, {
-    expiresIn: DB_CONFIG.expiresIn
+    expiresIn: DB_CONFIG.expiresIn,
   });
 };
 
-const loginService = async (req) => {
-  const { username, password } = req;
-
+const loginService = async (username, password) => {
   const { user } = await SQLQueries.getUserByUsernameOrEmail(username, username, 'login');
 
   if (!(await bcrypt.compare(password, user.password))) {
@@ -30,30 +28,21 @@ const loginService = async (req) => {
 
   const token = signJWT(username);
 
-  user.password = undefined;
-  return { token, user, statusCode: 200 };
+  return { token, user: { ...user, password: undefined }, statusCode: 200 };
 };
 
 const signupService = async (req) => {
-  const { username, email } = req;
+  await signupFieldValidationService(req);
 
-  await signupValidationService(req);
+  const { user } = await SQLQueries.createUser({ ...req, password: await bcrypt.hash(req.password, 12) });
 
-  req.password = await bcrypt.hash(req.password, 12);
+  const Email = new EmailValidator(user);
+  await Email.sendEmailVerification();
 
-  const { user } = await SQLQueries.createUser(req);
-
-  const Email = new EmailValidator(email, username, user.ID, user.email_verification_token);
-  const emailsent = await Email.sendEmailVerification();
-
-  if (!emailsent) {
-    throw new AppError('Error during sending email', 401, 'error-email-sending-verification');
-  }
-
-  return { user, statusCode: 200 };
+  return { message: 'User created successfully!', user, statusCode: 201 };
 };
 
-const signupValidationService = async (req) => {
+const signupFieldValidationService = async (req) => {
   const { username, email, password } = req;
   const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email, 'signup');
 
@@ -69,7 +58,11 @@ const signupValidationService = async (req) => {
 
   // Would have never been reached in its previous location
   if (!ValidationRegex.usernameRegex.test(username)) {
-    throw new AppError('Invalid Username! Please insure it contains only letters and numbers and minimum 6 characters', 401, 'error-invalid-username');
+    throw new AppError(
+      'Invalid Username! Please insure it contains only letters and numbers and minimum 6 characters',
+      401,
+      'error-invalid-username',
+    );
   }
 
   if (!ValidationRegex.emailRegex.test(email)) {
@@ -87,21 +80,20 @@ const signupValidationService = async (req) => {
 };
 
 const forgotPasswordService = async (id) => {
-  const { user, statusCode } = await SQLQueries.getUserByUsernameOrEmail(id);
+  const { user } = await SQLQueries.getUserByUsernameOrEmail(id);
 
-  const Email = new EmailValidator(user.email, user.username, user.id, user.email_verification_token);
+  const Email = new EmailValidator(user);
+  await Email.sendEmailRetrievingPassword();
 
-  const emailsent = await Email.sendEmailRetrievingPassword();
-
-  if (!emailsent || statusCode !== 200) {
-    throw new AppError('Error during sending email', 401, 'error-email-sending-forgotpassword');
-  }
-
-  return { user, statusCode };
+  return { user, statusCode: 200 };
 };
 
-const checkEmailVerification = async (id, email_verification_token) => {
+const checkVerificationToken = async (id, email_verification_token) => {
   const { user } = await SQLQueries.getUserById(id);
+
+  if (user.verified) {
+    throw new AppError('User is already verified!', 400, 'error-user-verified');
+  }
 
   //Date.now() returns an integer,number of ms since 1970, and time to verify was a Date object, new Date() returns current time, via Date object
   if (user.time_to_varify < new Date()) {
@@ -115,24 +107,14 @@ const checkEmailVerification = async (id, email_verification_token) => {
   return { user, statusCode: 200 };
 };
 
-const verifyUserService = async (req) => {
-  const { id, token } = req;
-  const { user } = await checkEmailVerification(id, token);
-
-  if (user.verified) {
-    throw new AppError('User is already verified!', 400, 'error-user-verified');
-  }
-
+const verifyUserService = async (id, token) => {
+  const { user } = await checkVerificationToken(id, token);
   await SQLQueries.updateUserVerification(id, 'verified', 1);
-
   return { user, statusCode: 200 };
 };
 
 const setNewPasswordService = async (newPassword, id) => {
-  newPassword = await bcrypt.hash(newPassword, 12);
-
-  const { new_value } = await SQLQueries.updateUserPassword(id, 'password', newPassword);
-
+  const { new_value } = await SQLQueries.updateUserPassword(id, 'password', await bcrypt.hash(newPassword, 12));
   return { new_value, statusCode: 200 };
 };
 
@@ -140,7 +122,6 @@ module.exports = {
   loginService,
   signupService,
   forgotPasswordService,
-  checkEmailVerification,
   verifyUserService,
-  setNewPasswordService
+  setNewPasswordService,
 };

@@ -13,16 +13,16 @@ function createInvoice(policy) {
         address: 'KRIVAULICA,DOBROTA BB',
         city: 'KOTOR',
         country: 'MNE',
-        postal_code: 94111
+        postal_code: 94111,
       },
       items: policy,
       paid: 0,
-      broj_polise: 12346
+      broj_polise: 12346,
     };
 
     // Handle errors
     doc.on('error', () => {
-      reject(new AppError('Error during creating PDF', 500));
+      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
     });
 
     // Collect the PDF buffers
@@ -32,6 +32,7 @@ function createInvoice(policy) {
 
     // Finalize the PDF document
     doc.on('end', () => {
+      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
       resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
     });
 
@@ -112,7 +113,7 @@ function generateInvoiceTable(doc, invoice) {
       item.opis_knjizenja,
       formatCurrency(item.duguje),
       formatCurrency(item.potrazuje),
-      formatCurrency(item.saldo)
+      formatCurrency(item.saldo),
     );
 
     generateHr(doc, position + 20);
@@ -161,5 +162,5 @@ function formatDate(date) {
 }
 
 module.exports = {
-  createInvoice
+  createInvoice,
 };

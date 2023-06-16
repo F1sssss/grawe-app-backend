@@ -4,15 +4,14 @@ const generateExcelFile = require('../utils/excelExport');
 const Invoice = require('../utils/createInvoice');
 const { get, setWithTTL } = require('../services/cachingService');
 
-const getPolicyHistoryService = async (id, dateFrom, dateTo) => {
-  const cacheKey = `policy-history-${id}-${dateFrom}-${dateTo}`;
+const getPolicyTemplate = async (cacheKey, policyQuery) => {
   const cacheData = await get(cacheKey);
 
   if (cacheData) {
     return { policy: cacheData, statusCode: 200 };
   }
 
-  const { policy, statusCode } = await PolicyQueries.getPolicyHistory(id, dateFrom, dateTo);
+  const { policy, statusCode } = await policyQuery;
 
   await setWithTTL(cacheKey, JSON.stringify(policy));
 
@@ -21,32 +20,17 @@ const getPolicyHistoryService = async (id, dateFrom, dateTo) => {
 
 const getPolicyInfoService = async (id) => {
   const cacheKey = `policy-info-${id}`;
-  const cacheData = await get(cacheKey);
-
-  if (cacheData) {
-    return { policies: cacheData, statusCode: 200 };
-  }
-
-  const { policies, statusCode } = await PolicyQueries.getPolicyInfo(id);
-
-  await setWithTTL(cacheKey, JSON.stringify(policies));
-
-  return { policies, statusCode };
+  return ({ policy, statusCode } = await getPolicyTemplate(cacheKey, PolicyQueries.getPolicyInfo(id)));
 };
 
 const getPolicyAnalyticalInfoService = async (id, dateFrom, dateTo) => {
   const cacheKey = `policy-analytical-info-${id}-${dateFrom}-${dateTo}`;
-  const cacheData = await get(cacheKey);
+  return ({ policy, statusCode } = await getPolicyTemplate(cacheKey, PolicyQueries.getPolicyAnalyticalInfo(id, dateFrom, dateTo)));
+};
 
-  if (cacheData) {
-    return { policy: cacheData, statusCode: 200 };
-  }
-
-  const { policy, statusCode } = await PolicyQueries.getPolicyAnalyticalInfo(id, dateFrom, dateTo);
-
-  await setWithTTL(cacheKey, JSON.stringify(policy));
-
-  return { policy, statusCode };
+const getPolicyHistoryService = async (id, dateFrom, dateTo) => {
+  const cacheKey = `policy-history-${id}-${dateFrom}-${dateTo}`;
+  return ({ policy, statusCode } = await getPolicyTemplate(cacheKey, PolicyQueries.getPolicyHistory(id, dateFrom, dateTo)));
 };
 
 const getAllPolicyAnalyticsService = async (id, dateFrom, dateTo) => {
@@ -57,31 +41,22 @@ const getAllPolicyAnalyticsService = async (id, dateFrom, dateTo) => {
     policyHistory,
     policyAnalyticalInfo,
     excelPath: `http://localhost:3000/api/v1/policies/${id}/history/xls/download`,
-    pdfPath: `http://localhost:3000/api/v1/policies/${id}/history/pdf/download`
+    pdfPath: `http://localhost:3000/api/v1/policies/${id}/history/pdf/download`,
   };
 };
 
-const getPolicyHistoryExcelDownloadService = async (id, dateFrom, dateTo) => {
-  const { policy, statusCode } = await getPolicyHistoryService(id, dateFrom, dateTo);
-
-  const { excelBuffer } = await generateExcelFile(policy);
-
-  if (!policy || !excelBuffer || statusCode !== 200) {
-    throw new AppError('Error during retrieving policy history', 404, 'error-getting-policy-history-excel');
-  }
-
-  return { excelBuffer, statusCode };
+const getPolicyHistoryExcelDownloadService = async (res, id, dateFrom, dateTo) => {
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="example.xlsx"');
+  const { policy } = await getPolicyHistoryService(id, dateFrom, dateTo);
+  return ({ excelBuffer, statusCode } = await generateExcelFile(policy));
 };
 
-const getPolicyHistoryPDFDownloadService = async (id, dateFrom, dateTo) => {
-  const { policy, statusCode } = await getPolicyHistoryService(id, dateFrom, dateTo);
-  const { pdfBuffer } = await Invoice.createInvoice(policy);
-
-  if (!pdfBuffer || statusCode !== 200) {
-    throw new AppError('Error during retrieving policy history', 404, 'error-getting-policy-history-pdf');
-  }
-
-  return { pdfBuffer, statusCode };
+const getPolicyHistoryPDFDownloadService = async (res, id, dateFrom, dateTo) => {
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="Invoice.pdf"');
+  const { policy } = await getPolicyHistoryService(id, dateFrom, dateTo);
+  return ({ pdfBuffer, statusCode } = await Invoice.createInvoice(policy));
 };
 
 module.exports = {
@@ -90,5 +65,5 @@ module.exports = {
   getPolicyHistoryExcelDownloadService,
   getPolicyHistoryPDFDownloadService,
   getPolicyAnalyticalInfoService,
-  getAllPolicyAnalyticsService
+  getAllPolicyAnalyticsService,
 };

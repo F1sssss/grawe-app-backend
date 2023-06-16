@@ -12,23 +12,23 @@ const AppError = require('../utils/appError');
 const CatchAsync = require('../utils/catchAsync');
 
 const login = CatchAsync(async (req, res) => {
-  const { token, user, statusCode } = await authServices.loginService(req.body);
+  const { token, user, statusCode } = await authServices.loginService(req.body.username, req.body.password);
 
   res.cookie('token', token, {
     httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
   });
   res.status(statusCode).send({
     message: 'Login successful!',
     token,
-    user
+    user,
   });
 });
 
 const logout = CatchAsync(async (req, res) => {
   res.cookie('token', 'loggedOut', {
     httpOnly: true,
-    expires: new Date(Date.now() + 10 * 1000)
+    expires: new Date(Date.now() + 10 * 1000),
   });
 
   res.status(200).json({ status: 'success' });
@@ -39,7 +39,7 @@ const signUp = CatchAsync(async (req, res) => {
 
   res.status(statusCode).send({
     message: 'Signup successful!',
-    user
+    user,
   });
 });
 
@@ -48,7 +48,7 @@ const forgotPassword = CatchAsync(async (req, res) => {
 
   res.status(statusCode).send({
     message: 'Password reset email sent!',
-    user
+    user,
   });
 });
 
@@ -57,16 +57,16 @@ const setNewPassword = CatchAsync(async (req, res) => {
 
   res.status(statusCode).send({
     message: 'Password reset successful!',
-    new_value
+    new_value,
   });
 });
 
 const emailVerification = CatchAsync(async (req, res) => {
-  const { user, statusCode } = await authServices.verifyUserService(req.query);
+  const { user, statusCode } = await authServices.verifyUserService(req.query.id, req.query.token);
 
   res.status(statusCode).send({
     message: 'User verified!',
-    user
+    user,
   });
 });
 
@@ -94,5 +94,5 @@ module.exports = {
   emailVerification,
   protect,
   restictTo,
-  setNewPassword
+  setNewPassword,
 };

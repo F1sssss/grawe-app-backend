@@ -1,1 +1,0 @@
-select 1 as test1;select 2 as test2

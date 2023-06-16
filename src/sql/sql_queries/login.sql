@@ -1,2 +1,0 @@
-select top 1 * from USERS (nolock)
-where username = @username

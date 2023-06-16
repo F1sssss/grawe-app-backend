@@ -1,59 +1,35 @@
-const sql = require('mssql');
 /** @namespace  sql.Int**/
 /** @namespace sql.VarChar **/
 const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
-const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
 const loadSQLQueries = require('../sql_queries/loadSQL');
+const { Policy, Policy_dateFrom_dateTo } = require('./params');
+
+const excecutePolicyQueryTemplate = async (queryFileName, params) => {
+  const query = await loadSQLQueries(queryFileName);
+  const connection = new DBConnection(DB_CONFIG.sql);
+  const policy = await connection.executeQuery(query, params);
+  if (!policy) {
+    throw new AppError('Error during retrieving policy', 404, 'error-getting-policy-query');
+  }
+  return { policy, statusCode: 200 };
+};
 
 const getPolicyInfo = async (id) => {
-  const connection = new DBConnection(DB_CONFIG.sql);
-  const query = await loadSQLQueries('policyInfo.sql');
-
-  if (!query) throw new AppError('Error loading policy query', 500, 'error-getting-policyinfo-query');
-
-  const policies = await connection.executeQuery(query, [new SQLParam('policy', id, sql.Int)]);
-
-  if (!policies) {
-    throw new AppError('Policy not found by id!', 404, 'error-getting-policyinfo-query');
-  }
-
-  return { policies, statusCode: 200 };
+  return ({ policy, statusCode } = await excecutePolicyQueryTemplate('policyInfo.sql', [Policy(id)]));
 };
 
 const getPolicyHistory = async (id, dateFrom, dateTo) => {
-  const policyHistoryQuery = await loadSQLQueries('getPolicyHistory.sql');
-  const connection = new DBConnection(DB_CONFIG.sql);
-  const policy = await connection.executeQuery(policyHistoryQuery, [
-    new SQLParam('polisa', id, sql.Int),
-    new SQLParam('dateFrom', dateFrom, sql.VarChar),
-    new SQLParam('dateTo', dateTo, sql.VarChar)
-  ]);
-  if (!policy) {
-    throw new AppError('Error during retrieving policy history', 404, 'error-getting-policy-history-query');
-  }
-
-  return { policy, statusCode: 200 };
+  return ({ policy, statusCode } = await excecutePolicyQueryTemplate('getPolicyHistory.sql', Policy_dateFrom_dateTo(id, dateFrom, dateTo)));
 };
 
 const getPolicyAnalyticalInfo = async (id, dateFrom, dateTo) => {
-  const policyAnalyticalInfoQuery = await loadSQLQueries('getPolicyAnalyticalInfo.sql');
-  const connection = new DBConnection(DB_CONFIG.sql);
-  const policy = await connection.executeQuery(policyAnalyticalInfoQuery, [
-    new SQLParam('policy', id, sql.Int),
-    new SQLParam('dateFrom', dateFrom, sql.VarChar),
-    new SQLParam('dateTo', dateTo, sql.VarChar)
-  ]);
-  if (!policy) {
-    throw new AppError('Error during retrieving policy history', 404, 'error-getting-policy-history-query');
-  }
-
-  return { policy, statusCode: 200 };
+  return ({ policy, statusCode } = await excecutePolicyQueryTemplate('getPolicyAnalyticalInfo.sql', Policy_dateFrom_dateTo(id, dateFrom, dateTo)));
 };
 
 module.exports = {
   getPolicyInfo,
   getPolicyHistory,
-  getPolicyAnalyticalInfo
+  getPolicyAnalyticalInfo,
 };
