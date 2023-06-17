@@ -9,5 +9,6 @@ cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo
 from
 praemienkonto (nolock)
-where pko_obnr=@polisa
+where pko_obnr=@policy
+and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,102) and convert(date,@dateTo,102)
 order by convert(date,pko_wertedatum,104) asc

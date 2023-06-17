@@ -58,7 +58,8 @@ module.exports = {
       idleTimeoutMillis: 30000
     },
     options: {
-      encrypt: isEncrypt
+      encrypt: isEncrypt,
+      requestTimeout: 1200000
     }
   }
 };

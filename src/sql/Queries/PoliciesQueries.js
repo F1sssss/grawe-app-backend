@@ -1,43 +1,35 @@
-const sql = require('mssql');
 /** @namespace  sql.Int**/
 /** @namespace sql.VarChar **/
 const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
-const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
 const loadSQLQueries = require('../sql_queries/loadSQL');
+const { Policy, Policy_dateFrom_dateTo } = require('./params');
 
-const getPolicyInfo = async (id) => {
+const excecutePolicyQueryTemplate = async (queryFileName, params) => {
+  const query = await loadSQLQueries(queryFileName);
   const connection = new DBConnection(DB_CONFIG.sql);
-  const query = await loadSQLQueries('policy.sql');
-
-  if (!query) throw new AppError('Error loading policy query', 500);
-
-  const policies = await connection.executeQuery(query, [
-    new SQLParam('policy', id, sql.Int)
-  ]);
-
-  if (!policies) {
-    throw new AppError('Policy not found by id!', 404);
+  const policy = await connection.executeQuery(query, params);
+  if (!policy) {
+    throw new AppError('Error during retrieving policy', 404, 'error-getting-policy-query');
   }
-
-  return { policies, statusCode: 200 };
+  return { policy, statusCode: 200 };
 };
 
-const getPolicyHistory = async (id) => {
-  const policyHistoryQuery = await loadSQLQueries('getPolicyHistory.sql');
-  const connection = new DBConnection(DB_CONFIG.sql);
-  const policy = await connection.executeQuery(policyHistoryQuery, [
-    new SQLParam('polisa', id, sql.Int)
-  ]);
-  if (!policy) {
-    throw new AppError('Error during retrieving policy history', 404);
-  }
+const getPolicyInfo = async (id) => {
+  return ({ policy, statusCode } = await excecutePolicyQueryTemplate('policyInfo.sql', [Policy(id)]));
+};
 
-  return { policy, statusCode: 200 };
+const getPolicyHistory = async (id, dateFrom, dateTo) => {
+  return ({ policy, statusCode } = await excecutePolicyQueryTemplate('getPolicyHistory.sql', Policy_dateFrom_dateTo(id, dateFrom, dateTo)));
+};
+
+const getPolicyAnalyticalInfo = async (id, dateFrom, dateTo) => {
+  return ({ policy, statusCode } = await excecutePolicyQueryTemplate('getPolicyAnalyticalInfo.sql', Policy_dateFrom_dateTo(id, dateFrom, dateTo)));
 };
 
 module.exports = {
   getPolicyInfo,
-  getPolicyHistory
+  getPolicyHistory,
+  getPolicyAnalyticalInfo,
 };

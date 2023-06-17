@@ -7,8 +7,11 @@ const cookieParser = require('cookie-parser');
 const xss = require('xss-clean');
 const compression = require('compression');
 
+const errorController = require('./src/controllers/errorController');
+
 const userRouter = require('./src/routes/userRouter');
 const policyRouter = require('./src/routes/policyRouter');
+const reportsRouter = require('./src/routes/reportsRouter');
 
 //start express app
 const app = express();
@@ -37,7 +40,6 @@ app.use(xss());
 app.use(compression());
 
 //test middleware
-
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
@@ -47,5 +49,9 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/policies', policyRouter);
+app.use('/api/v1/reports', reportsRouter);
+
+//Error handling middleware
+app.use(errorController);
 
 module.exports = app;
