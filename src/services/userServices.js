@@ -21,7 +21,7 @@ const getMeService = async (req) => {
 
   const decoded = await promisify(jwt.verify)(token, DB_CONFIG.encrypt);
 
-  const { user } = await SQLQueries.getUserByUsername(decoded.username);
+  const { user } = await SQLQueries.getUserByUsernameOrEmail(decoded.username, decoded.username);
 
   if (!user) {
     throw new AppError('The user belonging to this token does no longer exist.', 401, 'error-user-no-longer-exist');
@@ -31,5 +31,5 @@ const getMeService = async (req) => {
 };
 
 module.exports = {
-  getMeService
+  getMeService,
 };

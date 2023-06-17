@@ -1,8 +1,13 @@
 const sql = require('mssql');
 const SQLParam = require('../SQLParam');
+const AppError = require('../../utils/AppError');
 
 const Policy = (id) => {
   return new SQLParam('policy', id, sql.Int);
+};
+
+const Report = (id) => {
+  return [new SQLParam('report', id, sql.Int)];
 };
 
 const Policy_dateFrom_dateTo = (policy, dateFrom, dateTo) => {
@@ -25,9 +30,23 @@ const UserSignup = (username, password, name, last_name, email, date_of_birth, v
   ];
 };
 
+const ReportParams = (reportParams, InputParams) => {
+  if (reportParams.length !== Object.keys(InputParams).length)
+    throw new AppError('Error during retrieving reports', 404, 'error-getting-reports-query');
+
+  let queryParams = [];
+  reportParams.forEach((param, index) => {
+    queryParams.push(new SQLParam(param.param_name.slice(1), Object.values(InputParams)[index], sql[param.type]));
+  });
+
+  return queryParams;
+};
+
 module.exports = {
   Policy,
   Policy_dateFrom_dateTo,
   Policy_Date,
   UserSignup,
+  Report,
+  ReportParams,
 };

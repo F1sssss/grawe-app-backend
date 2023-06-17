@@ -14,7 +14,7 @@ const selectFromUsers = async (query, param, type = '') => {
     query = loadSqlQueries(query);
   }
   const user = await connection.executeQuery(query, param);
-  if (!user && type !== 'signup') {
+  if (!user.username && type !== 'signup') {
     throw new AppError(`User not found!`, 404, 'error-user-not-found');
   }
   if (type === 'login' && user.verified !== 1) {

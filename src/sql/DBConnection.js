@@ -43,7 +43,24 @@ module.exports = class DBConnection {
 
       result = multipleResultSets === false ? result.recordset : result.recordsets;
 
-      return result.length === 1 ? result[0] : result;
+      return result.length === 1 ? result[0] : result.length === 0 ? undefined : result;
+    } catch (err) {
+      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
+    }
+  }
+
+  async executeStoredProcedure(storedProcedure, params = []) {
+    try {
+      const request = await this.pool.request();
+
+      // Add parameters to the request
+      params.forEach((param) => {
+        request.input(param.name, param.type, param.value);
+      });
+
+      const result = await request.execute(storedProcedure);
+
+      return result.recordsets[0];
     } catch (err) {
       throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
     }

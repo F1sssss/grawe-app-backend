@@ -1,4 +1,3 @@
-const AppError = require('../utils/appError');
 const PolicyQueries = require('../sql/Queries/PoliciesQueries');
 const generateExcelFile = require('../utils/excelExport');
 const Invoice = require('../utils/createInvoice');
