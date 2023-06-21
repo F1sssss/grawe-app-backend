@@ -5,9 +5,9 @@ const AppError = require('../utils/appError');
 const client = redis.createClient({
   socket: {
     port: 6379,
-    host: process.env.REDIS_HOST
+    host: process.env.REDIS_HOST,
   },
-  password: process.env.REDIS_PASSWORD
+  password: process.env.REDIS_PASSWORD,
 });
 
 (async () => {
@@ -46,5 +46,5 @@ async function get(key) {
 
 module.exports = {
   setWithTTL,
-  get
+  get,
 };

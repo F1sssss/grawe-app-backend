@@ -10,6 +10,7 @@ const authServices = require('../services/authServices');
 const userServices = require('../services/userServices');
 const AppError = require('../utils/appError');
 const CatchAsync = require('../utils/catchAsync');
+const responseHandler = require('../utils/responseHandler');
 
 const login = CatchAsync(async (req, res) => {
   const { token, user, statusCode } = await authServices.loginService(req.body.username, req.body.password);
@@ -35,39 +36,24 @@ const logout = CatchAsync(async (req, res) => {
 });
 
 const signUp = CatchAsync(async (req, res) => {
-  const { user, statusCode } = await authServices.signupService(req.body);
-
-  res.status(statusCode).send({
-    message: 'Signup successful!',
-    user,
-  });
+  await responseHandler(authServices.signupService(req.body), res, { statusCode: 201 }, 'Signup successful!');
 });
 
 const forgotPassword = CatchAsync(async (req, res) => {
-  const { user, statusCode } = await authServices.forgotPasswordService(req.body.username);
-
-  res.status(statusCode).send({
-    message: 'Password reset email sent!',
-    user,
-  });
+  await responseHandler(authServices.forgotPasswordService(req.body.username), res, { statusCode: 200 }, 'Password reset email sent!');
 });
 
 const setNewPassword = CatchAsync(async (req, res) => {
-  const { new_value, statusCode } = await authServices.setNewPasswordService(req.body.newPassword, req.query.id);
-
-  res.status(statusCode).send({
-    message: 'Password reset successful!',
-    new_value,
-  });
+  await responseHandler(
+    authServices.setNewPasswordService(req.body.newPassword, req.query.id),
+    res,
+    { statusCode: 200 },
+    'Password reset successful!',
+  );
 });
 
 const emailVerification = CatchAsync(async (req, res) => {
-  const { user, statusCode } = await authServices.verifyUserService(req.query.id, req.query.token);
-
-  res.status(statusCode).send({
-    message: 'User verified!',
-    user,
-  });
+  await responseHandler(authServices.verifyUserService(req.query.id), res, { statusCode: 200 }, 'Email verification successful!');
 });
 
 const protect = CatchAsync(async (req, res, next) => {

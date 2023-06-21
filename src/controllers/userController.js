@@ -1,12 +1,8 @@
 const userService = require('../services/userServices');
+const responseHandler = require('../utils/responseHandler');
 
 const getMe = async (req, res) => {
-  const { user, statusCode } = await userService.getMeService(req);
-
-  res.status(statusCode).send({
-    message: 'User verified!',
-    user,
-  });
+  await responseHandler(userService.getMeService(req), res, { statusCode: 200 }, 'success');
 };
 
 module.exports = {

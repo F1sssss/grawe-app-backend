@@ -2,32 +2,28 @@
 /** @namespace req.query.dateTo * **/
 const policyService = require('../services/policiesServices');
 const CatchAsync = require('../utils/CatchAsync');
+const responseHandler = require('../utils/responseHandler');
 
 const getPolicyInfo = CatchAsync(async (req, res) => {
-  const { policy, statusCode } = await policyService.getPolicyInfoService(req.params.id);
-
-  res.status(statusCode).json({
-    status: 'success',
-    policy,
-  });
+  await responseHandler(policyService.getPolicyInfoService(req.params.id), res, { statusCode: 200 }, 'success');
 });
 
 const getPolicyAnalyticalInfo = CatchAsync(async (req, res) => {
-  const { policy, statusCode } = await policyService.getPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo);
-
-  res.status(statusCode).json({
-    status: 'success',
-    policy,
-  });
+  await responseHandler(
+    policyService.getPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo),
+    res,
+    { statusCode: 200 },
+    'success',
+  );
 });
 
 const getPolicyHistory = CatchAsync(async (req, res) => {
-  const { policy, statusCode } = await policyService.getPolicyHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo);
-
-  res.status(statusCode).json({
-    status: 'success',
-    policy,
-  });
+  await responseHandler(
+    policyService.getPolicyHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo),
+    res,
+    { statusCode: 200 },
+    'success',
+  );
 });
 
 const getAllPolicyAnalytics = CatchAsync(async (req, res) => {
@@ -39,10 +35,12 @@ const getAllPolicyAnalytics = CatchAsync(async (req, res) => {
 
   res.status(200).json({
     status: 'success',
-    policyHistory,
-    policyAnalyticalInfo,
-    excelPath,
-    pdfPath,
+    data: {
+      policyHistory,
+      policyAnalyticalInfo,
+      excelPath,
+      pdfPath,
+    },
   });
 });
 

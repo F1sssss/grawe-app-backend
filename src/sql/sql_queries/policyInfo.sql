@@ -1,6 +1,6 @@
 select distinct
-	b.bra_obnr					[Broj Polise],
-	vtg_antrag_obnr				[Broj Ponude],
+	b.bra_obnr					[Broj_Polise],
+	vtg_antrag_obnr				[Broj_Ponude],
 	vtg_pol_kreis				[Pol_kreis],
 	bra_bran					[Bransa],
 	bra_vv_ueb					[Naziv_Branse],

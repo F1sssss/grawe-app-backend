@@ -6,8 +6,11 @@ const router = express.Router();
 
 //router.use(authController.protect);
 
-router.get('/getReports', reportsController.getReports);
-router.get('/:id', reportsController.getReportById);
-router.get('/:id/generate', reportsController.generateReport);
+router.get('/param/', reportsController.getParamValues);
+router.get('/searchProcedure/', reportsController.searchProcedure);
+router.get('/generate/:id/', reportsController.generateReport);
+router.get('/:id/', reportsController.getReportById);
+router.get('/', reportsController.getReports);
+router.post('/createReport', reportsController.createReport);
 
 module.exports = router;

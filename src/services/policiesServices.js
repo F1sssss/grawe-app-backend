@@ -1,35 +1,21 @@
 const PolicyQueries = require('../sql/Queries/PoliciesQueries');
 const generateExcelFile = require('../utils/excelExport');
 const Invoice = require('../utils/createInvoice');
-const { get, setWithTTL } = require('../services/cachingService');
-
-const getPolicyTemplate = async (cacheKey, policyQuery) => {
-  const cacheData = await get(cacheKey);
-
-  if (cacheData) {
-    return { policy: cacheData, statusCode: 200 };
-  }
-
-  const { policy, statusCode } = await policyQuery;
-
-  await setWithTTL(cacheKey, JSON.stringify(policy));
-
-  return { policy, statusCode };
-};
+const cacheQuery = require('../utils/cacheQuery');
 
 const getPolicyInfoService = async (id) => {
   const cacheKey = `policy-info-${id}`;
-  return ({ policy, statusCode } = await getPolicyTemplate(cacheKey, PolicyQueries.getPolicyInfo(id)));
+  return ({ policy, statusCode } = await cacheQuery(cacheKey, PolicyQueries.getPolicyInfo(id)));
 };
 
 const getPolicyAnalyticalInfoService = async (id, dateFrom, dateTo) => {
   const cacheKey = `policy-analytical-info-${id}-${dateFrom}-${dateTo}`;
-  return ({ policy, statusCode } = await getPolicyTemplate(cacheKey, PolicyQueries.getPolicyAnalyticalInfo(id, dateFrom, dateTo)));
+  return ({ policy, statusCode } = await cacheQuery(cacheKey, PolicyQueries.getPolicyAnalyticalInfo(id, dateFrom, dateTo)));
 };
 
 const getPolicyHistoryService = async (id, dateFrom, dateTo) => {
   const cacheKey = `policy-history-${id}-${dateFrom}-${dateTo}`;
-  return ({ policy, statusCode } = await getPolicyTemplate(cacheKey, PolicyQueries.getPolicyHistory(id, dateFrom, dateTo)));
+  return ({ policy, statusCode } = await cacheQuery(cacheKey, PolicyQueries.getPolicyHistory(id, dateFrom, dateTo)));
 };
 
 const getAllPolicyAnalyticsService = async (id, dateFrom, dateTo) => {
