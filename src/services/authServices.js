@@ -56,7 +56,6 @@ const signupFieldValidationService = async (req) => {
     }
   }
 
-  // Would have never been reached in its previous location
   if (!ValidationRegex.usernameRegex.test(username)) {
     throw new AppError(
       'Invalid Username! Please insure it contains only letters and numbers and minimum 6 characters',
@@ -95,7 +94,6 @@ const checkVerificationToken = async (id, email_verification_token) => {
     throw new AppError('User is already verified!', 400, 'error-user-verified');
   }
 
-  //Date.now() returns an integer,number of ms since 1970, and time to verify was a Date object, new Date() returns current time, via Date object
   if (user.time_to_varify < new Date()) {
     throw new AppError('Email verification token expired!', 400, 'error-expired-email-verification-token');
   }
@@ -114,8 +112,7 @@ const verifyUserService = async (id, token) => {
 };
 
 const setNewPasswordService = async (newPassword, id) => {
-  const { new_value } = await SQLQueries.updateUserPassword(id, 'password', await bcrypt.hash(newPassword, 12));
-  return { new_value, statusCode: 200 };
+  return ({ new_value, statusCode } = await SQLQueries.updateUserPassword(id, 'password', await bcrypt.hash(newPassword, 12)));
 };
 
 module.exports = {

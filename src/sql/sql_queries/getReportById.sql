@@ -39,5 +39,14 @@ select distinct
 [procedure_name]
 from #temp
 
-select [order],param_name,type,length from #temp
+select [order],param_name,type,length,
+isnull((select sql from reports_param_options o where o.procedure_id=t.procedure_id and o.order_param=t.[order] and o.report_id=t.report_id),'') sql_query
+from #temp t
 
+
+/*
+select [order],t.param_name,type,length,m.*
+from #temp t
+left join reports_param_options o on o.procedure_id=t.procedure_id and o.order_param=t.[order] and o.report_id=t.report_id
+left join (select distinct ma_unterst_og from mitarbeiter) m on 1=1 and o.sql is not null
+*/

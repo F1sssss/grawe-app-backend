@@ -1,4 +1,7 @@
 const sql = require('mssql');
+/** @namespace sql.Int * **/
+/** @namespace sql.VarChar * **/
+
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
 
@@ -8,6 +11,32 @@ const Policy = (id) => {
 
 const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];
+};
+
+const StoredProcedure = (procedure_name) => {
+  return [new SQLParam('procedure_name', procedure_name, sql.VarChar)];
+};
+
+const NewReport = (new_report_name, procedure_id) => {
+  return [new SQLParam('new_report_name', new_report_name, sql.VarChar), new SQLParam('procedure_id', procedure_id, sql.Int)];
+};
+
+const NewParam = (procedure_id, report_id, order, param_name, sql_query) => {
+  return [
+    new SQLParam('procedure_id', procedure_id, sql.Int),
+    new SQLParam('report_id', report_id, sql.Int),
+    new SQLParam('order', order, sql.Int),
+    new SQLParam('param_name', param_name, sql.VarChar),
+    new SQLParam('sql_query', sql_query, sql.VarChar),
+  ];
+};
+
+const Param = (procedure_id, param_name, order) => {
+  return [
+    new SQLParam('procedure_id', procedure_id, sql.Int),
+    new SQLParam('param_name', param_name, sql.VarChar),
+    new SQLParam('order', order, sql.Int),
+  ];
 };
 
 const Policy_dateFrom_dateTo = (policy, dateFrom, dateTo) => {
@@ -36,7 +65,7 @@ const ReportParams = (reportParams, InputParams) => {
 
   let queryParams = [];
   reportParams.forEach((param, index) => {
-    queryParams.push(new SQLParam(param.param_name.slice(1), Object.values(InputParams)[index], sql[param.type]));
+    queryParams.push(new SQLParam(param['param_name'].slice(1), Object.values(InputParams)[index], sql[param.type]));
   });
 
   return queryParams;
@@ -49,4 +78,8 @@ module.exports = {
   UserSignup,
   Report,
   ReportParams,
+  NewReport,
+  NewParam,
+  StoredProcedure,
+  Param,
 };
