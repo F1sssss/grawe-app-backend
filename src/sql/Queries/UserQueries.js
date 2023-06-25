@@ -7,24 +7,29 @@ const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
 const loadSqlQueries = require('../sql_queries/loadSQL');
 const { UserSignup } = require('./params');
+const bcrypt = require('bcryptjs');
 
 const selectFromUsers = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);
   if (query.includes('.sql')) {
     query = loadSqlQueries(query);
   }
+
   const user = await connection.executeQuery(query, param);
-  if (!user.username && type !== 'signup') {
+
+  if (!user?.username && type !== 'signup') {
     throw new AppError(`User not found!`, 404, 'error-user-not-found');
   }
   if (type === 'login' && user.verified !== 1) {
     throw new AppError('Email not verified', 401, 'not-verified');
   }
-  user.password = type === 'login' ? user.password : undefined;
+
+  type !== 'signup' ? (user.password = type === 'login' ? user?.password : undefined) : undefined;
+
   return { user, statusCode: 200 };
 };
 
-const updateUser = async (id, field, value) => {
+const updateUserField = async (id, field, value) => {
   const connection = new DBConnection(DB_CONFIG.sql);
 
   if (typeof value === 'string') value = "'" + value + "'";
@@ -39,9 +44,10 @@ const updateUser = async (id, field, value) => {
     throw new AppError('Error updating user!', 401, 'error-updating-user-not-found');
   }
 
-  if (user[field] !== value) {
+  if (user[field] !== value && `'${user[field]}'` !== value && field !== 'password' && field !== 'updated_at') {
     throw new AppError('Error updating user!', 401, 'error-updating-user-not-updated');
   }
+
   return { newValue: field !== 'password' ? user[field] : undefined, statusCode: 200 };
 };
 
@@ -71,6 +77,7 @@ const getUserByUsernameOrEmail = async (username, email, requesttype) => {
     [new SQLParam('username', username, sql.VarChar), new SQLParam('email', email, sql.VarChar)],
     requesttype,
   );
+
   return { user, statusCode };
 };
 
@@ -91,13 +98,37 @@ const createUser = async (req) => {
 };
 
 const updateUserVerification = async (id, field, value) => {
-  const { user, statusCode } = await updateUser(id, field, value);
+  const { user, statusCode } = await updateUserField(id, field, value);
   return { user, statusCode };
 };
 
 const updateUserPassword = async (id, field, value) => {
-  const { user, statusCode } = await updateUser(id, field, value);
+  const { user, statusCode } = await updateUserField(id, field, value);
   return { user, statusCode };
+};
+
+const updateUser = async (user, updatedUser) => {
+  Object.keys(updatedUser).map(async (key) => {
+    await updateUserField(user.ID, key, key === 'password' ? await bcrypt.hash(updatedUser[key], 12) : updatedUser[key]);
+  });
+  await updateUserField(user.ID, 'updated_at', new Date().toISOString());
+  updatedUser = { ...updatedUser, password: undefined };
+  return { updatedFields: updatedUser, statusCode: 200 };
+};
+
+const deleteUser = async (id) => {
+  const connection = new DBConnection(DB_CONFIG.sql);
+  const user = await connection.executeQuery(
+    `delete from users where id = @id
+           select * from users where id = @id`,
+    [new SQLParam('id', id, sql.Int)],
+  );
+
+  if (user) {
+    throw new AppError('Error deleting user!', 401, 'error-deleting-user-not-found');
+  }
+
+  return { message: 'User Deleted!', statusCode: 200 };
 };
 
 module.exports = {
@@ -108,4 +139,7 @@ module.exports = {
   createUser,
   updateUserVerification,
   updateUserPassword,
+  updateUserField,
+  updateUser,
+  deleteUser,
 };

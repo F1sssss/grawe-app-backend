@@ -32,9 +32,14 @@ const createReportService = async (procedure) => {
   return ({ createdReport, statusCode } = await reportsQueries.createReport(procedure));
 };
 
+const updateReportService = async (id, report) => {
+  return ({ updatedReport, statusCode } = await reportsQueries.updateReport(id, report));
+};
+
 module.exports = {
   generateReportService,
   createReportService,
   getReportService,
   searchProcedureService,
+  updateReportService,
 };

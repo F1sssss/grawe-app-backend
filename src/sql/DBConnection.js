@@ -2,6 +2,7 @@
 /** @namespace result.recordsets**/
 const { ConnectionPool, Request } = require('mssql');
 const AppError = require('../utils/AppError');
+const { log } = require('util');
 module.exports = class DBConnection {
   constructor(config) {
     if (DBConnection._instance) {
@@ -43,7 +44,7 @@ module.exports = class DBConnection {
 
       result = multipleResultSets === false ? result.recordset : result.recordsets;
 
-      return result.length === 1 ? result[0] : result.length === 0 ? undefined : result;
+      return result?.length === 1 ? result[0] : result?.length === 0 ? undefined : result;
     } catch (err) {
       throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
     }

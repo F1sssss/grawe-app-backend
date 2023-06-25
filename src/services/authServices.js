@@ -44,6 +44,7 @@ const signupService = async (req) => {
 
 const signupFieldValidationService = async (req) => {
   const { username, email, password } = req;
+
   const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email, 'signup');
 
   if (user) {

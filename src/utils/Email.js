@@ -8,7 +8,7 @@ module.exports = class Email {
   constructor(user) {
     this.emailTo = user.email;
     this.username = user.username;
-    this.id = user.id;
+    this.id = user.ID;
     this.email_verification_token = user.email_verification_token;
   }
   async sendEmailVerification() {

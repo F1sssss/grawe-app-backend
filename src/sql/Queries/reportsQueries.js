@@ -2,13 +2,15 @@ const DB_CONFIG = require('../DBconfig');
 const DBConnection = require('../DBConnection');
 const AppError = require('../../utils/AppError');
 const loadSQLQueries = require('../sql_queries/loadSQL');
-const { Report, NewReport, NewParam, StoredProcedure, Param } = require('../Queries/params');
+const { Report, NewReport, NewParam, StoredProcedure, Param, ReportProcedure, ReportName } = require('../Queries/params');
 
 const excecuteReportTemplate = async (query, params = [], multiple = false, type = 'query') => {
   const connection = new DBConnection(DB_CONFIG.sql);
+
   if (query.includes('.sql')) {
     query = await loadSQLQueries(query);
   }
+
   const result = type === 'query' ? await connection.executeQuery(query, params, multiple) : await connection.executeStoredProcedure(query, params);
 
   if (!result || result.length === 0) {
@@ -34,6 +36,7 @@ const getReportById = async (id) => {
 
 const getProcedureInfo = async (procedure_name) => {
   const { result, statusCode } = await searchProcedure(procedure_name);
+
   return {
     procedure_info: result[0][0],
     procedure_params: result[1],
@@ -41,8 +44,8 @@ const getProcedureInfo = async (procedure_name) => {
   };
 };
 
-const getParamValues = async (procedure_id, param_name, order) => {
-  const { result, statusCode } = await excecuteReportTemplate('getParamValues.sql', Param(procedure_id, param_name, order));
+const getParamValues = async (procedure_id, report_id, param_name, order) => {
+  const { result, statusCode } = await excecuteReportTemplate('getParamValues.sql', Param(procedure_id, report_id, param_name, order));
   const values = await excecuteReportTemplate(result['sql']);
   return { param_values: values, statusCode };
 };
@@ -78,14 +81,36 @@ const insertReport = async (report_name, procedure_id) => {
 
 const insertParamSQL = async (procedure_params, procedure_id, report_id) => {
   procedure_params.map(async (param) => {
-    if (param['sql_query'] !== '') {
-      await excecuteReportTemplate(
-        'insert into reports_param_options (procedure_id,report_id,order_param,param_name,sql) values (@procedure_id,@report_id,@order,@param_name,@sql_query) select * from reports_param_options where report_id=@report_id and order_param=@order',
-        NewParam(procedure_id, report_id, param['order'], param['param_name'], param['sql_query']),
-      );
-    }
+    await excecuteReportTemplate(
+      'insert_update_reportParams.sql',
+      NewParam(procedure_id, report_id, param['order'], param['param_name'], param['sql_query']),
+    );
   });
   return { new_procedure_params: procedure_params, statusCode: 200 };
+};
+
+const updateReport = async (id, report) => {
+  const { report_info, report_params } = await getReportById(id);
+  const { report_name, procedure_id } = report_info;
+
+  if (procedure_id !== report.report_info.procedure_id) {
+    await excecuteReportTemplate('updateReportProcedure.sql', ReportProcedure(id, report.report_info.procedure_id));
+    await insertParamSQL(report.report_params, report.report_info.procedure_id, report.report_info.report_id);
+  }
+  if (report_name !== report.report_info.report_name) {
+    await excecuteReportTemplate(
+      'update reports set report_name=@report_name where id=@id select * from reports where id=@id',
+      ReportName(id, report.report_info.report_name),
+    );
+  }
+
+  if (JSON.stringify(report_params) !== JSON.stringify(report.report_params)) {
+    report.report_params.map(async (param, index) => {
+      await insertParamSQL([param], procedure_id, id);
+    });
+  }
+
+  return { updatedReport: await getReportById(id), statusCode: 200 };
 };
 
 module.exports = {
@@ -95,4 +120,5 @@ module.exports = {
   createReport,
   getParamValues,
   getProcedureInfo,
+  updateReport,
 };

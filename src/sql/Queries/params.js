@@ -31,9 +31,10 @@ const NewParam = (procedure_id, report_id, order, param_name, sql_query) => {
   ];
 };
 
-const Param = (procedure_id, param_name, order) => {
+const Param = (procedure_id, report_id, param_name, order) => {
   return [
     new SQLParam('procedure_id', procedure_id, sql.Int),
+    new SQLParam('report_id', report_id, sql.Int),
     new SQLParam('param_name', param_name, sql.VarChar),
     new SQLParam('order', order, sql.Int),
   ];
@@ -45,6 +46,10 @@ const Policy_dateFrom_dateTo = (policy, dateFrom, dateTo) => {
 
 const Policy_Date = (policy, date) => {
   return [new SQLParam('policy', policy, sql.Int), new SQLParam('date', date, sql.VarChar)];
+};
+
+const ReportProcedure = (report_id, procedure_id) => {
+  return [new SQLParam('id', report_id, sql.Int), new SQLParam('procedure_id', procedure_id, sql.Int)];
 };
 
 const UserSignup = (username, password, name, last_name, email, date_of_birth, verification_code) => {
@@ -71,6 +76,10 @@ const ReportParams = (reportParams, InputParams) => {
   return queryParams;
 };
 
+const ReportName = (id, report_name) => {
+  return [new SQLParam('id', id, sql.Int), new SQLParam('report_name', report_name, sql.VarChar)];
+};
+
 module.exports = {
   Policy,
   Policy_dateFrom_dateTo,
@@ -82,4 +91,6 @@ module.exports = {
   NewParam,
   StoredProcedure,
   Param,
+  ReportProcedure,
+  ReportName,
 };

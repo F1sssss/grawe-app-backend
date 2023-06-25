@@ -1,3 +1,5 @@
+//
+
 const catchAsync = require('../utils/catchAsync');
 const reportsQueries = require('../sql/Queries/reportsQueries');
 const reportService = require('../services/reportsService');
@@ -21,7 +23,7 @@ const createReport = catchAsync(async (req, res) => {
 
 const getParamValues = catchAsync(async (req, res) => {
   await responseHandler(
-    reportsQueries.getParamValues(req.query['procedure_id'], req.query['param_name'], req.query['order']),
+    reportsQueries.getParamValues(req.query['procedure_id'], req.query['report_id'], req.query['param_name'], req.query['order']),
     res,
     { statusCode: 200 },
     'Succesfully got param values',
@@ -32,6 +34,10 @@ const searchProcedure = catchAsync(async (req, res) => {
   await responseHandler(reportService.searchProcedureService(req.query['procedure_name']), res, { statusCode: 200 }, 'Search results:');
 });
 
+const updateReport = catchAsync(async (req, res) => {
+  await responseHandler(reportService.updateReportService(req.params.id, req.body), res, { statusCode: 200 }, 'Successfully updated report');
+});
+
 module.exports = {
   getReports,
   getReportById,
@@ -39,4 +45,5 @@ module.exports = {
   createReport,
   getParamValues,
   searchProcedure,
+  updateReport,
 };

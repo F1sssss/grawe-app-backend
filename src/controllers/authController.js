@@ -53,7 +53,7 @@ const setNewPassword = CatchAsync(async (req, res) => {
 });
 
 const emailVerification = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.verifyUserService(req.query.id), res, { statusCode: 200 }, 'Email verification successful!');
+  await responseHandler(authServices.verifyUserService(req.query.id, req.query.token), res, { statusCode: 200 }, 'Email verification successful!');
 });
 
 const protect = CatchAsync(async (req, res, next) => {

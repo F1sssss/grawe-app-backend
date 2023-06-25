@@ -2,11 +2,10 @@
 const app = require('./app');
 const DB_CONFIG = require('./src/sql/DBconfig');
 const DBConnection = require('./src/sql/DBConnection');
-const Policy = require('./src/sql/Queries/PoliciesQueries');
 const connection = new DBConnection(DB_CONFIG.sql);
 
 const server = app.listen(DB_CONFIG.port, async () => {
-  console.log(`🌐 App running on port  ${DB_CONFIG.port}...`);
+  console.log(`🌐 App runnnning on poort  ${DB_CONFIG.port}...`);
 
   try {
     await connection.connect();
