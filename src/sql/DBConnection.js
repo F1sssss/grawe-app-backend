@@ -2,7 +2,7 @@
 /** @namespace result.recordsets**/
 const { ConnectionPool, Request } = require('mssql');
 const AppError = require('../utils/AppError');
-const { log } = require('util');
+
 module.exports = class DBConnection {
   constructor(config) {
     if (DBConnection._instance) {

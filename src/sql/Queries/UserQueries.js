@@ -36,7 +36,7 @@ const updateUserField = async (id, field, value) => {
 
   const user = await connection.executeQuery(
     `update users set ${field} = ${value} where id = @id
-           select * from users where id = @id`,
+           select * from users (nolock) where id = @id`,
     [new SQLParam('id', id, sql.Int)],
   );
 
@@ -52,12 +52,12 @@ const updateUserField = async (id, field, value) => {
 };
 
 const getUserById = async (id) => {
-  const { user, statusCode } = await selectFromUsers('select * from users where id = @id', [new SQLParam('id', id, sql.Int)]);
+  const { user, statusCode } = await selectFromUsers('select * from users (nolock) where id = @id', [new SQLParam('id', id, sql.Int)]);
   return { user, statusCode };
 };
 
 const getUserByUsername = async (username) => {
-  const { user, statusCode } = await selectFromUsers('select * from users where username = @username and verified = 1', [
+  const { user, statusCode } = await selectFromUsers('select * from users  (nolock) where username = @username and verified = 1', [
     new SQLParam('username', username, sql.VarChar),
   ]);
 
@@ -65,7 +65,7 @@ const getUserByUsername = async (username) => {
 };
 
 const getUserByEmail = async (email) => {
-  const { user, statusCode } = await selectFromUsers('select * from users where username = @username and verified = 1', [
+  const { user, statusCode } = await selectFromUsers('select * from users  (nolock) where email = @email and verified = 1', [
     new SQLParam('email', email, sql.VarChar),
   ]);
   return { user, statusCode };
@@ -73,7 +73,7 @@ const getUserByEmail = async (email) => {
 
 const getUserByUsernameOrEmail = async (username, email, requesttype) => {
   const { user, statusCode } = await selectFromUsers(
-    'select * from users where username = @username or email = @email',
+    'select * from users  (nolock) where username = @username or email = @email',
     [new SQLParam('username', username, sql.VarChar), new SQLParam('email', email, sql.VarChar)],
     requesttype,
   );
@@ -85,6 +85,10 @@ const createUser = async (req) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const { username, password, name, last_name, email, date_of_birth } = req;
   const verification_code = Math.floor(Math.random() * 1000000000);
+
+  if (!username || !password || !name || !last_name || !email || !date_of_birth) {
+    throw new AppError('Missing fields!', 401, 'error-missing-fields');
+  }
 
   const user = await connection.executeQuery(
     await loadSqlQueries('signup.sql'),
@@ -120,7 +124,7 @@ const deleteUser = async (id) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const user = await connection.executeQuery(
     `delete from users where id = @id
-           select * from users where id = @id`,
+           select * from users  (nolock) where id = @id`,
     [new SQLParam('id', id, sql.Int)],
   );
 

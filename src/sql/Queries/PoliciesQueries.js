@@ -11,9 +11,9 @@ const excecutePolicyQueryTemplate = async (queryFileName, params, can_be_empty =
   const connection = new DBConnection(DB_CONFIG.sql);
   const policy = await connection.executeQuery(query, params);
   if (!policy && !can_be_empty) {
-    throw new AppError('Error during retrieving policy', 404, 'error-getting-policy-query');
+    throw new AppError('Error during retrieving policy', 404, 'error-getting-policy-not-found');
   }
-  return { policy, statusCode: 200 };
+  return { policy: policy === undefined ? {} : policy, statusCode: 200 };
 };
 
 const getPolicyInfo = async (id) => {
