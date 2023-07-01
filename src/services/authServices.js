@@ -109,6 +109,7 @@ const checkVerificationToken = async (id, email_verification_token) => {
 const verifyUserService = async (id, token) => {
   const { user } = await checkVerificationToken(id, token);
   await SQLQueries.updateUserVerification(id, 'verified', 1);
+
   return { user, statusCode: 200 };
 };
 
@@ -122,4 +123,6 @@ module.exports = {
   forgotPasswordService,
   verifyUserService,
   setNewPasswordService,
+  signupFieldValidationService,
+  checkVerificationToken,
 };

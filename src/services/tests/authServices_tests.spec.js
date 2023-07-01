@@ -1,113 +1,199 @@
-const DBConnection = require('../../sql/DBConnection');
 const authService = require('../authServices');
+const { getUserByUsernameOrEmail, createUser, getUserById, updateUserVerification, updateUserPassword } = require('../../sql/Queries/UserQueries');
+const Email = require('../../utils/Email');
+let {
+  signupService,
+  loginService,
+  forgotPasswordService,
+  checkVerificationToken,
+  verifyUserService,
+  setNewPasswordService,
+  signupFieldValidationService,
+} = authService;
+const bcryptjs = require('bcryptjs');
 
-sql = {
-  server: 'localhost',
-  database: 'GRAWE_TEST',
-  user: 'sa',
-  encrypt: false,
-  password: 'Grawe123$',
-  pool: {
-    max: 20,
-    min: 0,
-    idleTimeoutMillis: 30000,
+jest.mock('../../sql/Queries/UserQueries');
+jest.mock('bcryptjs');
+jest.mock('../../utils/Email');
+
+const mockUser = {
+  user: {
+    ID: 2,
+    username: 'filip123',
+    password: '$2a$12$pe8NUBi4sPNjnWuW9Lp8ye/JdK1GJzvZED2W87nLRLnmJZJcnNLi.',
+    name: 'Filip',
+    last_Name: 'Stankovic',
+    date_of_birth: '1999.01.11',
+    role: null,
+    email: 'filips385@rocketmail.com',
+    verified: 1,
+    time_to_varify: new Date('2023-06-25T11:27:50.277Z'),
+    created_at: new Date(' 2023-06-25T11:27:50.277Z'),
+    updated_at: null,
+    email_verification_token: 225946481,
   },
 };
 
-describe('authentication service', () => {
-  const random = Math.floor(Math.random() * 10000);
-  let createdUser;
-
-  const userToCreate = {
-    username: `filip${random}`,
-    password: `Test${random}$`,
-    name: 'Filip',
-    last_name: 'Stankovic',
-    email: `filips${random}@rocketmail.com`,
-    date_of_birth: '11.01.1999',
-  };
-
-  beforeAll(() => {
-    connection = new DBConnection(sql);
-  });
-
-  it('should connect to the test database', async () => {
-    const consoleSpy = jest.spyOn(console, 'log');
-    await connection.connect();
-    expect(consoleSpy).toHaveBeenCalledWith('🔒 Connected to MSSQL database');
-    consoleSpy.mockRestore();
-  });
-
-  it('should create a user', async () => {
-    createdUser = await authService.signupService(userToCreate);
-    expect(createdUser).toHaveProperty('user');
-  });
-
-  it('should verify a user', async () => {
-    const {
-      user: { ID, email_verification_token },
-    } = createdUser;
-    const user = await authService.verifyUserService(ID, email_verification_token);
-    expect(user).toHaveProperty('user');
-  });
-
+describe('authentication service tests', () => {
   it('should login a user', async () => {
-    const user = await authService.loginService(userToCreate.username, userToCreate.password);
-    expect(user).toHaveProperty('user');
+    const username = 'filip123';
+    const password = 'Test123$';
+
+    getUserByUsernameOrEmail.mockReturnValue(mockUser);
+    bcryptjs.compare.mockReturnValue(true);
+
+    const user = await loginService(username, password);
+
+    expect({ ...user.user, password: undefined }).toStrictEqual({ ...mockUser.user, password: undefined });
   });
 
-  it('should change a password', async () => {
-    const {
-      user: { ID },
-    } = createdUser;
-    const user = await authService.setNewPasswordService('Test123$', ID);
-    expect(user).toHaveProperty('user');
+  it('should throw an error that the password is invalid', async () => {
+    const username = 'filip123';
+    const password = 'Test123$';
+
+    getUserByUsernameOrEmail.mockReturnValue(mockUser);
+    bcryptjs.compare.mockReturnValue(false);
+    expect(loginService(username, password)).rejects.toThrow('Invalid Password');
   });
 
-  it('should throw a there is that user error', async () => {
-    try {
-      await authService.signupService(userToCreate);
-    } catch (error) {
-      expect(error.statusMessage).toBe('error-username-exists');
-    }
+  it('should test validation service for an existing user', async () => {
+    const user = { username: 'filip123', email: 'filips3855@rocketmail.com', password: 'Test123$' };
+
+    getUserByUsernameOrEmail.mockReturnValue(mockUser);
+    expect(signupFieldValidationService(user)).rejects.toThrow('Username already exists');
   });
 
-  it('should throw a there is that email error', async () => {
-    try {
-      userToCreate.username = `filip${random + 1}`;
-      await authService.signupService(userToCreate);
-    } catch (error) {
-      expect(error.statusMessage).toBe('error-email-exists');
-    }
+  it('should test validation service for an existing email', async () => {
+    const user = { username: 'filip1233213', email: 'filips3855@rocketmail.com', password: 'Test123$' };
+    getUserByUsernameOrEmail.mockReturnValue({ user: { ...mockUser.user, email: 'filips3855@rocketmail.com' } });
+    expect(signupFieldValidationService(user)).rejects.toThrow('Email already exists');
   });
 
-  it('should throw a invalid username error', async () => {
-    try {
-      userToCreate.username = `fis$`;
-      userToCreate.email = `filips${random + 1}@rocektmail.com`;
-      await authService.signupService(userToCreate);
-    } catch (error) {
-      expect(error.statusMessage).toBe('error-invalid-username');
-    }
+  it('should test validation service for an invalid username', async () => {
+    const user = { username: 'f1s$', email: 'filips3855@rocketmail.com', password: 'Test123$' };
+    getUserByUsernameOrEmail.mockReturnValue([]);
+    expect(signupFieldValidationService(user)).rejects.toThrow('Invalid Username');
   });
 
-  it('should throw a invalid email error', async () => {
-    try {
-      userToCreate.username = `filip${random + 2}`;
-      userToCreate.email = `kjabhnsdkjasnbd@dasda`;
-      await authService.signupService(userToCreate);
-    } catch (error) {
-      expect(error.statusMessage).toBe('error-invalid-email');
-    }
+  it('should test validation service for an invalid email', async () => {
+    const user = { username: 'filip1233213', email: 'filipsrocketmail.com', password: 'Test123$' };
+    getUserByUsernameOrEmail.mockReturnValue([]);
+    expect(signupFieldValidationService(user)).rejects.toThrow('Invalid email');
   });
 
-  it('should throw a invalid password error', async () => {
-    try {
-      userToCreate.email = `filips385@rocketmail.com`;
-      userToCreate.password = `Test`;
-      await authService.signupService(userToCreate);
-    } catch (error) {
-      expect(error.statusMessage).toBe('error-invalid-password');
-    }
+  it('should test validation service for an invalid password', async () => {
+    const user = { username: 'filip1233213', email: 'filips@rocketmail.com', password: 'test123$' };
+    getUserByUsernameOrEmail.mockReturnValue([]);
+    expect(signupFieldValidationService(user)).rejects.toThrow(
+      'Invalid Password! Please insure there is at least one digit, one capital letter and one sign',
+    );
+  });
+
+  it('should pass validation service', async () => {
+    const user = { username: 'filip1233213', email: 'filips@rocketmail.com', password: 'Test123$' };
+    getUserByUsernameOrEmail.mockReturnValue([]);
+    expect(signupFieldValidationService(user)).resolves.toBeDefined();
+  });
+
+  it('should send email verification', async () => {
+    const emailInstance = new Email({
+      email: 'test@example.com',
+      username: 'testuser',
+      ID: 123,
+      email_verification_token: 1235476,
+    });
+
+    emailInstance.sendEmailVerification = jest.fn().mockResolvedValueOnce({
+      message: 'Mock email sent successfully!',
+      statusCode: 200,
+    });
+
+    const result = await emailInstance.sendEmailVerification();
+
+    expect(result).toEqual({
+      message: 'Mock email sent successfully!',
+      statusCode: 200,
+    });
+
+    expect(emailInstance.sendEmailVerification).toHaveBeenCalled();
+  });
+
+  it('should signup a user', async () => {
+    getUserByUsernameOrEmail.mockReturnValueOnce([]);
+    signupFieldValidationService = jest.fn();
+    signupFieldValidationService.mockReturnValue({ message: 'Valid parameters!', statusCode: 200 });
+
+    const emailInstance = new Email({
+      email: 'test@example.com',
+      username: 'testuser',
+      ID: 123,
+      email_verification_token: 1235476,
+    });
+
+    emailInstance.sendEmailVerification = jest.fn().mockResolvedValueOnce({
+      message: 'Mock email sent successfully!',
+      statusCode: 200,
+    });
+
+    createUser.mockReturnValue({ user: { ...mockUser.user, password: undefined }, statusCode: 200 });
+
+    const user = await signupService({ username: 'filip1233213', email: 'test@rocketmail.com', password: 'Test123$' });
+
+    expect({ ...user.user, password: undefined }).toStrictEqual({ ...mockUser.user, password: undefined });
+  });
+
+  it('should send the forgot password email', async () => {
+    getUserByUsernameOrEmail.mockReturnValue({ user: { ...mockUser.user } });
+
+    const emailInstance = new Email({
+      email: 'test@example.com',
+      username: 'testuser',
+      ID: 123,
+      email_verification_token: 1235476,
+    });
+
+    emailInstance.sendEmailRetrievingPassword = jest.fn().mockResolvedValueOnce({
+      message: 'Mock email sent successfully!',
+      statusCode: 200,
+    });
+    const { user } = await forgotPasswordService('filip123');
+
+    expect(user).toStrictEqual(mockUser.user);
+  });
+
+  it('should throw an error that the user is already verified', async () => {
+    getUserById.mockReturnValue({ user: { ...mockUser.user, verified: 1 } });
+    expect(checkVerificationToken(123456)).rejects.toThrow('User is already verified');
+  });
+
+  it('should throw an error that the user token expired', async () => {
+    getUserById.mockReturnValue({ user: { ...mockUser.user, verified: 0 } });
+    expect(checkVerificationToken(123456)).rejects.toThrow('Email verification token expired!');
+  });
+
+  it('should throw an error that the token is invalid', async () => {
+    getUserById.mockReturnValue({ user: { ...mockUser.user, verified: 0, time_to_varify: new Date() + 100000, email_verification_token: 1 } });
+    expect(checkVerificationToken(123456)).rejects.toThrow('Invalid email verification token!');
+  });
+
+  it('should verify the user', async () => {
+    checkVerificationToken = jest.fn();
+
+    getUserById.mockReturnValue({
+      user: { ...mockUser.user, verified: 0, time_to_varify: new Date() + 100000, email_verification_token: 225946481 },
+    });
+    checkVerificationToken.mockReturnValue({
+      user: { ...mockUser.user, verified: 0, time_to_varify: new Date() + 100000, email_verification_token: 225946481 },
+      statusCode: 200,
+    });
+    updateUserVerification.mockReturnValue({ user: { ...mockUser.user, verified: 1 }, statusCode: 200 });
+    const { user } = await verifyUserService(123456, 225946481);
+    expect(user).toStrictEqual({ ...mockUser.user, verified: 0, time_to_varify: new Date() + 100000 });
+  });
+
+  it('should update user password', async () => {
+    updateUserPassword.mockReturnValue({ new_value: 'Test123$' });
+    const { new_value } = await updateUserPassword(2, 'Test123$');
+    expect(new_value).toBeDefined();
   });
 });

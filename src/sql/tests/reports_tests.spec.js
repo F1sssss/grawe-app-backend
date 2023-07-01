@@ -2,7 +2,6 @@ const DBConnection = require('../DBConnection');
 const ReportQueries = require('../Queries/ReportsQueries');
 const SQLParam = require('../SQLParam');
 const sql = require('mssql');
-const params = require('../Queries/params');
 
 test_sql = {
   server: 'localhost',
@@ -34,6 +33,8 @@ describe('Reports queries tests', () => {
     expect(reports.length).toBeGreaterThan(0);
   });
 
+  //Get Report By id Tests
+
   it('should throw an error that report does not exist', async () => {
     try {
       const { report_info, report_params } = await ReportQueries.getReportById(15252332523);
@@ -48,11 +49,19 @@ describe('Reports queries tests', () => {
     expect(report_params[0].order).toBe(1);
   });
 
+  //Get Report By Name Tests
+
   it('should get report info by name', async () => {
     const { report_info, report_params } = await ReportQueries.getReportByName('Dani Kasnjenja Polisa');
 
     expect(report_info.report_id).toBe(6);
     expect(report_params[0].order).toBe(1);
+  });
+
+  //Search Stored Procedure Tests
+  it('should return the name of the stored procedure', async () => {
+    const { procedure_info } = await ReportQueries.getProcedureInfo('gr_kanal_prodaje');
+    expect(procedure_info.procedure_name).toBe('gr_kanal_prodaje');
   });
 
   it('should return error if procedure does not exist', async () => {
@@ -66,6 +75,14 @@ describe('Reports queries tests', () => {
   it('should get param values', async () => {
     const { param_values } = await ReportQueries.getParamValues(251252050, 5, '@KanalProdaje', 2);
     expect(param_values.result).toBeDefined();
+  });
+
+  it('should throw an error that the param doesnt have sql', async () => {
+    try {
+      await ReportQueries.getParamValues(251252050, 5, '@datum', 1);
+    } catch (error) {
+      expect(error.statusMessage).toBe('error-param-query-empty');
+    }
   });
 
   it('should run the report', async () => {

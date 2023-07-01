@@ -1,10 +1,14 @@
+const sql = require('mssql');
 const DB_CONFIG = require('../DBconfig');
 const DBConnection = require('../DBConnection');
 const AppError = require('../../utils/AppError');
 const loadSQLQueries = require('../sql_queries/loadSQL');
 const { Report, NewReport, NewParam, StoredProcedure, Param, ReportProcedure, ReportName } = require('../Queries/params');
 const SQLParam = require('../SQLParam');
-const sql = require('mssql');
+
+function isNullOrEmpty(str) {
+  return !str || !str.trim();
+}
 
 const excecuteReportTemplate = async (query, params = [], multiple = false, type = 'query') => {
   const connection = new DBConnection(DB_CONFIG.sql);
@@ -58,9 +62,11 @@ const getProcedureInfo = async (procedure_name) => {
 
 const getParamValues = async (procedure_id, report_id, param_name, order) => {
   const { result, statusCode } = await excecuteReportTemplate('getParamValues.sql', Param(procedure_id, report_id, param_name, order));
-  if (result.sql === '') {
+
+  if (isNullOrEmpty(result.sql)) {
     throw new AppError('Params query is empty!', 404, 'error-param-query-empty');
   }
+
   const values = await excecuteReportTemplate(result['sql']);
   return { param_values: values, statusCode };
 };
@@ -75,6 +81,7 @@ const searchProcedure = async (procedure_name) => {
   return { result, statusCode };
 };
 
+//This function is used to insert a new report and its params, and returns the new report (with its params)
 const createReport = async (procedure) => {
   const {
     procedure_info: { procedure_id },
@@ -82,34 +89,28 @@ const createReport = async (procedure) => {
     new_report_name,
   } = procedure;
 
-  if (!new_report_name || new_report_name === '' || new_report_name === null) {
-    throw new AppError('Report name is empty!', 404, 'error-report-name-empty');
+  if (
+    isNullOrEmpty(new_report_name) ||
+    procedure_id === undefined ||
+    procedure_params.length === 0 ||
+    (await getReportByName(new_report_name))?.report_info?.report_name === new_report_name
+  ) {
+    throw new AppError('Invalid report data!', 404, 'error-invalid-report-data');
   }
 
-  if (procedure_id === null || procedure_id === '') {
-    throw new AppError('Procedure name is empty!', 404, 'error-procedure-name-empty');
-  }
-
-  if (procedure_params.length === 0) {
-    throw new AppError('Procedure params is empty!', 404, 'error-procedure-params-empty');
-  }
-
-  if ((await getReportByName(new_report_name))?.report_info?.report_name === new_report_name) {
-    throw new AppError('Report name already exists!', 404, 'error-report-name-already-exists');
-  }
-
-  const { report_id } = await insertReport(new_report_name, procedure_id);
+  const { report_id } = await insertReportSQL(new_report_name, procedure_id);
   await insertParamSQL(procedure_params, procedure_id, report_id);
   const createdReport = await getReportById(report_id);
 
   return { createdReport, statusCode: 200 };
 };
 
-const insertReport = async (report_name, procedure_id) => {
+//These 2 functions are helper to createReport and are used to insert rows into SQL table
+const insertReportSQL = async (report_name, procedure_id) => {
   const { result, statusCode } = await excecuteReportTemplate('insertReport.sql', NewReport(report_name, procedure_id));
   return { report_id: result.id, statusCode };
 };
-
+//Insert Prams inserts the params of the report or updates them if they already exist
 const insertParamSQL = async (procedure_params, procedure_id, report_id) => {
   procedure_params.map(async (param) => {
     await excecuteReportTemplate(
@@ -124,6 +125,7 @@ const updateReport = async (id, report) => {
   const { report_info, report_params } = await getReportById(id);
   const { report_name, procedure_id } = report_info;
 
+  //If the procedure_id or report_name is changed, we need to update the report and its params
   if (procedure_id !== report.report_info.procedure_id) {
     await excecuteReportTemplate('updateReportProcedure.sql', ReportProcedure(id, report.report_info.procedure_id));
     await insertParamSQL(report.report_params, report.report_info.procedure_id, report.report_info.report_id);
@@ -137,7 +139,7 @@ const updateReport = async (id, report) => {
       ReportName(id, report.report_info.report_name),
     );
   }
-
+  //If the report_params is changed, we need to update the report params
   if (JSON.stringify(report_params) !== JSON.stringify(report.report_params)) {
     report.report_params.map(async (param) => {
       await insertParamSQL([param], procedure_id, id);

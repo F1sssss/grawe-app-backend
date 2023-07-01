@@ -15,7 +15,7 @@ module.exports = errorHandler = (err, req, res, next) => {
   next();
 };
 
-const handleOtherErrors = (err, res) => {
+const handleOtherErrors = (err) => {
   if (err.name === 'TokenExpiredError') handleTokenExpiredError(err);
   if (err.name === 'TypeCastError') handleTypeCastError(err);
   if (err.name === 'JsonWebTokenError') handleJWTError(err);

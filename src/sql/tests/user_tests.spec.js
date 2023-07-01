@@ -90,6 +90,11 @@ describe('User queries tests', () => {
     expect(user).toHaveProperty('ID');
   });
 
+  it('should get user by username or email for login', async () => {
+    const { user } = await UserQueries.getUserByUsernameOrEmail('filips3855@rocketmail.com', 'filips3855@rocketmail.com', 'login');
+    expect(user).toHaveProperty('ID');
+  });
+
   it('should not return an error when trying to get a user by username or email for signup', async () => {
     const { user } = await UserQueries.getUserByUsernameOrEmail('filip6146414', '', 'signup');
     expect(user).toEqual(undefined);
