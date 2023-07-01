@@ -10,11 +10,11 @@ const Policy = (id) => {
 };
 
 const Client = (id) => {
-  return new SQLParam('client', id, sql.VarChar);
+  return [new SQLParam('id', id, sql.VarChar)];
 };
 
 const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
-  return [new SQLParam('client', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.VarChar), new SQLParam('dateTo', dateTo, sql.VarChar)];
+  return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.VarChar), new SQLParam('dateTo', dateTo, sql.VarChar)];
 };
 const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];

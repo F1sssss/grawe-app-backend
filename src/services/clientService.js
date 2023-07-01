@@ -1,9 +1,23 @@
 const cacheQuery = require('../utils/cacheQuery');
 const ClientQueries = require('../sql/Queries/ClientQueries');
+const generateExcelFile = require('../utils/ExcelExport');
+const Invoice = require('../utils/createInvoice');
+
+function seperateClientPolicies(client) {
+  const arraysByPolisa = {};
+
+  client.forEach((item) => {
+    const policy = item.polisa;
+    !arraysByPolisa[policy] ? (arraysByPolisa[policy] = []) : undefined;
+    arraysByPolisa[policy].push(item);
+  });
+
+  return Object.values(arraysByPolisa);
+}
 
 const getClientHistoryService = async (id, dateFrom, dateTo) => {
   const cacheKey = `client-history-${id}-${dateFrom}-${dateTo}`;
-  return ({ client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientHistory(id)));
+  return ({ client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientHistory(id, dateFrom, dateTo)));
 };
 
 const getClientInfoService = async (id) => {
@@ -13,11 +27,41 @@ const getClientInfoService = async (id) => {
 
 const getClientAnalyticalInfoService = async (id, dateFrom, dateTo) => {
   const cacheKey = `client-analytics-${id}-${dateFrom}-${dateTo}`;
-  return ({ client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientAnalyticalInfo(id)));
+  return ({ client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientAnalyticalInfo(id, dateFrom, dateTo)));
+};
+
+const getClientHistoryExcelDownloadService = async (res, id, dateFrom, dateTo) => {
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="client.xlsx"');
+  const { client } = await getClientHistoryService(id, dateFrom, dateTo);
+  return ({ excelBuffer, statusCode } = await generateExcelFile(client));
+};
+
+const getPolicyHistoryPDFDownloadService = async (res, id, dateFrom, dateTo) => {
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="InvoicesClient.pdf"');
+  let { client } = await getClientHistoryService(id, dateFrom, dateTo);
+  client = seperateClientPolicies(client);
+  return ({ pdfBuffer, statusCode } = await Invoice.createClientInvoice(client));
+};
+
+const getAllClientAnalyticsService = async (id, dateFrom, dateTo) => {
+  const clientHistory = await getClientHistoryService(id, dateFrom, dateTo);
+  const clientAnalyticalInfo = await getClientAnalyticalInfoService(id, dateFrom, dateTo);
+
+  return {
+    clientHistory,
+    clientAnalyticalInfo,
+    excelPath: `http://localhost:3000/api/v1/client/${id}/history/xls/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+    pdfPath: `http://localhost:3000/api/v1/client/${id}/history/pdf/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+  };
 };
 
 module.exports = {
   getClientHistoryService,
   getClientInfoService,
   getClientAnalyticalInfoService,
+  getClientHistoryExcelDownloadService,
+  getPolicyHistoryPDFDownloadService,
+  getAllClientAnalyticsService,
 };

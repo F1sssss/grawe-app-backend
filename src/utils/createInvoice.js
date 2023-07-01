@@ -7,6 +7,22 @@ function createInvoice(policy) {
     let buffers = [];
     let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
+    // Handle errors
+    doc.on('error', () => {
+      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+    });
+
+    // Collect the PDF buffers
+    doc.on('data', (buffer) => {
+      buffers.push(buffer);
+    });
+
+    // Finalize the PDF document
+    doc.on('end', () => {
+      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+      resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
+    });
+
     const invoiceData = {
       shipping: {
         name: 'SMN TRANSPORTI DOO',
@@ -19,6 +35,20 @@ function createInvoice(policy) {
       paid: 0,
       broj_polise: 12346,
     };
+
+    generateHeader(doc);
+    generateCustomerInformation(doc, invoiceData);
+    generateInvoiceTable(doc, invoiceData);
+    //generateFooter(doc);
+
+    doc.end();
+  });
+}
+
+function createClientInvoice(client) {
+  return new Promise(async (resolve, reject) => {
+    let buffers = [];
+    let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
     // Handle errors
     doc.on('error', () => {
@@ -36,10 +66,29 @@ function createInvoice(policy) {
       resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
     });
 
-    generateHeader(doc);
-    generateCustomerInformation(doc, invoiceData);
-    generateInvoiceTable(doc, invoiceData);
-    //generateFooter(doc);
+    const invoiceData = {
+      shipping: {
+        name: 'SMN TRANSPORTI DOO',
+        address: 'KRIVAULICA,DOBROTA BB',
+        city: 'KOTOR',
+        country: 'MNE',
+        postal_code: 94111,
+      },
+      items: client,
+      paid: 0,
+      broj_polise: 12346,
+    };
+
+    let invoiceDataCopy = invoiceData;
+
+    for (let i = 0; i < client[0].length; i++) {
+      invoiceDataCopy.items = client[i];
+      invoiceDataCopy.broj_polise = client[i][0].polisa;
+      generateHeader(doc);
+      generateCustomerInformation(doc, invoiceDataCopy);
+      generateInvoiceTable(doc, invoiceDataCopy);
+      doc.addPage();
+    }
 
     doc.end();
   });
@@ -163,4 +212,5 @@ function formatDate(date) {
 
 module.exports = {
   createInvoice,
+  createClientInvoice,
 };
