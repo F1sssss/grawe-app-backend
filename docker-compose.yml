@@ -47,6 +47,7 @@ services:
       mynetwork:
         ipv4_address: 172.23.0.23
 
+
   cache:
     image: redis:alpine
     command: redis-server --save 20 1 --loglevel warning --requirepass Grawe123$
@@ -59,6 +60,8 @@ services:
     networks:
       mynetwork:
         ipv4_address: 172.23.0.22
+
+
 
 networks:
   mynetwork:

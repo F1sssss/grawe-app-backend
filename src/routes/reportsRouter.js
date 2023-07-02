@@ -13,5 +13,6 @@ router.get('/:id/', reportsController.getReportById);
 router.get('/', reportsController.getReports);
 router.post('/', reportsController.createReport);
 router.patch('/:id/', reportsController.updateReport);
+router.delete('/:id/', reportsController.deleteReport);
 
 module.exports = router;

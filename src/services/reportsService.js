@@ -37,10 +37,15 @@ const updateReportService = async (id, report) => {
   return ({ updatedReport, statusCode } = await reportsQueries.updateReport(id, report));
 };
 
+const deleteReportService = async (id) => {
+  return ({ deletedReport, statusCode } = await reportsQueries.deleteReport(id));
+};
+
 module.exports = {
   generateReportService,
   createReportService,
   getReportService,
   searchProcedureService,
   updateReportService,
+  deleteReportService,
 };

@@ -38,6 +38,10 @@ const updateReport = catchAsync(async (req, res) => {
   await responseHandler(reportService.updateReportService(req.params.id, req.body), res, { statusCode: 200 }, 'Successfully updated report');
 });
 
+const deleteReport = catchAsync(async (req, res) => {
+  await responseHandler(reportService.deleteReportService(req.params.id), res, { statusCode: 200 }, 'Successfully deleted report');
+});
+
 module.exports = {
   getReports,
   getReportById,
@@ -46,4 +50,5 @@ module.exports = {
   getParamValues,
   searchProcedure,
   updateReport,
+  deleteReport,
 };

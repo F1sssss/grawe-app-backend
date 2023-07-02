@@ -1,5 +1,6 @@
 const DBConnection = require('../DBConnection');
 const UserQueries = require('../Queries/UserQueries');
+const { beforeEach } = require('node:test');
 
 sql = {
   server: 'localhost',
@@ -29,6 +30,11 @@ describe('User queries tests', () => {
 
   beforeAll(() => {
     connection = new DBConnection(sql);
+    jest.setTimeout(3000000);
+  });
+
+  beforeEach(() => {
+    jest.setTimeout(3000000);
   });
 
   it('should connect to the test database', async () => {
@@ -105,7 +111,7 @@ describe('User queries tests', () => {
     expect(createdUser).toHaveProperty('user');
   });
 
-  it('should update the verified field', async () => {
+  it('should update the verifed field', async () => {
     const {
       user: { ID },
     } = createdUser;

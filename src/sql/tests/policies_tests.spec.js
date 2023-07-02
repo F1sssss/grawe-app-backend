@@ -1,5 +1,6 @@
 const DBConnection = require('../DBConnection');
 const PolicyQueries = require('../Queries/PoliciesQueries');
+const { beforeEach } = require('node:test');
 
 sql = {
   server: 'localhost',

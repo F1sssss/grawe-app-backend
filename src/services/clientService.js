@@ -52,8 +52,8 @@ const getAllClientAnalyticsService = async (id, dateFrom, dateTo) => {
   return {
     clientHistory,
     clientAnalyticalInfo,
-    excelPath: `http://localhost:3000/api/v1/client/${id}/history/xls/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
-    pdfPath: `http://localhost:3000/api/v1/client/${id}/history/pdf/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+    excelPath: `http://localhost:3000/api/v1/clients/${id}/history/xls/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+    pdfPath: `http://localhost:3000/api/v1/clients/${id}/history/pdf/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
   };
 };
 
