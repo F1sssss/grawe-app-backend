@@ -1,9 +1,9 @@
 const clientService = require('../services/clientService');
-const responseHandler = require('../utils/responseHandler');
+const handleResponse = require('../utils/responseHandler');
 const CatchAsync = require('../utils/CatchAsync');
 
 const getClientHistory = CatchAsync(async (req, res) => {
-  await responseHandler(
+  await handleResponse(
     clientService.getClientHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo),
     res,
     { statusCode: 200 },
@@ -12,11 +12,11 @@ const getClientHistory = CatchAsync(async (req, res) => {
 });
 
 const getClientInfo = CatchAsync(async (req, res) => {
-  await responseHandler(clientService.getClientInfoService(req.params.id), res, { statusCode: 200 }, 'success');
+  await handleResponse(clientService.getClientInfoService(req.params.id), res, { statusCode: 200 }, 'succeess');
 });
 
 const getClientAnalyticalInfo = CatchAsync(async (req, res) => {
-  await responseHandler(
+  await handleResponse(
     clientService.getClientAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo),
     res,
     { statusCode: 200 },
@@ -35,8 +35,17 @@ const getClientHistoryPDFDownload = CatchAsync(async (req, res) => {
 });
 
 const getAllClientAnalytics = CatchAsync(async (req, res) => {
-  await responseHandler(
+  await handleResponse(
     clientService.getAllClientAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo),
+    res,
+    { statusCode: 200 },
+    'success',
+  );
+});
+
+const getAllClientInfo = CatchAsync(async (req, res) => {
+  await handleResponse(
+    clientService.getAllClientInfoService(req.params.id, req.query.dateFrom, req.query.dateTo),
     res,
     { statusCode: 200 },
     'success',
@@ -50,4 +59,5 @@ module.exports = {
   getClientHistoryExcelDownload,
   getClientHistoryPDFDownload,
   getAllClientAnalytics,
+  getAllClientInfo,
 };

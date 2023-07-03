@@ -6,7 +6,6 @@ module.exports = cacheQuery = async (cacheKey, promiseQuery) => {
   if (cacheData) {
     return { ...cacheData, statusCode: 200 };
   }
-
   const data = await promiseQuery;
 
   await setWithTTL(cacheKey, JSON.stringify({ ...data }));

@@ -34,8 +34,14 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
   ));
 };
 
+const getAllClientInfo = async (id, dateFrom, dateTo) => {
+  const { client, statusCode } = await excecuteClientQueryTemplate('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo), true);
+  return { client, statusCode };
+};
+
 module.exports = {
   getClientInfo,
   getClientHistory,
   getClientAnalyticalInfo,
+  getAllClientInfo,
 };

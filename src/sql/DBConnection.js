@@ -2,6 +2,7 @@
 /** @namespace result.recordsets**/
 const { ConnectionPool, Request } = require('mssql');
 const AppError = require('../utils/AppError');
+const loadSqlQueries = require('./sql_queries/loadSQL');
 
 module.exports = class DBConnection {
   constructor(config) {
@@ -33,6 +34,10 @@ module.exports = class DBConnection {
     try {
       const request = await this.pool.request();
 
+      if (query.includes('.sql')) {
+        query = await loadSqlQueries(query);
+      }
+
       // Add parameters to the request
       params.forEach((param) => {
         request.input(param.name, param.value);
@@ -62,36 +67,6 @@ module.exports = class DBConnection {
       const result = await request.execute(storedProcedure);
 
       return result.recordsets[0];
-    } catch (err) {
-      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
-    }
-  }
-
-  async executeStreamQuery(query, params = []) {
-    try {
-      const request = new Request(this.pool);
-      request.stream = true;
-
-      // Add parameters to the request
-      params.forEach((param) => {
-        request.input(param.name, param.value);
-      });
-
-      request.query(query);
-
-      request.on('recordset', (columns) => {
-        console.log(columns);
-      });
-
-      request.on('row', (row) => {
-        console.log(row);
-      });
-
-      request.on('done', (result) => {
-        console.log('done', result);
-      });
-
-      return true;
     } catch (err) {
       throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
     }

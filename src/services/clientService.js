@@ -17,17 +17,20 @@ function seperateClientPolicies(client) {
 
 const getClientHistoryService = async (id, dateFrom, dateTo) => {
   const cacheKey = `client-history-${id}-${dateFrom}-${dateTo}`;
-  return ({ client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientHistory(id, dateFrom, dateTo)));
+  const { client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientHistory(id, dateFrom, dateTo));
+  return { client, statusCode };
 };
 
 const getClientInfoService = async (id) => {
   const cacheKey = `client-info-${id}`;
-  return ({ client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientInfo(id)));
+  const { client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientInfo(id));
+  return { client, statusCode };
 };
 
 const getClientAnalyticalInfoService = async (id, dateFrom, dateTo) => {
   const cacheKey = `client-analytics-${id}-${dateFrom}-${dateTo}`;
-  return ({ client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientAnalyticalInfo(id, dateFrom, dateTo)));
+  const { client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientAnalyticalInfo(id, dateFrom, dateTo));
+  return { client, statusCode };
 };
 
 const getClientHistoryExcelDownloadService = async (res, id, dateFrom, dateTo) => {
@@ -57,6 +60,13 @@ const getAllClientAnalyticsService = async (id, dateFrom, dateTo) => {
   };
 };
 
+const getAllClientInfoService = async (id, dateFrom, dateTo) => {
+  const cacheKey = `client-anlaytics-all-${id}-${dateFrom}-${dateTo}`;
+  let { client } = await cacheQuery(cacheKey, ClientQueries.getAllClientInfo(id, dateFrom, dateTo));
+  client = seperateClientPolicies(client);
+  return { client, statusCode: 200 };
+};
+
 module.exports = {
   getClientHistoryService,
   getClientInfoService,
@@ -64,4 +74,5 @@ module.exports = {
   getClientHistoryExcelDownloadService,
   getPolicyHistoryPDFDownloadService,
   getAllClientAnalyticsService,
+  getAllClientInfoService,
 };

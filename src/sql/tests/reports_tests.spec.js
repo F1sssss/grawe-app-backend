@@ -94,6 +94,43 @@ describe('Reports queries tests', () => {
     expect(reportResult.length).toBeGreaterThan(0);
   });
 
+  it('should ythrow an error for create report', async () => {
+    const policy = {
+      procedure_info: {
+        report_id: 5,
+        report_name: 'Kanal Prodaje',
+        procedure_id: 53015370,
+        procedure_name: 'gr_kanal_prodaje',
+      },
+      procedure_params: [
+        {
+          order: 1,
+          param_name: '@datum',
+          type: 'VARCHAR',
+          length: 10,
+          sql_query: '',
+        },
+        {
+          order: 2,
+          param_name: '@KanalProdaje',
+          type: 'INT',
+          length: 4,
+          sql_query: 'select 1',
+        },
+      ],
+      new_report_name: '',
+    };
+
+    try {
+      const {
+        createdReport: { report_info: report_id },
+        statusCode,
+      } = await ReportQueries.createReport(policy);
+    } catch (error) {
+      expect(error.statusCode).toBe(404);
+    }
+  });
+
   it('should create a report', async () => {
     const policy = {
       procedure_info: {
@@ -126,6 +163,42 @@ describe('Reports queries tests', () => {
       statusCode,
     } = await ReportQueries.createReport(policy);
     expect(report_id).toBeDefined();
+  });
+
+  it('should throw an error for update report that name already exists', async () => {
+    const updated_report = {
+      report_info: {
+        report_id: 5,
+        report_name: 'testingReport',
+        procedure_id: 251252050,
+        procedure_name: 'gr_kanal_prodaje',
+      },
+      report_params: [
+        {
+          order: 1,
+          param_name: '@datum',
+          type: 'VARCHAR',
+          length: 10,
+          sql_query: '',
+        },
+        {
+          order: 2,
+          param_name: '@KanalProdaje',
+          type: 'INT',
+          length: 4,
+          sql_query: 'select 1 as test',
+        },
+      ],
+    };
+
+    try {
+      const {
+        updatedReport: { report_info: report_id },
+        statusCode,
+      } = await ReportQueries.updateReport(5, updated_report);
+    } catch (error) {
+      expect(error.statusCode).toBe(404);
+    }
   });
 
   it('should update a report name', async () => {
@@ -162,6 +235,14 @@ describe('Reports queries tests', () => {
     const { updatedReport, statusCode } = await ReportQueries.updateReport(report_id, updated_report);
 
     expect(updatedReport.report_info.report_name).toBe('Updateovani report');
+  });
+
+  it('should throw an error that report doesnt exist', async () => {
+    try {
+      const { statusCode } = await ReportQueries.deleteReport(826371763912);
+    } catch (error) {
+      expect(error.statusCode).toBe(404);
+    }
   });
 
   it('should delete a report', async () => {

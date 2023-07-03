@@ -70,8 +70,8 @@ services:
       - mssql-server
     ports:
       - '8088:8088'
-    volumes:
-      - ./superset/:/app/superset
+
+
 
     environment:
       - SUPERSET_LOAD_EXAMPLES=no

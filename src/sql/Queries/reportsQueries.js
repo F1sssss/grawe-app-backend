@@ -13,10 +13,6 @@ function isNullOrEmpty(str) {
 const excecuteReportTemplate = async (query, params = [], multiple = false, type = 'query') => {
   const connection = new DBConnection(DB_CONFIG.sql);
 
-  if (query.includes('.sql')) {
-    query = await loadSQLQueries(query);
-  }
-
   const result = type === 'query' ? await connection.executeQuery(query, params, multiple) : await connection.executeStoredProcedure(query, params);
 
   if (!result || result.length === 0) {
@@ -159,7 +155,7 @@ const deleteReport = async (id) => {
   );
 
   if (user) {
-    throw new AppError('Error deleting report!', 401, 'error-deleting-report-not-found');
+    throw new AppError('Error deleting report!', 404, 'error-deleting-report-not-found');
   }
 
   return { message: 'Report Deleted!', statusCode: 200 };

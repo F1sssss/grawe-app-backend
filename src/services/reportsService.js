@@ -46,4 +46,5 @@ module.exports = {
   searchProcedureService,
   updateReportService,
   deleteReportService,
+  executeReport,
 };

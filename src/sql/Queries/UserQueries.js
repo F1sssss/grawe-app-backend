@@ -5,21 +5,17 @@ const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
-const loadSqlQueries = require('../sql_queries/loadSQL');
 const { UserSignup } = require('./params');
 const bcrypt = require('bcryptjs');
 
-const selectFromUsers = async (query, param, type = '') => {
+const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  if (query.includes('.sql')) {
-    query = loadSqlQueries(query);
-  }
-
   const user = await connection.executeQuery(query, param);
 
   if (!user?.username && type !== 'signup') {
     throw new AppError(`User not found!`, 404, 'error-user-not-found');
   }
+
   if (type === 'login' && user.verified !== 1) {
     throw new AppError('Email not verified', 401, 'not-verified');
   }
@@ -52,12 +48,12 @@ const updateUserField = async (id, field, value) => {
 };
 
 const getUserById = async (id) => {
-  const { user, statusCode } = await selectFromUsers('select * from users (nolock) where id = @id', [new SQLParam('id', id, sql.Int)]);
+  const { user, statusCode } = await excecuteUserQuery('select * from users (nolock) where id = @id', [new SQLParam('id', id, sql.Int)]);
   return { user, statusCode };
 };
 
 const getUserByUsername = async (username) => {
-  const { user, statusCode } = await selectFromUsers('select * from users  (nolock) where username = @username and verified = 1', [
+  const { user, statusCode } = await excecuteUserQuery('select * from users  (nolock) where username = @username and verified = 1', [
     new SQLParam('username', username, sql.VarChar),
   ]);
 
@@ -65,14 +61,14 @@ const getUserByUsername = async (username) => {
 };
 
 const getUserByEmail = async (email) => {
-  const { user, statusCode } = await selectFromUsers('select * from users  (nolock) where email = @email and verified = 1', [
+  const { user, statusCode } = await excecuteUserQuery('select * from users  (nolock) where email = @email and verified = 1', [
     new SQLParam('email', email, sql.VarChar),
   ]);
   return { user, statusCode };
 };
 
 const getUserByUsernameOrEmail = async (username, email, requesttype) => {
-  const { user, statusCode } = await selectFromUsers(
+  const { user, statusCode } = await excecuteUserQuery(
     'select * from users  (nolock) where username = @username or email = @email',
     [new SQLParam('username', username, sql.VarChar), new SQLParam('email', email, sql.VarChar)],
     requesttype,
@@ -82,7 +78,6 @@ const getUserByUsernameOrEmail = async (username, email, requesttype) => {
 };
 
 const createUser = async (req) => {
-  const connection = new DBConnection(DB_CONFIG.sql);
   const { username, password, name, last_name, email, date_of_birth } = req;
   const verification_code = Math.floor(Math.random() * 1000000000);
 
@@ -90,10 +85,12 @@ const createUser = async (req) => {
     throw new AppError('Missing fields!', 401, 'error-missing-fields');
   }
 
-  const user = await connection.executeQuery(
-    await loadSqlQueries('signup.sql'),
+  const { user } = await excecuteUserQuery(
+    'signup.sql',
     UserSignup(username, password, name, last_name, email, date_of_birth, verification_code),
+    'signup',
   );
+
   if (!user) {
     throw new AppError('Error creating user!', 401, 'error-creating-user');
   }
@@ -101,14 +98,14 @@ const createUser = async (req) => {
   return { user: { ...user, password: undefined }, statusCode: 200 };
 };
 
-const updateUserVerification = async (id, field, value) => {
-  const { user, statusCode } = await updateUserField(id, field, value);
-  return { user, statusCode };
+const updateUserVerification = async (id, value) => {
+  const { newValue, statusCode } = await updateUserField(id, 'verified', value);
+  return { newValue, statusCode };
 };
 
-const updateUserPassword = async (id, field, value) => {
-  const { user, statusCode } = await updateUserField(id, field, value);
-  return { user, statusCode };
+const updateUserPassword = async (id, value) => {
+  const { newValue, statusCode } = await updateUserField(id, 'password', value);
+  return { newValue, statusCode };
 };
 
 const updateUser = async (user, updatedUser) => {
@@ -146,4 +143,5 @@ module.exports = {
   updateUserField,
   updateUser,
   deleteUser,
+  excecuteUserQuery,
 };

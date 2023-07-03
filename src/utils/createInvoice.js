@@ -66,20 +66,23 @@ function createClientInvoice(client) {
       resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
     });
 
-    const invoiceData = {
-      shipping: {
-        name: 'SMN TRANSPORTI DOO',
-        address: 'KRIVAULICA,DOBROTA BB',
-        city: 'KOTOR',
-        country: 'MNE',
-        postal_code: 94111,
+    const clientData = {
+      clientInfo: {
+        name: 'VERICA JEREMIC',
+        date_of_birth: '05.08.1968',
+        embg_pib: '0508968288028',
+        address: 'UBLI BB',
+        place: 'PODGORICA',
+        phone1: '069 / 537-632',
+        phone2: '',
+        email: 'nes @gmail.com',
       },
-      items: client,
+      items: [],
       paid: 0,
       broj_polise: 12346,
     };
 
-    let invoiceDataCopy = invoiceData;
+    let invoiceDataCopy = clientData;
 
     for (let i = 0; i < client[0].length; i++) {
       invoiceDataCopy.items = client[i];
@@ -114,24 +117,40 @@ function generateCustomerInformation(doc, invoice) {
 
   generateHr(doc, 185);
 
-  const customerInformationTop = 200;
+  const customerInformationTop = 190;
 
   doc
-    .fontSize(10)
-    .text('Broj Polise:', 50, customerInformationTop)
+    .fontSize(8)
+    .text('Broj Polise:', 420, customerInformationTop)
     .font('Helvetica-Bold')
-    .text(invoice.broj_polise, 150, customerInformationTop)
+    .text(invoice.broj_polise, 500, customerInformationTop)
     .font('Helvetica')
-    .text('Datum od:', 50, customerInformationTop + 15)
-    .text(formatDate(new Date()), 150, customerInformationTop + 15)
-    .text('Balance Due:', 50, customerInformationTop + 30)
-    .text(formatCurrency(invoice.subtotal - invoice.paid), 150, customerInformationTop + 30)
+    .text('Pocetak osiguranja:', 420, customerInformationTop + 15)
+    .font('Helvetica')
+    .text(formatDate(new Date()), 500, customerInformationTop + 15)
+    .font('Helvetica')
+    .text('Kraj osiguranja:', 420, customerInformationTop + 30)
+    .font('Helvetica')
+    .text(formatDate(new Date()), 500, customerInformationTop + 30)
+    .font('Helvetica')
+    .text('Premija:', 420, customerInformationTop + 45)
+    .font('Helvetica')
+    .text(formatCurrency(invoice.subtotal - invoice.paid), 500, customerInformationTop + 45)
+    .font('Helvetica')
 
     .font('Helvetica-Bold')
-    .text(invoice.shipping.name, 300, customerInformationTop)
+    .text(invoice.clientInfo.name, 50, customerInformationTop)
     .font('Helvetica')
-    .text(invoice.shipping.address, 300, customerInformationTop + 15)
-    .text(invoice.shipping.city + ', ' + invoice.shipping.country, 300, customerInformationTop + 30)
+    .text(invoice.clientInfo.address, 50, customerInformationTop + 12)
+    .font('Helvetica')
+    .text(invoice.clientInfo.place, 50, customerInformationTop + 24)
+    .font('Helvetica')
+    .text(invoice.clientInfo.phone1, 50, customerInformationTop + 36)
+    .font('Helvetica')
+    .text(invoice.clientInfo.phone2, 50, customerInformationTop + 48)
+    .font('Helvetica')
+    .text(invoice.clientInfo.email, 50, customerInformationTop + 60)
+    .font('Helvetica')
     .moveDown();
 
   generateHr(doc, 270);
@@ -169,15 +188,16 @@ function generateInvoiceTable(doc, invoice) {
   }
 
   const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 690;
-  generateTableRow(doc, subtotalPosition, '', '', '', '', '', 'Duguje', '', formatCurrency(invoice.duguje));
+  generateTableRow(doc, subtotalPosition, '', '', '', '', 'Ukupno dospjelo', '', '', formatCurrency(invoice.duguje));
 
   const paidToDatePosition = (subtotalPosition + 20) % 690;
-  generateTableRow(doc, paidToDatePosition, '', '', '', '', '', 'Potrazuje', '', formatCurrency(invoice.potrazuje));
+  generateTableRow(doc, paidToDatePosition, '', '', '', '', 'Ukupno placeno', '', '', formatCurrency(invoice.potrazuje));
 
-  const duePosition = (paidToDatePosition + 25) % 690;
-  doc.font('Helvetica-Bold');
-  generateTableRow(doc, duePosition, '', '', '', '', '', 'Potrazuje', '', formatCurrency(invoice.saldo));
-  doc.font('Helvetica');
+  const duePosition = (paidToDatePosition + 20) % 690;
+  generateTableRow(doc, duePosition, '', '', '', '', 'Dospjeli dug', '', '', formatCurrency(invoice.saldo));
+
+  const totalRemaining = (duePosition + 20) % 690;
+  generateTableRow(doc, totalRemaining, '', '', '', '', 'Ukupno nedospjelo', '', '', formatCurrency(invoice.saldo));
 }
 
 function generateTableRow(doc, y, datum_dokumenta, broj_dokumenta, broj_ponude, vid, opis_knjizenja, duguje, potrazuje, saldo) {

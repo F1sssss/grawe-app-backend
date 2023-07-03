@@ -9,6 +9,10 @@ const Policy = (id) => {
   return new SQLParam('policy', id, sql.Int);
 };
 
+const searchField = (search) => {
+  return [new SQLParam('search', search, sql.VarChar)];
+};
+
 const Client = (id) => {
   return [new SQLParam('id', id, sql.VarChar)];
 };
@@ -102,4 +106,5 @@ module.exports = {
   ReportName,
   Client,
   Client_dateFrom_dateTo,
+  searchField,
 };

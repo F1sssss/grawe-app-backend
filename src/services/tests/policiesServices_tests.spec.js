@@ -1,5 +1,5 @@
 const { getPolicyInfo, getPolicyAnalyticalInfo, getPolicyHistory } = require('../../sql/Queries/PoliciesQueries');
-const { getPolicyInfoService, getPolicyAnalyticalInfoService, getPolicyHistoryService } = require('../policiesServices');
+let { getPolicyInfoService, getPolicyAnalyticalInfoService, getPolicyHistoryService } = require('../policiesServices');
 const cacheQuery = require('../../utils/cacheQuery');
 
 jest.mock('../../sql/Queries/PoliciesQueries');

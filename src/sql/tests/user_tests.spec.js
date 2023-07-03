@@ -33,6 +33,10 @@ describe('User queries tests', () => {
     jest.setTimeout(3000000);
   });
 
+  afterAll(async () => {
+    await connection.close();
+  });
+
   beforeEach(() => {
     jest.setTimeout(3000000);
   });
@@ -111,11 +115,27 @@ describe('User queries tests', () => {
     expect(createdUser).toHaveProperty('user');
   });
 
+  it('should throw a error that user doesnt exist', async () => {
+    try {
+      await UserQueries.updateUserField(756412376, 'username', 'TestName');
+    } catch (error) {
+      expect(error.statusMessage).toBe('error-updating-user-not-found');
+    }
+  });
+
+  it('should throw a error that user is not verified', async () => {
+    try {
+      await UserQueries.excecuteUserQuery(`SELECT * FROM Users (nolock) WHERE ID = ${createdUser.user.ID}`, [], 'login');
+    } catch (error) {
+      expect(error.statusMessage).toBe('not-verified');
+    }
+  });
+
   it('should update the verifed field', async () => {
     const {
       user: { ID },
     } = createdUser;
-    const { newValue } = await UserQueries.updateUserField(ID, 'verified', 1);
+    const { newValue } = await UserQueries.updateUserVerification(ID, 1);
 
     expect(newValue).toEqual(1);
   });
@@ -130,6 +150,37 @@ describe('User queries tests', () => {
     expect(newValue).toEqual('TestName');
   });
 
+  it('should update the password', async () => {
+    const {
+      user: { ID },
+    } = createdUser;
+
+    const { newValue } = await UserQueries.updateUserPassword(ID, 'TestPass123$');
+
+    console.log(newValue);
+    expect(newValue).toBe(undefined);
+  });
+
+  it('should update all info', async () => {
+    const updateUser = {
+      username: `filipUpdated`,
+      password: `Test${random}$`,
+    };
+
+    const { updatedFields } = await UserQueries.updateUser(createdUser.user, updateUser);
+
+    expect(updatedFields.username).toEqual(`filipUpdated`);
+    expect(updatedFields?.password).toEqual(undefined);
+  });
+
+  it('should throw an error that user for delerion doesnt exist', async () => {
+    try {
+      const { user } = await UserQueries.getUserById(631279836217836);
+    } catch (error) {
+      expect(error.statusMessage).toBe('error-user-not-found');
+    }
+  });
+
   it('should delete the user', async () => {
     const {
       user: { ID },
@@ -140,12 +191,5 @@ describe('User queries tests', () => {
     } catch (error) {
       expect(error.statusMessage).toBe('error-user-not-found');
     }
-  });
-
-  it('should close the connection', async () => {
-    const consoleSpy = jest.spyOn(console, 'log');
-    await connection.close();
-    expect(consoleSpy).toHaveBeenCalledWith('🔒 Connection to MSSQL database closed');
-    consoleSpy.mockRestore();
   });
 });
