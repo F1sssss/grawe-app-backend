@@ -16,9 +16,7 @@ const generateReportService = async (id, input_params) => {
 
 const getReportService = async (id) => {
   const cacheKey = `get-report-${id}`;
-
   const { report_info, report_params } = await cacheQuery(cacheKey, reportsQueries.getReportById(id));
-
   return {
     report_info,
     report_params: report_params.map((param) => ({ ...param, sql_query: param['sql_query'] !== '' })),

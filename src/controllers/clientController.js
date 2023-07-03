@@ -1,7 +1,6 @@
 const clientService = require('../services/clientService');
 const responseHandler = require('../utils/responseHandler');
 const CatchAsync = require('../utils/CatchAsync');
-const policyService = require('../services/policiesServices');
 
 const getClientHistory = CatchAsync(async (req, res) => {
   await responseHandler(
@@ -36,21 +35,12 @@ const getClientHistoryPDFDownload = CatchAsync(async (req, res) => {
 });
 
 const getAllClientAnalytics = CatchAsync(async (req, res) => {
-  const { clientHistory, clientAnalyticalInfo, excelPath, pdfPath } = await clientService.getAllClientAnalyticsService(
-    req.params.id,
-    req.query.dateFrom,
-    req.query.dateTo,
+  await responseHandler(
+    clientService.getAllClientAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo),
+    res,
+    { statusCode: 200 },
+    'success',
   );
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      clientHistory,
-      clientAnalyticalInfo,
-      excelPath,
-      pdfPath,
-    },
-  });
 });
 
 module.exports = {
