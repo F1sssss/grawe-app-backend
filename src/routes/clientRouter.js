@@ -13,6 +13,8 @@ router.get('/:id/history/pdf/download', clientController.getClientHistoryPDFDown
 
 router.get('/:id/analytics', clientController.getClientAnalyticalInfo);
 router.get('/:id/analytics/all', clientController.getAllClientAnalytics);
+
+//This is just for testing, remove later
 router.get('/:id/analytics/allInfo', clientController.getAllClientInfo);
 
 module.exports = router;

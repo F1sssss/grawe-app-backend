@@ -2,7 +2,7 @@ const sql = require('mssql');
 const DB_CONFIG = require('../DBconfig');
 const DBConnection = require('../DBConnection');
 const AppError = require('../../utils/AppError');
-const loadSQLQueries = require('../sql_queries/loadSQL');
+
 const { Report, NewReport, NewParam, StoredProcedure, Param, ReportProcedure, ReportName } = require('../Queries/params');
 const SQLParam = require('../SQLParam');
 

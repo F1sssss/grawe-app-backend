@@ -7,7 +7,12 @@ module.exports = errorHandler = (err, req, res, next) => {
 
   res.status(err.statusCode || 500).json({
     status: err.status,
-    statusMessage: err.statusMessage,
+    statusMessage:
+      err.statusMessage === 'error-executing-query'
+        ? err.message.includes('-')
+          ? err.message.split(' ').pop()
+          : err.statusMessage
+        : err.statusMessage,
     message: err.message,
     statusCode: err.statusCode,
     error: err.name,

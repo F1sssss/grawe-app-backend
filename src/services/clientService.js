@@ -43,7 +43,8 @@ const getClientHistoryExcelDownloadService = async (res, id, dateFrom, dateTo) =
 const getPolicyHistoryPDFDownloadService = async (res, id, dateFrom, dateTo) => {
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'attachment; filename="InvoicesClient.pdf"');
-  let { client } = await getClientHistoryService(id, dateFrom, dateTo);
+  const cacheKey = `client-anlaytics-all-${id}-${dateFrom}-${dateTo}`;
+  let { client } = await cacheQuery(cacheKey, ClientQueries.getAllClientInfo(id, dateFrom, dateTo));
   client = seperateClientPolicies(client);
   return ({ pdfBuffer, statusCode } = await Invoice.createClientInvoice(client));
 };

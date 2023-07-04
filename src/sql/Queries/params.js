@@ -91,6 +91,14 @@ const ReportName = (id, report_name) => {
   return [new SQLParam('id', id, sql.Int), new SQLParam('report_name', report_name, sql.VarChar)];
 };
 
+const Date = (date) => {
+  return [new SQLParam('date', date, sql.VarChar)];
+};
+
+const Exception = (policy, id, exception) => {
+  return [new SQLParam('policy', policy, sql.Int), new SQLParam('id', id, sql.Int), new SQLParam('exception', exception, sql.VarChar)];
+};
+
 module.exports = {
   Policy,
   Policy_dateFrom_dateTo,
@@ -107,4 +115,6 @@ module.exports = {
   Client,
   Client_dateFrom_dateTo,
   searchField,
+  Date,
+  Exception,
 };

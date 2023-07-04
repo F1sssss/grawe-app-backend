@@ -1,16 +1,13 @@
 const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
 const AppError = require('../../utils/AppError');
-const loadSQLQueries = require('../sql_queries/loadSQL');
 const { Client, Client_dateFrom_dateTo } = require('./params');
 
-const excecuteClientQueryTemplate = async (queryFileName, params, can_be_empty = false) => {
-  const query = await loadSQLQueries(queryFileName);
+const excecuteClientQueryTemplate = async (queryFileName, params) => {
   const connection = new DBConnection(DB_CONFIG.sql);
+  const client = await connection.executeQuery(queryFileName, params);
 
-  const client = await connection.executeQuery(query, params);
-
-  if (!client && !can_be_empty) {
+  if (!client && queryFileName === 'getclientInfo.sql') {
     throw new AppError('Error during retrieving client', 404, 'error-getting-client-not-found');
   }
 
@@ -22,16 +19,30 @@ const getClientInfo = async (id) => {
 };
 
 const getClientHistory = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteClientQueryTemplate('getClientHistory.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo), true);
+  const { client, statusCode } = await excecuteClientQueryTemplate('getClientHistory.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   return { client, statusCode };
 };
 
 const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
-  return ({ client, statusCode } = await excecuteClientQueryTemplate(
-    'getClientAnalyticalInfo.sql',
-    Client_dateFrom_dateTo(id, dateFrom, dateTo),
-    true,
-  ));
+  const { client, statusCode } = await excecuteClientQueryTemplate('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const {
+    klijent_bruto_polisirana_premija,
+    klijent_neto_polisirana_premija,
+    dani_kasnjenja,
+    klijent_ukupna_potrazivanja,
+    klijent_dospjela_potrazivanja,
+  } = client[0];
+
+  return {
+    client: {
+      klijent_bruto_polisirana_premija,
+      klijent_neto_polisirana_premija,
+      dani_kasnjenja,
+      klijent_ukupna_potrazivanja,
+      klijent_dospjela_potrazivanja,
+    },
+    statusCode,
+  };
 };
 
 const getAllClientInfo = async (id, dateFrom, dateTo) => {

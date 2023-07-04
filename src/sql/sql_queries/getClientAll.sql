@@ -21,8 +21,8 @@ convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja]
 convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
 convert(varchar,convert(date,bra_storno_ab,104),102)   				[datum_storna],
 cast(0 as decimal(18,2))											[premija],
-vtg_zahlungsweise													[nacin_Placanja],
-bra_vv_ueb															[naziv_Branse],
+vtg_zahlungsweise													[nacin_placanja],
+bra_vv_ueb															[naziv_branse],
 cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))			[bruto_polisirana_premija],
 cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[neto_polisirana_premija],
 cast(0 as integer)													[dani_kasnjenja],
@@ -31,7 +31,7 @@ cast(0 as decimal(18,2))											[dospjela_potrazivanja],
 cast('' as vaRCHAR(400))											[status_polise],
 bra_bran															[bransa],
 bra_storno_grund													[storno_tip],
-cast(0 as decimal(18,2))											[Uplacena_premija]
+cast(0 as decimal(18,2))											[uplacena_premija]
 into #temp
 from kunde k(nolock)
 left join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
@@ -90,11 +90,24 @@ set [ukupna_potrazivanja]=Bruto_polisirana_premija-[Uplacena_premija]
 from #temp t
 
 
+update t
+set Bruto_polisirana_premija=(select sum(Bruto_polisirana_premija) from #temp t2 where t2.polisa=t.polisa)
+from #temp t
+
+
 select t.*,
 convert(varchar,convert(date,pko_wertedatum,104),102) datum_dokumenta,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    potrazuje,
-cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo
+cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo,
+(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_dospjelo,
+(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_placeno,
+cast(0 as decimal(18,2))		                                        ukupno_dug,
+cast(0 as decimal(18,2))                                                ukupno_nedospjelo,
+(select SUM(bruto_polisirana_premija) from (select polisa,max(bruto_polisirana_premija) bruto_polisirana_premija  from #temp group by polisa)a) klijent_bruto_polisirana_premija,
+(select SUM(neto_polisirana_premija) from (select polisa,max(neto_polisirana_premija) neto_polisirana_premija  from #temp group by polisa)a) klijent_neto_polisirana_premija,
+(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))-cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from #praemienkonto p2) klijent_dospjela_potrazivanja,
+(select SUM(ukupna_potrazivanja) from (select polisa,max(ukupna_potrazivanja) ukupna_potrazivanja  from #temp group by polisa)a) klijent_ukupna_potrazivanja
 from #praemienkonto p(nolock)
 right join #temp t on p.pko_obnr=t.polisa
-order by polisa,Pocetak_osiguranja asc
+order by polisa,Pocetak_osiguranja asc,pko_buch_nr asc
