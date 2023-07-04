@@ -33,8 +33,7 @@ left join kunde k (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 left join kunde k1 (nolock) on k1.kun_kundenkz=v.vtg_kundenkz_2
 left join vertrag_kunde vk(nolock) on vk.vtk_obnr=b.bra_obnr and vk.vtk_kundenkz=k.kun_kundenkz and vk.vtk_kundenrolle='PA'  --Ugovarac
 left join vertrag_kunde vk1(nolock) on vk.vtk_obnr=b.bra_obnr and vk1.vtk_kundenkz=k1.kun_kundenkz and vk.vtk_kundenrolle='VN' --Osiguranik
-where vtg_pol_kreis<>98
-and bra_obnr=@policy
+where bra_obnr=@policy
 
 
 -----------------------------------------------------------------------------------------

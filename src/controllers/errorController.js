@@ -1,3 +1,5 @@
+// Desc: Error handler for the application
+
 const AppError = require('../utils/appError');
 
 module.exports = errorHandler = (err, req, res, next) => {
@@ -5,7 +7,12 @@ module.exports = errorHandler = (err, req, res, next) => {
 
   res.status(err.statusCode || 500).json({
     status: err.status,
-    statusMessage: err.statusMessage,
+    statusMessage:
+      err.statusMessage === 'error-executing-query'
+        ? err.message.includes('-')
+          ? err.message.split(' ').pop()
+          : err.statusMessage
+        : err.statusMessage,
     message: err.message,
     statusCode: err.statusCode,
     error: err.name,
@@ -13,7 +20,7 @@ module.exports = errorHandler = (err, req, res, next) => {
   next();
 };
 
-const handleOtherErrors = (err, res) => {
+const handleOtherErrors = (err) => {
   if (err.name === 'TokenExpiredError') handleTokenExpiredError(err);
   if (err.name === 'TypeCastError') handleTypeCastError(err);
   if (err.name === 'JsonWebTokenError') handleJWTError(err);

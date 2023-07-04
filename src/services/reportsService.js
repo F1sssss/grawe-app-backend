@@ -17,7 +17,6 @@ const generateReportService = async (id, input_params) => {
 const getReportService = async (id) => {
   const cacheKey = `get-report-${id}`;
   const { report_info, report_params } = await cacheQuery(cacheKey, reportsQueries.getReportById(id));
-
   return {
     report_info,
     report_params: report_params.map((param) => ({ ...param, sql_query: param['sql_query'] !== '' })),
@@ -32,9 +31,20 @@ const createReportService = async (procedure) => {
   return ({ createdReport, statusCode } = await reportsQueries.createReport(procedure));
 };
 
+const updateReportService = async (id, report) => {
+  return ({ updatedReport, statusCode } = await reportsQueries.updateReport(id, report));
+};
+
+const deleteReportService = async (id) => {
+  return ({ deletedReport, statusCode } = await reportsQueries.deleteReport(id));
+};
+
 module.exports = {
   generateReportService,
   createReportService,
   getReportService,
   searchProcedureService,
+  updateReportService,
+  deleteReportService,
+  executeReport,
 };

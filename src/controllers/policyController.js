@@ -1,3 +1,5 @@
+//Controller for policies routes
+
 /** @namespace req.query.dateFrom * **/
 /** @namespace req.query.dateTo * **/
 const policyService = require('../services/policiesServices');
@@ -45,13 +47,13 @@ const getAllPolicyAnalytics = CatchAsync(async (req, res) => {
 });
 
 const getPolicyHistoryExcelDownload = CatchAsync(async (req, res) => {
-  const { excelBuffer } = await policyService.getPolicyHistoryExcelDownloadService(res, req.params.id, '2020.01.01', '2025.01.01');
+  const { excelBuffer } = await policyService.getPolicyHistoryExcelDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
 
   res.send(excelBuffer);
 });
 
 const getPolicyHistoryPDFDownload = CatchAsync(async (req, res) => {
-  const { pdfBuffer, statusCode } = await policyService.getPolicyHistoryPDFDownloadService(res, req.params.id, '2020.01.01', '2025.01.01');
+  const { pdfBuffer, statusCode } = await policyService.getPolicyHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
 
   res.status(statusCode).send(pdfBuffer);
 });

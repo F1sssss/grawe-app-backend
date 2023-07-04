@@ -1,7 +1,7 @@
 const AppError = require('./appError');
 
 const handleResponse = async (promise, res, responseFields = {}, message = 'success') => {
-  const data = await promise;
+  let data = await promise;
 
   const { statusCode, ...fields } = responseFields;
 

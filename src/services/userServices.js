@@ -24,12 +24,23 @@ const getMeService = async (req) => {
   const { user } = await SQLQueries.getUserByUsernameOrEmail(decoded.username, decoded.username);
 
   if (!user) {
-    throw new AppError('The user belonging to this token does no longer exist.', 401, 'error-user-no-longer-exist');
+    throw new AppError('The user belonging to this tken does no longer exist.', 401, 'error-user-no-longer-exist');
   }
 
   return { token, user, statusCode: 200 };
 };
 
+const updateMeService = async (data) => {
+  const updatedUser = data.body;
+  return ({ updatedFields } = await SQLQueries.updateUser(data.user, updatedUser));
+};
+
+const deleteMeService = async (data) => {
+  return ({ message } = await SQLQueries.deleteUser(data.user.ID));
+};
+
 module.exports = {
   getMeService,
+  updateMeService,
+  deleteMeService,
 };

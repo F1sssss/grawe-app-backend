@@ -12,6 +12,6 @@ router.get('/:id/info', policyController.getPolicyInfo);
 router.get('/:id/history/xls/download', policyController.getPolicyHistoryExcelDownload);
 router.get('/:id/history/pdf/download', policyController.getPolicyHistoryPDFDownload);
 
-router.get('/:id/AnalyticalInfo', policyController.getPolicyAnalyticalInfo);
-router.get('/:id/AllAnalytics', policyController.getAllPolicyAnalytics);
+router.get('/:id/analytics/info', policyController.getPolicyAnalyticalInfo);
+router.get('/:id/analytics/all', policyController.getAllPolicyAnalytics);
 module.exports = router;

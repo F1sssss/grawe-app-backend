@@ -7,6 +7,22 @@ function createInvoice(policy) {
     let buffers = [];
     let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
+    // Handle errors
+    doc.on('error', () => {
+      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+    });
+
+    // Collect the PDF buffers
+    doc.on('data', (buffer) => {
+      buffers.push(buffer);
+    });
+
+    // Finalize the PDF document
+    doc.on('end', () => {
+      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+      resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
+    });
+
     const invoiceData = {
       shipping: {
         name: 'SMN TRANSPORTI DOO',
@@ -19,6 +35,20 @@ function createInvoice(policy) {
       paid: 0,
       broj_polise: 12346,
     };
+
+    generateHeader(doc);
+    generateCustomerInformation(doc, invoiceData);
+    generateInvoiceTable(doc, invoiceData);
+    //generateFooter(doc);
+
+    doc.end();
+  });
+}
+
+function createClientInvoice(client) {
+  return new Promise(async (resolve, reject) => {
+    let buffers = [];
+    let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
     // Handle errors
     doc.on('error', () => {
@@ -36,10 +66,70 @@ function createInvoice(policy) {
       resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
     });
 
+    const clientData = {
+      clientInfo: {
+        name: client[0][0].klijent,
+        date_of_birth: client[0][0].datum_rodjenja,
+        embg_pib: client[0][0]['EMBG/PIB'],
+        address: client[0][0].adresa,
+        place: client[0][0].mjesto,
+        phone1: client[0][0].telefon1,
+        phone2: client[0][0].telefon2,
+        email: 'placeholder@gmal.com',
+      },
+      items: [],
+      broj_polise: 12346,
+      pocetak_osiguranja: client[0][0].pocetak_osiguranja,
+      istek_osiguranja: client[0][0].istek_osiguranja,
+      ukupno_dospjelo: client[0][0].ukupno_dospjelo,
+      ukupno_placeno: client[0][0].ukupno_placeno,
+      ukupno_duguje: client[0][0].ukupno_duguje,
+      ukupno_nedospjelo: client[0][0].ukupno_nedospjelo,
+      premija: client[0][0].bruto_polisirana_premija,
+      nacin_placanja: client[0][0].nacin_placanja,
+      naziv_branse: client[0][0].naziv_branse,
+    };
+
+    let invoiceDataCopy = clientData;
+    let recapitulation = [];
+
+    for (let i = 0; i <= client[0].length; i++) {
+      if (client[i][0].datum_dokumenta === null || !client[i][0].datum_dokumenta) {
+        continue;
+      }
+
+      invoiceDataCopy.items = getDistinctObjects(client[i], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
+      invoiceDataCopy.broj_polise = client[i][0].polisa;
+      invoiceDataCopy.pocetak_osiguranja = client[i][0].pocetak_osiguranja;
+      invoiceDataCopy.istek_osiguranja = client[i][0].istek_osiguranja;
+      invoiceDataCopy.ukupno_dospjelo = client[i][0].ukupno_dospjelo;
+      invoiceDataCopy.ukupno_placeno = client[i][0].ukupno_placeno;
+      invoiceDataCopy.ukupno_duguje = client[i][0].ukupno_duguje;
+      invoiceDataCopy.ukupno_nedospjelo = client[i][0].ukupno_nedospjelo;
+      invoiceDataCopy.premija = client[i][0].bruto_polisirana_premija;
+      invoiceDataCopy.nacin_placanja = client[i][0].nacin_placanja;
+      invoiceDataCopy.naziv_branse = client[i][0].naziv_branse;
+
+      recapitulation.push([
+        invoiceDataCopy.broj_polise,
+        invoiceDataCopy.naziv_branse,
+        invoiceDataCopy.premija,
+        invoiceDataCopy.ukupno_dospjelo,
+        invoiceDataCopy.ukupno_placeno,
+        invoiceDataCopy.ukupno_duguje,
+        invoiceDataCopy.ukupno_nedospjelo,
+      ]);
+
+      generateHeader(doc);
+      generateCustomerInformation(doc, invoiceDataCopy);
+      generateInvoiceTable(doc, invoiceDataCopy);
+      doc.addPage();
+    }
+
     generateHeader(doc);
-    generateCustomerInformation(doc, invoiceData);
-    generateInvoiceTable(doc, invoiceData);
-    //generateFooter(doc);
+    generateCustomerRecapInformation(doc, invoiceDataCopy);
+
+    generateInvoiceTableRecap(doc, recapitulation);
 
     doc.end();
   });
@@ -60,32 +150,123 @@ function generateHeader(doc) {
     .moveDown();
 }
 
+function generateCustomerRecapInformation(doc, invoice) {
+  doc.fillColor('#444444').fontSize(14).text('REKAPITULACIJA', 50, 160);
+  generateHr(doc, 185);
+
+  const customerInformationTop = 190;
+
+  doc
+    .fontSize(9)
+    .font('Helvetica-Bold')
+    .text(invoice.clientInfo.name, 50, customerInformationTop)
+    .font('Helvetica')
+    .text(invoice.clientInfo.address, 50, customerInformationTop + 15)
+    .font('Helvetica')
+    .text(invoice.clientInfo.place, 50, customerInformationTop + 30)
+    .font('Helvetica')
+    .text(invoice.clientInfo.phone1 === '' ? invoice.clientInfo.phone2 : invoice.clientInfo.phone1, 50, customerInformationTop + 45)
+    .font('Helvetica')
+    .text(invoice.clientInfo.email, 50, customerInformationTop + 60)
+    .font('Helvetica')
+    .moveDown();
+
+  generateHr(doc, 270);
+}
+
 function generateCustomerInformation(doc, invoice) {
   doc.fillColor('#444444').fontSize(14).text('KONTO KARTICA', 50, 160);
 
   generateHr(doc, 185);
 
-  const customerInformationTop = 200;
+  const customerInformationTop = 190;
 
   doc
-    .fontSize(10)
-    .text('Broj Polise:', 50, customerInformationTop)
+    .fontSize(8)
+    .text('Broj Polise:', 420, customerInformationTop)
     .font('Helvetica-Bold')
-    .text(invoice.broj_polise, 150, customerInformationTop)
+    .text(invoice.broj_polise, 500, customerInformationTop, { align: 'right' })
     .font('Helvetica')
-    .text('Datum od:', 50, customerInformationTop + 15)
-    .text(formatDate(new Date()), 150, customerInformationTop + 15)
-    .text('Balance Due:', 50, customerInformationTop + 30)
-    .text(formatCurrency(invoice.subtotal - invoice.paid), 150, customerInformationTop + 30)
+    .text('Pocetak osiguranja:', 420, customerInformationTop + 15)
+    .font('Helvetica')
+    .text(invoice.pocetak_osiguranja, 500, customerInformationTop + 15, { align: 'right' })
+    .font('Helvetica')
+    .text('Kraj osiguranja:', 420, customerInformationTop + 30)
+    .font('Helvetica')
+    .text(invoice.istek_osiguranja, 500, customerInformationTop + 30, { align: 'right' })
+    .font('Helvetica')
+    .text('Premija:', 420, customerInformationTop + 45)
+    .font('Helvetica')
+    .text(formatCurrency(invoice.premija), 500, customerInformationTop + 45, { align: 'right' })
+    .font('Helvetica')
+    .text('Nacin placanja:', 420, customerInformationTop + 60)
+    .font('Helvetica')
+    .text(invoice.nacin_placanja, 500, customerInformationTop + 60, { align: 'right' })
+    .font('Helvetica')
 
+    .fontSize(9)
     .font('Helvetica-Bold')
-    .text(invoice.shipping.name, 300, customerInformationTop)
+    .text(invoice.clientInfo.name, 50, customerInformationTop)
     .font('Helvetica')
-    .text(invoice.shipping.address, 300, customerInformationTop + 15)
-    .text(invoice.shipping.city + ', ' + invoice.shipping.country, 300, customerInformationTop + 30)
+    .text(invoice.clientInfo.address, 50, customerInformationTop + 15)
+    .font('Helvetica')
+    .text(invoice.clientInfo.place, 50, customerInformationTop + 30)
+    .font('Helvetica')
+    .text(invoice.clientInfo.phone1 === '' ? invoice.clientInfo.phone2 : invoice.clientInfo.phone1, 50, customerInformationTop + 45)
+    .font('Helvetica')
+    .text(invoice.clientInfo.email, 50, customerInformationTop + 60)
+    .font('Helvetica')
     .moveDown();
 
   generateHr(doc, 270);
+}
+
+function generateInvoiceTableRecap(doc, invoice) {
+  let i;
+  const invoiceTableTop = 330;
+
+  doc.font('Helvetica-Bold');
+  generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Zaduzeno', 'Placeno', 'Dospjelo', 'Nedospjelo');
+  generateHr(doc, invoiceTableTop + 20);
+  doc.font('Helvetica');
+
+  for (i = 0; i < invoice.length; i++) {
+    const item = invoice[i];
+    let position = (invoiceTableTop + (i + 1) * 30) % 690;
+
+    position = position < 30 ? (doc.addPage(), 30) : position;
+
+    generateTableRowRecap(
+      doc,
+      position,
+      item[0],
+      item[1],
+      formatCurrency(item[2]),
+      formatCurrency(item[3]),
+      formatCurrency(item[4]),
+      formatCurrency(item[5]),
+      formatCurrency(item[6]),
+    );
+
+    generateHr(doc, position + 20);
+  }
+
+  const subtotalPosition = invoiceTableTop + (i + 1) * 30;
+  doc.font('Helvetica-Bold');
+  generateTableRowRecap(doc, subtotalPosition, '', '', 'Ukupno', formatCurrency(invoice.ukupno));
+}
+
+function generateTableRowRecap(doc, y, polisa, osiguranje, premija, duguje, potrazuje, saldo, dospjelo, nedospjelo) {
+  doc
+    .fontSize(8)
+    .text(polisa, 50, y)
+    .text(osiguranje, 100, y)
+    .text(premija, 300, y)
+    .text(duguje, 350, y)
+    .text(potrazuje, 400, y)
+    .text(saldo, 450, y)
+    .text(dospjelo, 500, y)
+    .text(nedospjelo, 550, y, { width: 90, align: 'right' });
 }
 
 function generateInvoiceTable(doc, invoice) {
@@ -93,7 +274,7 @@ function generateInvoiceTable(doc, invoice) {
   const invoiceTableTop = 330;
 
   doc.font('Helvetica-Bold');
-  generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Dokumenta', 'Broj Polise', 'Vid', 'Opis Knjizenja', 'Duguje', 'Potrazuje', 'Saldo');
+  generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Polise', 'Zaduzeno', 'Uplaceno', 'Saldo');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('Helvetica');
 
@@ -107,10 +288,7 @@ function generateInvoiceTable(doc, invoice) {
       doc,
       position,
       item.datum_dokumenta,
-      item.broj_dokumenta,
-      item.broj_ponude,
-      item.vid,
-      item.opis_knjizenja,
+      item.broj_polise,
       formatCurrency(item.duguje),
       formatCurrency(item.potrazuje),
       formatCurrency(item.saldo),
@@ -120,28 +298,26 @@ function generateInvoiceTable(doc, invoice) {
   }
 
   const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 690;
-  generateTableRow(doc, subtotalPosition, '', '', '', '', '', 'Duguje', '', formatCurrency(invoice.duguje));
+  generateTableRow(doc, subtotalPosition, '', '', 'Ukupno dospjelo', '', formatCurrency(invoice.ukupno_dospjelo));
 
   const paidToDatePosition = (subtotalPosition + 20) % 690;
-  generateTableRow(doc, paidToDatePosition, '', '', '', '', '', 'Potrazuje', '', formatCurrency(invoice.potrazuje));
+  generateTableRow(doc, paidToDatePosition, '', '', 'Ukupno placeno', '', formatCurrency(invoice.ukupno_placeno));
 
-  const duePosition = (paidToDatePosition + 25) % 690;
-  doc.font('Helvetica-Bold');
-  generateTableRow(doc, duePosition, '', '', '', '', '', 'Potrazuje', '', formatCurrency(invoice.saldo));
-  doc.font('Helvetica');
+  const duePosition = (paidToDatePosition + 20) % 690;
+  generateTableRow(doc, duePosition, '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_duguje));
+
+  const totalRemaining = (duePosition + 20) % 690;
+  generateTableRow(doc, totalRemaining, '', '', 'Ukupno nedospjelo', '', formatCurrency(invoice.ukupno_nedospjelo));
 }
 
-function generateTableRow(doc, y, datum_dokumenta, broj_dokumenta, broj_ponude, vid, opis_knjizenja, duguje, potrazuje, saldo) {
+function generateTableRow(doc, y, datum_dokumenta, broj_polise, duguje, potrazuje, saldo) {
   doc
     .fontSize(10)
     .font('Helvetica')
     .text(datum_dokumenta, 50, y)
-    .text(broj_dokumenta, 140, y)
-    .text(broj_ponude, 220, y)
-    .text(vid, 290, y)
-    .text(opis_knjizenja, 335, y, { width: 90 })
-    .text(duguje, 400, y, { width: 50, align: 'right' })
-    .text(potrazuje, 450, y, { width: 50, align: 'right' })
+    .text(broj_polise, 150, y)
+    .text(duguje, 320, y, { width: 90, align: 'right' })
+    .text(potrazuje, 435, y, { width: 50, align: 'right' })
     .text(saldo, 0, y, { align: 'right' });
 }
 
@@ -150,7 +326,7 @@ function generateHr(doc, y) {
 }
 
 function formatCurrency(cents) {
-  return '€' + (cents / 100).toFixed(2);
+  return '€' + (cents / 1).toFixed(2);
 }
 
 function formatDate(date) {
@@ -161,6 +337,19 @@ function formatDate(date) {
   return day + '/' + month + '/' + year;
 }
 
+function getDistinctObjects(jsonArray, keys) {
+  const distinctObjects = jsonArray.reduce((result, obj) => {
+    const key = keys.map((key) => obj[key]).join('|');
+    if (!result[key]) {
+      result[key] = obj;
+    }
+    return result;
+  }, {});
+
+  return Object.values(distinctObjects);
+}
+
 module.exports = {
   createInvoice,
+  createClientInvoice,
 };

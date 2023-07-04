@@ -44,6 +44,7 @@ const signupService = async (req) => {
 
 const signupFieldValidationService = async (req) => {
   const { username, email, password } = req;
+
   const { user } = await SQLQueries.getUserByUsernameOrEmail(username, email, 'signup');
 
   if (user) {
@@ -107,12 +108,13 @@ const checkVerificationToken = async (id, email_verification_token) => {
 
 const verifyUserService = async (id, token) => {
   const { user } = await checkVerificationToken(id, token);
-  await SQLQueries.updateUserVerification(id, 'verified', 1);
+  await SQLQueries.updateUserVerification(id, 1);
+
   return { user, statusCode: 200 };
 };
 
 const setNewPasswordService = async (newPassword, id) => {
-  return ({ new_value, statusCode } = await SQLQueries.updateUserPassword(id, 'password', await bcrypt.hash(newPassword, 12)));
+  return ({ new_value, statusCode } = await SQLQueries.updateUserPassword(id, await bcrypt.hash(newPassword, 12)));
 };
 
 module.exports = {
@@ -121,4 +123,6 @@ module.exports = {
   forgotPasswordService,
   verifyUserService,
   setNewPasswordService,
+  signupFieldValidationService,
+  checkVerificationToken,
 };

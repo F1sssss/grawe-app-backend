@@ -9,6 +9,17 @@ const Policy = (id) => {
   return new SQLParam('policy', id, sql.Int);
 };
 
+const searchField = (search) => {
+  return [new SQLParam('search', search, sql.VarChar)];
+};
+
+const Client = (id) => {
+  return [new SQLParam('id', id, sql.VarChar)];
+};
+
+const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
+  return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.VarChar), new SQLParam('dateTo', dateTo, sql.VarChar)];
+};
 const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];
 };
@@ -31,9 +42,10 @@ const NewParam = (procedure_id, report_id, order, param_name, sql_query) => {
   ];
 };
 
-const Param = (procedure_id, param_name, order) => {
+const Param = (procedure_id, report_id, param_name, order) => {
   return [
     new SQLParam('procedure_id', procedure_id, sql.Int),
+    new SQLParam('report_id', report_id, sql.Int),
     new SQLParam('param_name', param_name, sql.VarChar),
     new SQLParam('order', order, sql.Int),
   ];
@@ -45,6 +57,10 @@ const Policy_dateFrom_dateTo = (policy, dateFrom, dateTo) => {
 
 const Policy_Date = (policy, date) => {
   return [new SQLParam('policy', policy, sql.Int), new SQLParam('date', date, sql.VarChar)];
+};
+
+const ReportProcedure = (report_id, procedure_id) => {
+  return [new SQLParam('id', report_id, sql.Int), new SQLParam('procedure_id', procedure_id, sql.Int)];
 };
 
 const UserSignup = (username, password, name, last_name, email, date_of_birth, verification_code) => {
@@ -71,6 +87,18 @@ const ReportParams = (reportParams, InputParams) => {
   return queryParams;
 };
 
+const ReportName = (id, report_name) => {
+  return [new SQLParam('id', id, sql.Int), new SQLParam('report_name', report_name, sql.VarChar)];
+};
+
+const Date = (date) => {
+  return [new SQLParam('date', date, sql.VarChar)];
+};
+
+const Exception = (policy, id, exception) => {
+  return [new SQLParam('policy', policy, sql.Int), new SQLParam('id', id, sql.Int), new SQLParam('exception', exception, sql.VarChar)];
+};
+
 module.exports = {
   Policy,
   Policy_dateFrom_dateTo,
@@ -82,4 +110,11 @@ module.exports = {
   NewParam,
   StoredProcedure,
   Param,
+  ReportProcedure,
+  ReportName,
+  Client,
+  Client_dateFrom_dateTo,
+  searchField,
+  Date,
+  Exception,
 };

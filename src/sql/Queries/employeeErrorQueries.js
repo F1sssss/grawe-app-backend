@@ -1,0 +1,49 @@
+const DB_CONFIG = require('../DBconfig');
+const DBConnection = require('../DBConnection');
+const AppError = require('../../utils/AppError');
+const { getPolicyInfo } = require('./PoliciesQueries');
+const { Date, Exception } = require('../Queries/params');
+const excecuteErrorQueryTemplate = async (query, params = []) => {
+  const connection = new DBConnection(DB_CONFIG.sql);
+
+  const result = await connection.executeQuery(query, params);
+
+  if ((!result || result.length === 0) && query === 'addErrorException.sql') {
+    throw new AppError('Error during retrieving errors', 404, 'error-getting-errors-query-result-empty');
+  }
+  return { result, statusCode: 200 };
+};
+
+const getEmployeeErrors = async (date) => {
+  const { result, statusCode } = await excecuteErrorQueryTemplate('getEmployeeErrors.sql', Date(date));
+  return { employee_errors: result, statusCode };
+};
+
+const getErrorExceptions = async () => {
+  const { result, statusCode } = await excecuteErrorQueryTemplate('select * from gr_greske_izuzetci (nolock)');
+  return { exceptions: result, statusCode };
+};
+
+const addErrorException = async (policy, id, exception) => {
+  await getPolicyInfo(id);
+  const { result, statusCode } = await excecuteErrorQueryTemplate('addErrorException.sql', Exception(policy, id, exception));
+  return { result, statusCode };
+};
+
+const deleteErrorException = async (policy, id) => {
+  await excecuteErrorQueryTemplate('deleteErrorException.sql', Exception(policy, id));
+  return { result: 'Successfully deleted report!', statusCode: 200 };
+};
+
+const updateErrorException = async (policy, id, exception) => {
+  const { result, statusCode } = await excecuteErrorQueryTemplate('updateErrorException.sql', Exception(policy, id, exception));
+  return { result, statusCode };
+};
+
+module.exports = {
+  getEmployeeErrors,
+  getErrorExceptions,
+  addErrorException,
+  deleteErrorException,
+  updateErrorException,
+};

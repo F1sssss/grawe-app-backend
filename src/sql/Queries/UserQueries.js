@@ -5,33 +5,34 @@ const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
-const loadSqlQueries = require('../sql_queries/loadSQL');
 const { UserSignup } = require('./params');
+const bcrypt = require('bcryptjs');
 
-const selectFromUsers = async (query, param, type = '') => {
+const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  if (query.includes('.sql')) {
-    query = loadSqlQueries(query);
-  }
   const user = await connection.executeQuery(query, param);
-  if (!user.username && type !== 'signup') {
+
+  if (!user?.username && type !== 'signup') {
     throw new AppError(`User not found!`, 404, 'error-user-not-found');
   }
+
   if (type === 'login' && user.verified !== 1) {
     throw new AppError('Email not verified', 401, 'not-verified');
   }
-  user.password = type === 'login' ? user.password : undefined;
+
+  type !== 'signup' ? (user.password = type === 'login' ? user?.password : undefined) : undefined;
+
   return { user, statusCode: 200 };
 };
 
-const updateUser = async (id, field, value) => {
+const updateUserField = async (id, field, value) => {
   const connection = new DBConnection(DB_CONFIG.sql);
 
   if (typeof value === 'string') value = "'" + value + "'";
 
   const user = await connection.executeQuery(
     `update users set ${field} = ${value} where id = @id
-           select * from users where id = @id`,
+           select * from users (nolock) where id = @id`,
     [new SQLParam('id', id, sql.Int)],
   );
 
@@ -39,19 +40,20 @@ const updateUser = async (id, field, value) => {
     throw new AppError('Error updating user!', 401, 'error-updating-user-not-found');
   }
 
-  if (user[field] !== value) {
+  if (user[field] !== value && `'${user[field]}'` !== value && field !== 'password' && field !== 'updated_at') {
     throw new AppError('Error updating user!', 401, 'error-updating-user-not-updated');
   }
+
   return { newValue: field !== 'password' ? user[field] : undefined, statusCode: 200 };
 };
 
 const getUserById = async (id) => {
-  const { user, statusCode } = await selectFromUsers('select * from users where id = @id', [new SQLParam('id', id, sql.Int)]);
+  const { user, statusCode } = await excecuteUserQuery('select * from users (nolock) where id = @id', [new SQLParam('id', id, sql.Int)]);
   return { user, statusCode };
 };
 
 const getUserByUsername = async (username) => {
-  const { user, statusCode } = await selectFromUsers('select * from users where username = @username and verified = 1', [
+  const { user, statusCode } = await excecuteUserQuery('select * from users  (nolock) where username = @username and verified = 1', [
     new SQLParam('username', username, sql.VarChar),
   ]);
 
@@ -59,30 +61,36 @@ const getUserByUsername = async (username) => {
 };
 
 const getUserByEmail = async (email) => {
-  const { user, statusCode } = await selectFromUsers('select * from users where username = @username and verified = 1', [
+  const { user, statusCode } = await excecuteUserQuery('select * from users  (nolock) where email = @email and verified = 1', [
     new SQLParam('email', email, sql.VarChar),
   ]);
   return { user, statusCode };
 };
 
 const getUserByUsernameOrEmail = async (username, email, requesttype) => {
-  const { user, statusCode } = await selectFromUsers(
-    'select * from users where username = @username or email = @email',
+  const { user, statusCode } = await excecuteUserQuery(
+    'select * from users  (nolock) where username = @username or email = @email',
     [new SQLParam('username', username, sql.VarChar), new SQLParam('email', email, sql.VarChar)],
     requesttype,
   );
+
   return { user, statusCode };
 };
 
 const createUser = async (req) => {
-  const connection = new DBConnection(DB_CONFIG.sql);
   const { username, password, name, last_name, email, date_of_birth } = req;
   const verification_code = Math.floor(Math.random() * 1000000000);
 
-  const user = await connection.executeQuery(
-    await loadSqlQueries('signup.sql'),
+  if (!username || !password || !name || !last_name || !email || !date_of_birth) {
+    throw new AppError('Missing fields!', 401, 'error-missing-fields');
+  }
+
+  const { user } = await excecuteUserQuery(
+    'signup.sql',
     UserSignup(username, password, name, last_name, email, date_of_birth, verification_code),
+    'signup',
   );
+
   if (!user) {
     throw new AppError('Error creating user!', 401, 'error-creating-user');
   }
@@ -90,14 +98,38 @@ const createUser = async (req) => {
   return { user: { ...user, password: undefined }, statusCode: 200 };
 };
 
-const updateUserVerification = async (id, field, value) => {
-  const { user, statusCode } = await updateUser(id, field, value);
-  return { user, statusCode };
+const updateUserVerification = async (id, value) => {
+  const { newValue, statusCode } = await updateUserField(id, 'verified', value);
+  return { newValue, statusCode };
 };
 
-const updateUserPassword = async (id, field, value) => {
-  const { user, statusCode } = await updateUser(id, field, value);
-  return { user, statusCode };
+const updateUserPassword = async (id, value) => {
+  const { newValue, statusCode } = await updateUserField(id, 'password', value);
+  return { newValue, statusCode };
+};
+
+const updateUser = async (user, updatedUser) => {
+  Object.keys(updatedUser).map(async (key) => {
+    await updateUserField(user.ID, key, key === 'password' ? await bcrypt.hash(updatedUser[key], 12) : updatedUser[key]);
+  });
+  await updateUserField(user.ID, 'updated_at', new Date().toISOString());
+  updatedUser = { ...updatedUser, password: undefined };
+  return { updatedFields: updatedUser, statusCode: 200 };
+};
+
+const deleteUser = async (id) => {
+  const connection = new DBConnection(DB_CONFIG.sql);
+  const user = await connection.executeQuery(
+    `delete from users where id = @id
+           select * from users  (nolock) where id = @id`,
+    [new SQLParam('id', id, sql.Int)],
+  );
+
+  if (user) {
+    throw new AppError('Error deleting user!', 401, 'error-deleting-user-not-found');
+  }
+
+  return { message: 'User Deleted!', statusCode: 200 };
 };
 
 module.exports = {
@@ -108,4 +140,8 @@ module.exports = {
   createUser,
   updateUserVerification,
   updateUserPassword,
+  updateUserField,
+  updateUser,
+  deleteUser,
+  excecuteUserQuery,
 };

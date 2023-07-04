@@ -25,8 +25,8 @@ const getAllPolicyAnalyticsService = async (id, dateFrom, dateTo) => {
   return {
     policyHistory,
     policyAnalyticalInfo,
-    excelPath: `http://localhost:3000/api/v1/policies/${id}/history/xls/download`,
-    pdfPath: `http://localhost:3000/api/v1/policies/${id}/history/pdf/download`,
+    excelPath: `http://localhost:3000/api/v1/policies/${id}/history/xls/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+    pdfPath: `http://localhost:3000/api/v1/policies/${id}/history/pdf/download?dateFrom=${dateFrom}&dateTo=${dateTo}`,
   };
 };
 
