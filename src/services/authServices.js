@@ -81,10 +81,8 @@ const signupFieldValidationService = async (req) => {
 
 const forgotPasswordService = async (id) => {
   const { user } = await SQLQueries.getUserByUsernameOrEmail(id);
-
   const Email = new EmailValidator(user);
   await Email.sendEmailRetrievingPassword();
-
   return { user, statusCode: 200 };
 };
 
@@ -109,7 +107,6 @@ const checkVerificationToken = async (id, email_verification_token) => {
 const verifyUserService = async (id, token) => {
   const { user } = await checkVerificationToken(id, token);
   await SQLQueries.updateUserVerification(id, 1);
-
   return { user, statusCode: 200 };
 };
 

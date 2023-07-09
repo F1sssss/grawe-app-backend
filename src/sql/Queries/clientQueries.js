@@ -3,7 +3,7 @@ const DB_CONFIG = require('../DBconfig');
 const AppError = require('../../utils/AppError');
 const { Client, Client_dateFrom_dateTo } = require('./params');
 
-const excecuteClientQueryTemplate = async (queryFileName, params) => {
+const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const client = await connection.executeQuery(queryFileName, params);
 
@@ -15,16 +15,18 @@ const excecuteClientQueryTemplate = async (queryFileName, params) => {
 };
 
 const getClientInfo = async (id) => {
-  return ({ client, statusCode } = await excecuteClientQueryTemplate('getclientInfo.sql', Client(id)));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('getclientInfo.sql', Client(id));
+  const policies = await excecuteQueryAndHandleErrors('getclientPolicies.sql', Client(id));
+  return { client: { ...client, policies: policies['client']?.map((obj) => Object.values(obj)[0]) ?? [] }, statusCode };
 };
 
 const getClientHistory = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteClientQueryTemplate('getClientHistory.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientHistory.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   return { client, statusCode };
 };
 
 const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteClientQueryTemplate('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   const {
     klijent_bruto_polisirana_premija,
     klijent_neto_polisirana_premija,
@@ -46,7 +48,7 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
 };
 
 const getAllClientInfo = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteClientQueryTemplate('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo), true);
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   return { client, statusCode };
 };
 

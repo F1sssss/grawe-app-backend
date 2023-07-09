@@ -6,6 +6,7 @@ const router = express.Router();
 
 //router.use(authController.protect);
 
+router.get('/all', searchController.searchAllController);
 router.get('/', searchController.globalSearchController);
 
 module.exports = router;

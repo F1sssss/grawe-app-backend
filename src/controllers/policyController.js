@@ -4,14 +4,14 @@
 /** @namespace req.query.dateTo * **/
 const policyService = require('../services/policiesServices');
 const CatchAsync = require('../utils/CatchAsync');
-const responseHandler = require('../utils/responseHandler');
+const handleResponse = require('../utils/responseHandler');
 
 const getPolicyInfo = CatchAsync(async (req, res) => {
-  await responseHandler(policyService.getPolicyInfoService(req.params.id), res, { statusCode: 200 }, 'success');
+  await handleResponse(policyService.getPolicyInfoService(req.params.id), res, { statusCode: 200 }, 'success');
 });
 
 const getPolicyAnalyticalInfo = CatchAsync(async (req, res) => {
-  await responseHandler(
+  await handleResponse(
     policyService.getPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo),
     res,
     { statusCode: 200 },
@@ -20,7 +20,7 @@ const getPolicyAnalyticalInfo = CatchAsync(async (req, res) => {
 });
 
 const getPolicyHistory = CatchAsync(async (req, res) => {
-  await responseHandler(
+  await handleResponse(
     policyService.getPolicyHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo),
     res,
     { statusCode: 200 },
@@ -29,32 +29,21 @@ const getPolicyHistory = CatchAsync(async (req, res) => {
 });
 
 const getAllPolicyAnalytics = CatchAsync(async (req, res) => {
-  const { policyHistory, policyAnalyticalInfo, excelPath, pdfPath } = await policyService.getAllPolicyAnalyticsService(
-    req.params.id,
-    req.query.dateFrom,
-    req.query.dateTo,
+  await handleResponse(
+    policyService.getAllPolicyAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo),
+    res,
+    { statusCode: 200 },
+    'success',
   );
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      policyHistory,
-      policyAnalyticalInfo,
-      excelPath,
-      pdfPath,
-    },
-  });
 });
 
 const getPolicyHistoryExcelDownload = CatchAsync(async (req, res) => {
   const { excelBuffer } = await policyService.getPolicyHistoryExcelDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
-
   res.send(excelBuffer);
 });
 
 const getPolicyHistoryPDFDownload = CatchAsync(async (req, res) => {
   const { pdfBuffer, statusCode } = await policyService.getPolicyHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
-
   res.status(statusCode).send(pdfBuffer);
 });
 

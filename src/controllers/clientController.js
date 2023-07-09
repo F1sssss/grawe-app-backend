@@ -1,3 +1,6 @@
+//Controller for client information and analytics
+
+//TODO: Better naming for this controller
 const clientService = require('../services/clientService');
 const handleResponse = require('../utils/responseHandler');
 const CatchAsync = require('../utils/CatchAsync');
@@ -24,16 +27,6 @@ const getClientAnalyticalInfo = CatchAsync(async (req, res) => {
   );
 });
 
-const getClientHistoryExcelDownload = CatchAsync(async (req, res) => {
-  const { excelBuffer } = await clientService.getClientHistoryExcelDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
-  res.status(200).send(excelBuffer);
-});
-
-const getClientHistoryPDFDownload = CatchAsync(async (req, res) => {
-  const { pdfBuffer } = await clientService.getPolicyHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
-  res.status(200).send(pdfBuffer);
-});
-
 const getAllClientAnalytics = CatchAsync(async (req, res) => {
   await handleResponse(
     clientService.getAllClientAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo),
@@ -43,6 +36,7 @@ const getAllClientAnalytics = CatchAsync(async (req, res) => {
   );
 });
 
+//TOBE DELETED
 const getAllClientInfo = CatchAsync(async (req, res) => {
   await handleResponse(
     clientService.getAllClientInfoService(req.params.id, req.query.dateFrom, req.query.dateTo),
@@ -50,6 +44,16 @@ const getAllClientInfo = CatchAsync(async (req, res) => {
     { statusCode: 200 },
     'success',
   );
+});
+
+const getClientHistoryExcelDownload = CatchAsync(async (req, res) => {
+  const { excelBuffer } = await clientService.getClientHistoryExcelDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
+  res.status(200).send(excelBuffer);
+});
+
+const getClientHistoryPDFDownload = CatchAsync(async (req, res) => {
+  const { pdfBuffer } = await clientService.getPolicyHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
+  res.status(200).send(pdfBuffer);
 });
 
 module.exports = {

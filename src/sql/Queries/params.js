@@ -1,3 +1,5 @@
+//Params for queries and stored procedures
+
 const sql = require('mssql');
 /** @namespace sql.Int * **/
 /** @namespace sql.VarChar * **/

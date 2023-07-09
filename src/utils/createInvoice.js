@@ -1,28 +1,10 @@
 const PDFDocument = require('pdfkit');
 const AppError = require('./AppError');
-const policyQueries = require('../sql/Queries/PoliciesQueries');
+let buffers = [];
+let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
 function createInvoice(policy) {
   return new Promise(async (resolve, reject) => {
-    let buffers = [];
-    let doc = new PDFDocument({ size: 'A4', margin: 50 });
-
-    // Handle errors
-    doc.on('error', () => {
-      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-    });
-
-    // Collect the PDF buffers
-    doc.on('data', (buffer) => {
-      buffers.push(buffer);
-    });
-
-    // Finalize the PDF document
-    doc.on('end', () => {
-      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-      resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
-    });
-
     const invoiceData = {
       shipping: {
         name: 'SMN TRANSPORTI DOO',
@@ -47,8 +29,7 @@ function createInvoice(policy) {
 
 function createClientInvoice(client) {
   return new Promise(async (resolve, reject) => {
-    let buffers = [];
-    let doc = new PDFDocument({ size: 'A4', margin: 50 });
+    let recapitulation = [];
 
     // Handle errors
     doc.on('error', () => {
@@ -66,69 +47,43 @@ function createClientInvoice(client) {
       resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
     });
 
-    const clientData = {
-      clientInfo: {
-        name: client[0][0].klijent,
-        date_of_birth: client[0][0].datum_rodjenja,
-        embg_pib: client[0][0]['EMBG/PIB'],
-        address: client[0][0].adresa,
-        place: client[0][0].mjesto,
-        phone1: client[0][0].telefon1,
-        phone2: client[0][0].telefon2,
-        email: 'placeholder@gmal.com',
-      },
-      items: [],
-      broj_polise: 12346,
-      pocetak_osiguranja: client[0][0].pocetak_osiguranja,
-      istek_osiguranja: client[0][0].istek_osiguranja,
-      ukupno_dospjelo: client[0][0].ukupno_dospjelo,
-      ukupno_placeno: client[0][0].ukupno_placeno,
-      ukupno_duguje: client[0][0].ukupno_duguje,
-      ukupno_nedospjelo: client[0][0].ukupno_nedospjelo,
-      premija: client[0][0].bruto_polisirana_premija,
-      nacin_placanja: client[0][0].nacin_placanja,
-      naziv_branse: client[0][0].naziv_branse,
-    };
-
-    let invoiceDataCopy = clientData;
-    let recapitulation = [];
+    let clientData = extractClientInfo(client);
 
     for (let i = 0; i <= client[0].length; i++) {
       if (client[i][0].datum_dokumenta === null || !client[i][0].datum_dokumenta) {
         continue;
       }
 
-      invoiceDataCopy.items = getDistinctObjects(client[i], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
-      invoiceDataCopy.broj_polise = client[i][0].polisa;
-      invoiceDataCopy.pocetak_osiguranja = client[i][0].pocetak_osiguranja;
-      invoiceDataCopy.istek_osiguranja = client[i][0].istek_osiguranja;
-      invoiceDataCopy.ukupno_dospjelo = client[i][0].ukupno_dospjelo;
-      invoiceDataCopy.ukupno_placeno = client[i][0].ukupno_placeno;
-      invoiceDataCopy.ukupno_duguje = client[i][0].ukupno_duguje;
-      invoiceDataCopy.ukupno_nedospjelo = client[i][0].ukupno_nedospjelo;
-      invoiceDataCopy.premija = client[i][0].bruto_polisirana_premija;
-      invoiceDataCopy.nacin_placanja = client[i][0].nacin_placanja;
-      invoiceDataCopy.naziv_branse = client[i][0].naziv_branse;
+      clientData.items = getDistinctObjects(client[i], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
+      clientData.broj_polise = client[i][0].polisa;
+      clientData.pocetak_osiguranja = client[i][0].pocetak_osiguranja;
+      clientData.istek_osiguranja = client[i][0].istek_osiguranja;
+      clientData.ukupno_dospjelo = client[i][0].ukupno_dospjelo;
+      clientData.ukupno_placeno = client[i][0].ukupno_placeno;
+      clientData.ukupno_duguje = client[i][0].ukupno_duguje;
+      clientData.ukupno_nedospjelo = client[i][0].ukupno_nedospjelo;
+      clientData.premija = client[i][0].bruto_polisirana_premija;
+      clientData.nacin_placanja = client[i][0].nacin_placanja;
+      clientData.naziv_branse = client[i][0].naziv_branse;
 
       recapitulation.push([
-        invoiceDataCopy.broj_polise,
-        invoiceDataCopy.naziv_branse,
-        invoiceDataCopy.premija,
-        invoiceDataCopy.ukupno_dospjelo,
-        invoiceDataCopy.ukupno_placeno,
-        invoiceDataCopy.ukupno_duguje,
-        invoiceDataCopy.ukupno_nedospjelo,
+        clientData.broj_polise,
+        clientData.naziv_branse,
+        clientData.premija,
+        clientData.ukupno_dospjelo,
+        clientData.ukupno_placeno,
+        clientData.ukupno_duguje,
+        clientData.ukupno_nedospjelo,
       ]);
 
       generateHeader(doc);
-      generateCustomerInformation(doc, invoiceDataCopy);
-      generateInvoiceTable(doc, invoiceDataCopy);
+      generateCustomerInformation(doc, clientData);
+      generateInvoiceTable(doc, clientData);
       doc.addPage();
     }
 
     generateHeader(doc);
-    generateCustomerRecapInformation(doc, invoiceDataCopy);
-
+    generateCustomerRecapInformation(doc, clientData);
     generateInvoiceTableRecap(doc, recapitulation);
 
     doc.end();
@@ -148,30 +103,6 @@ function generateHeader(doc) {
     .text('F  +382 20 657 301', 200, 90, { align: 'right' })
     .text('E  info.nezivot@grawe.me', 200, 105, { align: 'right' })
     .moveDown();
-}
-
-function generateCustomerRecapInformation(doc, invoice) {
-  doc.fillColor('#444444').fontSize(14).text('REKAPITULACIJA', 50, 160);
-  generateHr(doc, 185);
-
-  const customerInformationTop = 190;
-
-  doc
-    .fontSize(9)
-    .font('Helvetica-Bold')
-    .text(invoice.clientInfo.name, 50, customerInformationTop)
-    .font('Helvetica')
-    .text(invoice.clientInfo.address, 50, customerInformationTop + 15)
-    .font('Helvetica')
-    .text(invoice.clientInfo.place, 50, customerInformationTop + 30)
-    .font('Helvetica')
-    .text(invoice.clientInfo.phone1 === '' ? invoice.clientInfo.phone2 : invoice.clientInfo.phone1, 50, customerInformationTop + 45)
-    .font('Helvetica')
-    .text(invoice.clientInfo.email, 50, customerInformationTop + 60)
-    .font('Helvetica')
-    .moveDown();
-
-  generateHr(doc, 270);
 }
 
 function generateCustomerInformation(doc, invoice) {
@@ -204,6 +135,29 @@ function generateCustomerInformation(doc, invoice) {
     .text(invoice.nacin_placanja, 500, customerInformationTop + 60, { align: 'right' })
     .font('Helvetica')
 
+    .fontSize(9)
+    .font('Helvetica-Bold')
+    .text(invoice.clientInfo.name, 50, customerInformationTop)
+    .font('Helvetica')
+    .text(invoice.clientInfo.address, 50, customerInformationTop + 15)
+    .font('Helvetica')
+    .text(invoice.clientInfo.place, 50, customerInformationTop + 30)
+    .font('Helvetica')
+    .text(invoice.clientInfo.phone1 === '' ? invoice.clientInfo.phone2 : invoice.clientInfo.phone1, 50, customerInformationTop + 45)
+    .font('Helvetica')
+    .text(invoice.clientInfo.email, 50, customerInformationTop + 60)
+    .font('Helvetica')
+    .moveDown();
+
+  generateHr(doc, 270);
+}
+function generateCustomerRecapInformation(doc, invoice) {
+  doc.fillColor('#444444').fontSize(14).text('REKAPITULACIJA', 50, 160);
+  generateHr(doc, 185);
+
+  const customerInformationTop = 190;
+
+  doc
     .fontSize(9)
     .font('Helvetica-Bold')
     .text(invoice.clientInfo.name, 50, customerInformationTop)
@@ -288,7 +242,7 @@ function generateInvoiceTable(doc, invoice) {
       doc,
       position,
       item.datum_dokumenta,
-      item.broj_polise,
+      invoice.broj_polise,
       formatCurrency(item.duguje),
       formatCurrency(item.potrazuje),
       formatCurrency(item.saldo),
@@ -327,6 +281,32 @@ function generateHr(doc, y) {
 
 function formatCurrency(cents) {
   return '€' + (cents / 1).toFixed(2);
+}
+
+function extractClientInfo(client) {
+  return {
+    clientInfo: {
+      name: client[0][0].klijent,
+      date_of_birth: client[0][0].datum_rodjenja,
+      embg_pib: client[0][0]['EMBG/PIB'],
+      address: client[0][0].adresa,
+      place: client[0][0].mjesto,
+      phone1: client[0][0].telefon1,
+      phone2: client[0][0].telefon2,
+      email: 'placeholder@gmal.com',
+    },
+    items: [],
+    broj_polise: 0,
+    pocetak_osiguranja: client[0][0].pocetak_osiguranja,
+    istek_osiguranja: client[0][0].istek_osiguranja,
+    ukupno_dospjelo: client[0][0].ukupno_dospjelo,
+    ukupno_placeno: client[0][0].ukupno_placeno,
+    ukupno_duguje: client[0][0].ukupno_duguje,
+    ukupno_nedospjelo: client[0][0].ukupno_nedospjelo,
+    premija: client[0][0].bruto_polisirana_premija,
+    nacin_placanja: client[0][0].nacin_placanja,
+    naziv_branse: client[0][0].naziv_branse,
+  };
 }
 
 function formatDate(date) {
