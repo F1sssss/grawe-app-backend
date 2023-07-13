@@ -11,6 +11,7 @@ router.get('/procedure/', reportsController.searchProcedure);
 router.get('/generate/:id/', reportsController.generateReport);
 router.get('/:id/', reportsController.getReportById);
 router.get('/', reportsController.getReports);
+router.get('/xls/:id/', reportsController.downloadReport);
 
 router.post('/', reportsController.createReport);
 

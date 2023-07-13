@@ -17,6 +17,11 @@ const generateReport = catchAsync(async (req, res) => {
   await responseHandler(reportService.generateReportService(req.params.id, req.query), res, { statusCode: 200 }, 'Success');
 });
 
+const downloadReport = catchAsync(async (req, res) => {
+  const { excelBuffer, statusCode } = await reportService.downloadReportService(res, req.params.id, req.query);
+  res.status(statusCode).send(excelBuffer);
+});
+
 const createReport = catchAsync(async (req, res) => {
   await responseHandler(reportService.createReportService(req.body['procedure']), res, { statusCode: 201 }, 'Successfully created report');
 });
@@ -51,4 +56,5 @@ module.exports = {
   searchProcedure,
   updateReport,
   deleteReport,
+  downloadReport,
 };
