@@ -4,7 +4,12 @@ into #client_policies
 from branche b (nolock)
 left join vertrag v (nolock) on b.bra_vertragid=v.vtg_vertragid
 left join kunde k (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
-where case when len(kun_yu_persnr)=12 then '0'+kun_yu_persnr else kun_yu_persnr end=@id
+where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
+      else
+      case when len(kun_yu_persnr)=12
+      	then '0' + FORMAT(kun_yu_persnr, '0')
+      else FORMAT(kun_yu_persnr, '0') end
+      end		=@id
 
 
 

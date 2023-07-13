@@ -33,7 +33,12 @@ left join kunde k (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 left join kunde k1 (nolock) on k1.kun_kundenkz=v.vtg_kundenkz_2
 left join vertrag_kunde vk(nolock) on vk.vtk_obnr=b.bra_obnr and vk.vtk_kundenkz=k.kun_kundenkz and vk.vtk_kundenrolle='PA'  --Ugovarac
 left join vertrag_kunde vk1(nolock) on vk.vtk_obnr=b.bra_obnr and vk1.vtk_kundenkz=k1.kun_kundenkz and vk.vtk_kundenrolle='VN' --Osiguranik
-where case when len(case when bra_bran not in (10,11,56,8) then k1.kun_yu_persnr else k.kun_yu_persnr end)=12 then '0'+k.kun_yu_persnr else k.kun_yu_persnr end=@id
+where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
+      else
+      case when len(kun_yu_persnr)=12
+      	then '0' + FORMAT(kun_yu_persnr, '0')
+      else FORMAT(kun_yu_persnr, '0') end
+      end=@id
 and convert(varchar,convert(date,bra_vers_beginn,104),102) between @dateFrom and @dateTo
 
 
