@@ -47,6 +47,11 @@ const deleteReport = catchAsync(async (req, res) => {
   await responseHandler(reportService.deleteReportService(req.params.id), res, { statusCode: 200 }, 'Successfully deleted report');
 });
 
+const downloadFilteredReport = catchAsync(async (req, res) => {
+  const { excelBuffer, statusCode } = await reportService.downloadFilteredReportService(res, req.body['report']);
+  res.status(statusCode).send(excelBuffer);
+});
+
 module.exports = {
   getReports,
   getReportById,
@@ -57,4 +62,5 @@ module.exports = {
   updateReport,
   deleteReport,
   downloadReport,
+  downloadFilteredReport,
 };

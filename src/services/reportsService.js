@@ -23,6 +23,12 @@ const downloadReportService = async (res, id, input_params) => {
   return ({ excelBuffer, statusCode = 200 } = await generateExcelFile(reportResult));
 };
 
+const downloadFilteredReportService = async (res, report) => {
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="generated_report.xlsx"');
+  return ({ excelBuffer, statusCode = 200 } = await generateExcelFile(report));
+};
+
 const getReportService = async (id) => {
   const cacheKey = `get-report-${id}`;
   const { report_info, report_params } = await cacheQuery(cacheKey, reportsQueries.getReportById(id));
@@ -57,4 +63,5 @@ module.exports = {
   deleteReportService,
   executeReport,
   downloadReportService,
+  downloadFilteredReportService,
 };

@@ -14,6 +14,7 @@ router.get('/', reportsController.getReports);
 router.get('/xls/:id/', reportsController.downloadReport);
 
 router.post('/', reportsController.createReport);
+router.post('/xls/', reportsController.downloadFilteredReport);
 
 router.patch('/:id/', reportsController.updateReport);
 
