@@ -59,9 +59,15 @@ const getAllClientInfo = async (id, dateFrom, dateTo) => {
   return { client, statusCode };
 };
 
+const getClientPolicyAnalticalInfo = async (id, dateFrom, dateTo) => {
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientPolicyAnalticalInfo.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  return { client, statusCode };
+};
+
 module.exports = {
   getClientInfo,
   getClientHistory,
   getClientAnalyticalInfo,
   getAllClientInfo,
+  getClientPolicyAnalticalInfo,
 };

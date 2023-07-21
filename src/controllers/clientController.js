@@ -27,6 +27,15 @@ const getClientAnalyticalInfo = CatchAsync(async (req, res) => {
   );
 });
 
+const getClientPolicyAnalyticalInfo = CatchAsync(async (req, res) => {
+  await handleResponse(
+    clientService.getClientPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo),
+    res,
+    { statusCode: 200 },
+    'success',
+  );
+});
+
 const getAllClientAnalytics = CatchAsync(async (req, res) => {
   await handleResponse(
     clientService.getAllClientAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo),
@@ -64,4 +73,5 @@ module.exports = {
   getClientHistoryPDFDownload,
   getAllClientAnalytics,
   getAllClientInfo,
+  getClientPolicyAnalyticalInfo,
 };

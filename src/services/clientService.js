@@ -33,6 +33,12 @@ const getClientAnalyticalInfoService = async (id, dateFrom, dateTo) => {
   return { client, statusCode };
 };
 
+const getClientPolicyAnalyticalInfoService = async (id, dateFrom, dateTo) => {
+  const cacheKey = `client-policy-analytics-${id}-${dateFrom}-${dateTo}`;
+  const { client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientPolicyAnalticalInfo(id, dateFrom, dateTo));
+  return { client, statusCode };
+};
+
 const getClientHistoryExcelDownloadService = async (res, id, dateFrom, dateTo) => {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename="client.xlsx"');
@@ -76,4 +82,5 @@ module.exports = {
   getPolicyHistoryPDFDownloadService,
   getAllClientAnalyticsService,
   getAllClientInfoService,
+  getClientPolicyAnalyticalInfoService,
 };
