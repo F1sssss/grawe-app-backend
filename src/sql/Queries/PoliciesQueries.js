@@ -28,8 +28,13 @@ const getPolicyAnalyticalInfo = async (id, dateFrom, dateTo) => {
   return ({ policy, statusCode } = await excecuteQueryAndHandleErrors('getPolicyAnalyticalInfo.sql', Policy_dateFrom_dateTo(id, dateFrom, dateTo)));
 };
 
+const getPolicyExcelInfo = async (id, dateFrom, dateTo) => {
+  return ({ policy, statusCode } = await excecuteQueryAndHandleErrors('getExcelInfo.sql', Policy_dateFrom_dateTo(id, dateFrom, dateTo)));
+};
+
 module.exports = {
   getPolicyInfo,
   getPolicyHistory,
   getPolicyAnalyticalInfo,
+  getPolicyExcelInfo,
 };

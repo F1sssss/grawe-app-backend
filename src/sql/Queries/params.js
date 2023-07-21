@@ -26,6 +26,10 @@ const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];
 };
 
+const ReportId = (id) => {
+  return [new SQLParam('id', id, sql.Int)];
+};
+
 const StoredProcedure = (procedure_name) => {
   return [new SQLParam('procedure_name', procedure_name, sql.VarChar)];
 };
@@ -119,4 +123,5 @@ module.exports = {
   searchField,
   Date,
   Exception,
+  ReportId,
 };

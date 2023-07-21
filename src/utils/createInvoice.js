@@ -5,22 +5,29 @@ let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
 function createInvoice(policy) {
   return new Promise(async (resolve, reject) => {
-    const invoiceData = {
-      shipping: {
-        name: 'SMN TRANSPORTI DOO',
-        address: 'KRIVAULICA,DOBROTA BB',
-        city: 'KOTOR',
-        country: 'MNE',
-        postal_code: 94111,
-      },
-      items: policy,
-      paid: 0,
-      broj_polise: 12346,
-    };
+    // Handle errors
+    doc.on('error', () => {
+      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+    });
+
+    // Collect the PDF buffers
+    doc.on('data', (buffer) => {
+      buffers.push(buffer);
+    });
+
+    // Finalize the PDF document
+    doc.on('end', () => {
+      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+      resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
+    });
+
+    let clientData = extractClientInfo(policy);
+    //console.log(getDistinctObjects(policy[0], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']));
+    clientData.items = getDistinctObjects(policy, ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
 
     generateHeader(doc);
-    generateCustomerInformation(doc, invoiceData);
-    generateInvoiceTable(doc, invoiceData);
+    generateCustomerInformation(doc, clientData);
+    generateInvoiceTable(doc, clientData);
     //generateFooter(doc);
 
     doc.end();
@@ -286,26 +293,26 @@ function formatCurrency(cents) {
 function extractClientInfo(client) {
   return {
     clientInfo: {
-      name: client[0][0].klijent,
-      date_of_birth: client[0][0].datum_rodjenja,
-      embg_pib: client[0][0]['EMBG/PIB'],
-      address: client[0][0].adresa,
-      place: client[0][0].mjesto,
-      phone1: client[0][0].telefon1,
-      phone2: client[0][0].telefon2,
+      name: client[0].klijent,
+      date_of_birth: client[0].datum_rodjenja,
+      embg_pib: client[0]['EMBG/PIB'],
+      address: client[0].adresa,
+      place: client[0].mjesto,
+      phone1: client[0].telefon1,
+      phone2: client[0].telefon2,
       email: 'placeholder@gmal.com',
     },
     items: [],
-    broj_polise: 0,
-    pocetak_osiguranja: client[0][0].pocetak_osiguranja,
-    istek_osiguranja: client[0][0].istek_osiguranja,
-    ukupno_dospjelo: client[0][0].ukupno_dospjelo,
-    ukupno_placeno: client[0][0].ukupno_placeno,
-    ukupno_duguje: client[0][0].ukupno_duguje,
-    ukupno_nedospjelo: client[0][0].ukupno_nedospjelo,
-    premija: client[0][0].bruto_polisirana_premija,
-    nacin_placanja: client[0][0].nacin_placanja,
-    naziv_branse: client[0][0].naziv_branse,
+    broj_polise: client[0].polisa,
+    pocetak_osiguranja: client[0].pocetak_osiguranja,
+    istek_osiguranja: client[0].istek_osiguranja,
+    ukupno_dospjelo: client[0].ukupno_dospjelo,
+    ukupno_placeno: client[0].ukupno_placeno,
+    ukupno_duguje: client[0].ukupno_duguje,
+    ukupno_nedospjelo: client[0].ukupno_nedospjelo,
+    premija: client[0].bruto_polisirana_premija,
+    nacin_placanja: client[0].nacin_placanja,
+    naziv_branse: client[0].naziv_branse,
   };
 }
 

@@ -1,5 +1,5 @@
 //Controller for policies routes
-
+//TODO add policy route for analytical info
 /** @namespace req.query.dateFrom * **/
 /** @namespace req.query.dateTo * **/
 const policyService = require('../services/policiesServices');
