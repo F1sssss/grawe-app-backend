@@ -37,7 +37,7 @@ into #temp
 from kunde k(nolock)
 left join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 left join branche b (nolock) on b.bra_vertragid=v.vtg_vertragid
-where bra_obnr=@id
+where bra_obnr=@policy
 and v.vtg_pol_bran=bra_bran
 
 
