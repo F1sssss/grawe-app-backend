@@ -48,7 +48,6 @@ function createClientInvoice(client) {
 
     // Collect the PDF buffers
     doc.on('data', (buffer) => {
-      console.log(buffer);
       buffers.push(buffer);
     });
 
