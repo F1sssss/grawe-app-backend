@@ -1,11 +1,12 @@
 const PDFDocument = require('pdfkit');
 const AppError = require('./AppError');
-let buffers = [];
-let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
 function createInvoice(policy) {
   return new Promise(async (resolve, reject) => {
     // Handle errors
+    let buffers = [];
+    let doc = new PDFDocument({ size: 'A4', margin: 50 });
+
     doc.on('error', () => {
       throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
     });
@@ -21,13 +22,13 @@ function createInvoice(policy) {
       resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
     });
 
-    let clientData = extractClientPolicyInfo(policy);
+    let policyData = extractClientPolicyInfo(policy);
     //console.log(getDistinctObjects(policy[0], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']));
-    clientData.items = getDistinctObjects(policy, ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
+    policyData.items = getDistinctObjects(policy, ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
 
     generateHeader(doc);
-    generateCustomerInformation(doc, clientData);
-    generateInvoiceTable(doc, clientData);
+    generateCustomerInformation(doc, policyData);
+    generateInvoiceTable(doc, policyData);
     //generateFooter(doc);
 
     doc.end();
@@ -36,6 +37,8 @@ function createInvoice(policy) {
 
 function createClientInvoice(client) {
   return new Promise(async (resolve, reject) => {
+    let doc = new PDFDocument({ size: 'A4', margin: 50 });
+    let buffers = [];
     let recapitulation = [];
 
     // Handle errors
@@ -45,6 +48,7 @@ function createClientInvoice(client) {
 
     // Collect the PDF buffers
     doc.on('data', (buffer) => {
+      console.log(buffer);
       buffers.push(buffer);
     });
 
@@ -93,6 +97,7 @@ function createClientInvoice(client) {
     generateCustomerRecapInformation(doc, clientData);
     generateInvoiceTableRecap(doc, recapitulation);
 
+    clientData = [];
     doc.end();
   });
 }

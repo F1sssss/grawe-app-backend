@@ -2,6 +2,7 @@ const cacheQuery = require('../utils/cacheQuery');
 const ClientQueries = require('../sql/Queries/ClientQueries');
 const generateExcelFile = require('../utils/ExcelExport');
 const Invoice = require('../utils/createInvoice');
+const { log } = require('util');
 
 function seperateClientPolicies(client) {
   const arraysByPolisa = {};
