@@ -14,14 +14,14 @@ router.get('/:id/', reportsController.getReportById);
 router.get('/', reportsController.getReports);
 router.get('/xls/:id/', reportsController.downloadReport);
 
+router.post('/*', cachingService.del);
 router.post('/', reportsController.createReport);
 router.post('/xls/', reportsController.downloadFilteredReport);
-router.post('/*', cachingService.del);
 
-router.patch('/:id/', reportsController.updateReport);
 router.patch('/*', cachingService.del);
+router.patch('/:id/', reportsController.updateReport);
 
-router.delete('/:id/', reportsController.deleteReport);
 router.delete('/*', cachingService.del);
+router.delete('/:id/', reportsController.deleteReport);
 
 module.exports = router;
