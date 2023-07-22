@@ -44,15 +44,16 @@ async function get(key) {
   }
 }
 
-async function del() {
+async function del(req, res, next) {
   try {
-    return await client.flushAll();
+    next(await client.flushAll());
   } catch (err) {
-    throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
+    next(throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis'));
   }
 }
 
 module.exports = {
   setWithTTL,
   get,
+  del,
 };

@@ -1,6 +1,7 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const reportsController = require('../controllers/reportsController');
+const cachingService = require('../services/cachingService');
 
 const router = express.Router();
 
@@ -15,9 +16,12 @@ router.get('/xls/:id/', reportsController.downloadReport);
 
 router.post('/', reportsController.createReport);
 router.post('/xls/', reportsController.downloadFilteredReport);
+router.post('/*', cachingService.del);
 
 router.patch('/:id/', reportsController.updateReport);
+router.patch('/*', cachingService.del);
 
 router.delete('/:id/', reportsController.deleteReport);
+router.delete('/*', cachingService.del);
 
 module.exports = router;
