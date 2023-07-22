@@ -59,10 +59,14 @@ function createClientInvoice(client) {
 
     let clientData = extractClientInfo(client);
 
-    for (let i = 0; i <= client[0].length; i++) {
+    console.log(client.length);
+
+    for (let i = 0; i < client.length; i++) {
       if (client[i][0].datum_dokumenta === null || !client[i][0].datum_dokumenta) {
         continue;
       }
+
+      console.log(i);
 
       clientData.items = getDistinctObjects(client[i], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
       clientData.broj_polise = client[i][0].polisa;
@@ -189,6 +193,7 @@ function generateCustomerRecapInformation(doc, invoice) {
 function generateInvoiceTableRecap(doc, invoice) {
   let i;
   const invoiceTableTop = 330;
+  let position = 0;
 
   doc.font('Helvetica-Bold');
   generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Zaduzeno', 'Placeno', 'Dospjelo', 'Nedospjelo');
@@ -197,9 +202,9 @@ function generateInvoiceTableRecap(doc, invoice) {
 
   for (i = 0; i < invoice.length; i++) {
     const item = invoice[i];
-    let position = (invoiceTableTop + (i + 1) * 30) % 690;
+    position = (invoiceTableTop + (i + 1) * 30) % 690;
 
-    position = position < 30 ? (doc.addPage(), 30) : position;
+    position = position < 30 ? (doc.addPage(), 30) : position + 30;
 
     generateTableRowRecap(
       doc,
@@ -216,7 +221,7 @@ function generateInvoiceTableRecap(doc, invoice) {
     generateHr(doc, position + 20);
   }
 
-  const subtotalPosition = invoiceTableTop + (i + 1) * 30;
+  const subtotalPosition = position + 30;
   doc.font('Helvetica-Bold');
   generateTableRowRecap(doc, subtotalPosition, '', '', 'Ukupno', formatCurrency(invoice.ukupno));
 }

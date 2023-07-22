@@ -1,4 +1,4 @@
-SELECT DISTINCT
+SELECT DISTINCT TOP 1
 p.object_id			[report_id],
 p.name				[report_name],
 pa.parameter_id 	[order],
@@ -20,7 +20,8 @@ select distinct
 [procedure_name]
 from #temp
 
-select [order],
+select distinct
+       [order],
        param_name,
        type,
        length,
