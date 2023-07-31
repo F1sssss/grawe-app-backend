@@ -1,3 +1,5 @@
+//Controller for errors in grawe data and exceptions
+
 const handleResponse = require('../utils/responseHandler');
 const catchAsync = require('../utils/catchAsync');
 const employeeErrorQueries = require('../sql/Queries/employeeErrorQueries');

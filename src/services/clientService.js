@@ -2,6 +2,7 @@ const cacheQuery = require('../utils/cacheQuery');
 const ClientQueries = require('../sql/Queries/ClientQueries');
 const generateExcelFile = require('../utils/ExcelExport');
 const Invoice = require('../utils/createInvoice');
+const { log } = require('util');
 
 function seperateClientPolicies(client) {
   const arraysByPolisa = {};
@@ -30,6 +31,12 @@ const getClientInfoService = async (id) => {
 const getClientAnalyticalInfoService = async (id, dateFrom, dateTo) => {
   const cacheKey = `client-analytics-${id}-${dateFrom}-${dateTo}`;
   const { client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientAnalyticalInfo(id, dateFrom, dateTo));
+  return { client, statusCode };
+};
+
+const getClientPolicyAnalyticalInfoService = async (id, dateFrom, dateTo) => {
+  const cacheKey = `client-policy-analytics-${id}-${dateFrom}-${dateTo}`;
+  const { client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientPolicyAnalticalInfo(id, dateFrom, dateTo));
   return { client, statusCode };
 };
 
@@ -76,4 +83,5 @@ module.exports = {
   getPolicyHistoryPDFDownloadService,
   getAllClientAnalyticsService,
   getAllClientInfoService,
+  getClientPolicyAnalyticalInfoService,
 };

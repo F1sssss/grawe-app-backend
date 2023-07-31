@@ -12,6 +12,7 @@ router.get('/:id/history/xls/download', clientController.getClientHistoryExcelDo
 router.get('/:id/history/pdf/download', clientController.getClientHistoryPDFDownload);
 
 router.get('/:id/analytics', clientController.getClientAnalyticalInfo);
+router.get('/policy/:id', clientController.getClientPolicyAnalyticalInfo);
 router.get('/:id/analytics/all', clientController.getAllClientAnalytics);
 
 //This is just for testing, remove later

@@ -70,9 +70,8 @@ services:
       - mssql-server
     ports:
       - '8088:8088'
-
-
-
+    volumes:
+      - ./superset:/usr/src/app/superset/
     environment:
       - SUPERSET_LOAD_EXAMPLES=no
       - SUPERSET_DATABASE_URI=mssql+pymssql://sa:Grawe123$@172.23.0.23:1433/GRAWE
@@ -83,6 +82,9 @@ services:
       - SUPERSET_WEBSERVER_WORKERS=10
       - SUPERSET_WEBSERVER_THREADS=10
       - SUPERSET_WEBSERVER_MAX_REQUESTS=1000
+        #- ADMIN_USERNAME=admin
+        #- ADMIN_EMAIL=admin@superset.com
+        #- ADMIN_PASSWORD=admin
 
 
     networks:

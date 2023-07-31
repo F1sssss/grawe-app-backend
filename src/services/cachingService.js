@@ -2,7 +2,7 @@ const redis = require('redis');
 
 const AppError = require('../utils/appError');
 
-const client = redis.createClient({
+let client = redis.createClient({
   socket: {
     port: 6379,
     host: process.env.REDIS_HOST,
@@ -44,7 +44,16 @@ async function get(key) {
   }
 }
 
+async function del(req, res, next) {
+  try {
+    next(await client.flushAll());
+  } catch (err) {
+    next(throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis'));
+  }
+}
+
 module.exports = {
   setWithTTL,
   get,
+  del,
 };

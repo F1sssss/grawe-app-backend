@@ -1,3 +1,4 @@
+
 if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
 
@@ -36,13 +37,8 @@ into #temp
 from kunde k(nolock)
 left join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 left join branche b (nolock) on b.bra_vertragid=v.vtg_vertragid
-where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
-      else
-      case when len(kun_yu_persnr)=12
-      	then '0' + FORMAT(kun_yu_persnr, '0')
-      else FORMAT(kun_yu_persnr, '0') end
-      end		=@id
-
+where bra_obnr=@policy
+and v.vtg_pol_bran=bra_bran
 
 
 if OBJECT_ID('tempdb..#praemienkonto') is not null
@@ -116,3 +112,4 @@ cast(0 as decimal(18,2))                                                ukupno_n
 from #praemienkonto p(nolock)
 right join #temp t on p.pko_obnr=t.polisa
 order by polisa,Pocetak_osiguranja asc,pko_buch_nr asc
+

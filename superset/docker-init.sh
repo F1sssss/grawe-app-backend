@@ -42,7 +42,7 @@ if [ "$CYPRESS_CONFIG" == "true" ]; then
     ADMIN_PASSWORD="general"
     export SUPERSET_CONFIG=tests.integration_tests.superset_test_config
     export SUPERSET_TESTENV=true
-    export SUPERSET__SQLALCHEMY_DATABASE_URI=mssql+pymssql://sa:Grawe123$@172.23.0.23:1433/GRAWE
+    export SUPERSET_SQLALCHEMY_DATABASE_URI=mssql+pymssql://sa:Grawe123$@172.23.0.23:1433/GRAWE
 fi
 # Initialize the database
 echo_step "1" "Starting" "Applying DB migrations"
@@ -75,6 +75,10 @@ if [ "$SUPERSET_LOAD_EXAMPLES" = "yes" ]; then
     fi
     echo_step "4" "Complete" "Loading examples"
 fi
+
+# Start the dev web server
+echo_step "5" "Starting" "Starting dev webserver"
+superset run -p 8088 -h
 
 while true; do
     sleep 1

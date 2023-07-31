@@ -37,4 +37,4 @@ RUN pip install \
 COPY ./superset/docker-init.sh /app/docker-init.sh
 
 # Set the entrypoint to run the docker-init.sh script
-#ENTRYPOINT ["bash", "/app/docker-init.sh"]
+ENTRYPOINT ["bash", "/app/docker-init.sh"]

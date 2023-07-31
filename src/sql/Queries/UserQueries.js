@@ -1,12 +1,12 @@
 const sql = require('mssql');
 /** @namespace  sql.Int**/
 /** @namespace sql.VarChar **/
+const bcrypt = require('bcryptjs');
 const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
 const { UserSignup } = require('./params');
-const bcrypt = require('bcryptjs');
 
 const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);

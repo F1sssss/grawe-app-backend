@@ -1,4 +1,5 @@
 // Description: Controller for user authentication
+//It also contains the protect and restrictTo middleware functions
 
 /** @namespace req.body.last_name * **/
 /** @namespace req.body.Date_of_birth * **/
@@ -14,7 +15,6 @@ const responseHandler = require('../utils/responseHandler');
 
 const login = CatchAsync(async (req, res) => {
   const { token, user, statusCode } = await authServices.loginService(req.body.username, req.body.password);
-
   res.cookie('token', token, {
     httpOnly: true,
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
@@ -44,12 +44,7 @@ const forgotPassword = CatchAsync(async (req, res) => {
 });
 
 const setNewPassword = CatchAsync(async (req, res) => {
-  await responseHandler(
-    authServices.setNewPasswordService(req.body.newPassword, req.query.id),
-    res,
-    { statusCode: 200 },
-    'Password reset successful!',
-  );
+  await responseHandler(authServices.setNewPasswordService(req.body.newPassword, req.query.id), res, { statusCode: 200 }, 'Successful!');
 });
 
 const emailVerification = CatchAsync(async (req, res) => {
@@ -58,9 +53,7 @@ const emailVerification = CatchAsync(async (req, res) => {
 
 const protect = CatchAsync(async (req, res, next) => {
   const { user } = await userServices.getMeService(req);
-
   req.user = user;
-  //res.local.user = user;
   next();
 });
 

@@ -1,3 +1,5 @@
+//Params for queries and stored procedures
+
 const sql = require('mssql');
 /** @namespace sql.Int * **/
 /** @namespace sql.VarChar * **/
@@ -22,6 +24,10 @@ const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
 };
 const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];
+};
+
+const ReportId = (id) => {
+  return [new SQLParam('id', id, sql.Int)];
 };
 
 const StoredProcedure = (procedure_name) => {
@@ -117,4 +123,5 @@ module.exports = {
   searchField,
   Date,
   Exception,
+  ReportId,
 };

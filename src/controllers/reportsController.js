@@ -1,4 +1,4 @@
-//
+//Controller for route creation, excecution and deletion
 
 const catchAsync = require('../utils/catchAsync');
 const reportsQueries = require('../sql/Queries/reportsQueries');
@@ -15,6 +15,11 @@ const getReportById = catchAsync(async (req, res) => {
 
 const generateReport = catchAsync(async (req, res) => {
   await responseHandler(reportService.generateReportService(req.params.id, req.query), res, { statusCode: 200 }, 'Success');
+});
+
+const downloadReport = catchAsync(async (req, res) => {
+  const { excelBuffer, statusCode } = await reportService.downloadReportService(res, req.params.id, req.query);
+  res.status(statusCode).send(excelBuffer);
 });
 
 const createReport = catchAsync(async (req, res) => {
@@ -42,6 +47,11 @@ const deleteReport = catchAsync(async (req, res) => {
   await responseHandler(reportService.deleteReportService(req.params.id), res, { statusCode: 200 }, 'Successfully deleted report');
 });
 
+const downloadFilteredReport = catchAsync(async (req, res) => {
+  const { excelBuffer, statusCode } = await reportService.downloadFilteredReportService(res, req.body['report']);
+  res.status(statusCode).send(excelBuffer);
+});
+
 module.exports = {
   getReports,
   getReportById,
@@ -51,4 +61,6 @@ module.exports = {
   searchProcedure,
   updateReport,
   deleteReport,
+  downloadReport,
+  downloadFilteredReport,
 };
