@@ -16,8 +16,8 @@ const server = app.listen(DB_CONFIG.port, async () => {
   }
 });
 
-//Error handling
-
+//Error handling - Only in developement
+/*
 process.on('unhandledRejection', async (err) => {
   console.log('UNHANDLED REJECTION! 💥 Shutting down...');
   console.log(err.name, err.message);
@@ -32,6 +32,7 @@ process.on('unhandledRejection', async (err) => {
     process.exit(1);
   }
 });
+*/
 
 process.on('SIGTERM', async () => {
   console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
