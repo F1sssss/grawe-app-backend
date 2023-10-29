@@ -17,7 +17,7 @@ module.exports = class Email {
     const msg = {
       to: this.emailTo,
       from: EMAIL_FROM, // Change to your verified sender
-      subject: '[GRAWE] Verification email',
+      subject: '[GRAWE] Verifiction email',
       html: emailRegister(this.username, `${FRONTEND_URL}/api/v1/users/signup/verification/?id=${this.id}?token=${this.email_verification_token}`),
     };
     const email = await sgMail.send(msg);

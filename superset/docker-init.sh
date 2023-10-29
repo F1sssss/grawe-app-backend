@@ -78,7 +78,7 @@ fi
 
 # Start the dev web server
 echo_step "5" "Starting" "Starting dev webserver"
-superset run -p 8088 -h
+superset run -p 8088
 
 while true; do
     sleep 1
