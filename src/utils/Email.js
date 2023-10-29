@@ -6,7 +6,6 @@ const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL } = process.env;
 
 module.exports = class Email {
   constructor(user) {
-  
     console.log(user);
     this.emailTo = user.email;
     this.username = user.username;
@@ -15,7 +14,6 @@ module.exports = class Email {
   }
   async sendEmailVerification() {
     sgMail.setApiKey(SENDGRID_API_KEY);
-
 
     const msg = {
       to: this.emailTo,
@@ -39,10 +37,7 @@ module.exports = class Email {
       to: this.emailTo,
       from: EMAIL_FROM, // Change to your verified sender
       subject: '[GRAWE] Password reset',
-      html: emailForgotPassword(
-        this.username,
-        `${FRONTEND_URL}/api/v1/users/forgot-password/?id=${this.id}&&?token=${this.email_verification_token}`,
-      ),
+      html: emailForgotPassword(this.username, `${FRONTEND_URL}/api/v1/users/forgot-password/?id=${this.id}&token=${this.email_verification_token}`),
     };
     const email = await sgMail.send(msg);
     if (!email) {

@@ -17,10 +17,11 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
 const getClientInfo = async (id) => {
   const { client, statusCode } = await excecuteQueryAndHandleErrors('getclientInfo.sql', Client(id));
   const policies = await excecuteQueryAndHandleErrors('getclientPolicies.sql', Client(id));
+
   return {
     client: {
       ...client,
-      policies: Array.isArray(policies['client']) ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? [] : policies['client'],
+      policies: Array.isArray(policies['client']) ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? [] : [policies['client']['bra_obnr']],
     },
     statusCode,
   };
