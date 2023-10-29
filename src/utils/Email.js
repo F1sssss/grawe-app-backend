@@ -6,6 +6,8 @@ const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL } = process.env;
 
 module.exports = class Email {
   constructor(user) {
+  
+    console.log(user);
     this.emailTo = user.email;
     this.username = user.username;
     this.id = user.ID;
@@ -13,6 +15,7 @@ module.exports = class Email {
   }
   async sendEmailVerification() {
     sgMail.setApiKey(SENDGRID_API_KEY);
+
 
     const msg = {
       to: this.emailTo,

@@ -1,7 +1,7 @@
 //Global search controller
 
 const searchQueries = require('../sql/Queries/searchQueries');
-const catchAsync = require('../utils/catchAsync');
+const catchAsync = require('../utils/CatchAsync');
 const handleResponse = require('../utils/responseHandler');
 const { searchAllService } = require('../services/searchService');
 

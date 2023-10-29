@@ -1,6 +1,6 @@
 const redis = require('redis');
 
-const AppError = require('../utils/appError');
+const AppError = require('../utils/AppError');
 
 let client = redis.createClient({
   socket: {

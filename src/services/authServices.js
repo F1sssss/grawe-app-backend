@@ -7,11 +7,11 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-const DB_CONFIG = require('../sql/DBConfig');
+const DB_CONFIG = require('../sql/DBconfig');
 const EmailValidator = require('../utils/Email');
 const SQLQueries = require('../sql/Queries/UserQueries');
 const AppError = require('../utils/AppError');
-const ValidationRegex = require('../utils/ValidationRegex');
+const ValidationRegex = require('../utils/ValidationRegEx');
 
 const signJWT = (username) => {
   return jwt.sign({ username }, DB_CONFIG.encrypt, {
@@ -37,6 +37,7 @@ const signupService = async (req) => {
   const { user } = await SQLQueries.createUser({ ...req, password: await bcrypt.hash(req.password, 12) });
 
   const Email = new EmailValidator(user);
+
   await Email.sendEmailVerification();
 
   return { message: 'User created successfully!', user, statusCode: 201 };

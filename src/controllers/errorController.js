@@ -1,6 +1,6 @@
 // Desc: Error handler for the application
 
-const AppError = require('../utils/appError');
+const AppError = require('../utils/AppError');
 
 module.exports = errorHandler = (err, req, res, next) => {
   handleOtherErrors(err, res);

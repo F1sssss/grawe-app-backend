@@ -1,5 +1,5 @@
 const { promisify } = require('util');
-const AppError = require('../utils/appError');
+const AppError = require('../utils/AppError');
 const jwt = require('jsonwebtoken');
 const DB_CONFIG = require('../sql/DBconfig');
 const SQLQueries = require('../sql/Queries/UserQueries');

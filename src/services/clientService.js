@@ -1,5 +1,5 @@
 const cacheQuery = require('../utils/cacheQuery');
-const ClientQueries = require('../sql/Queries/ClientQueries');
+const ClientQueries = require('../sql/Queries/clientQueries');
 const generateExcelFile = require('../utils/ExcelExport');
 const Invoice = require('../utils/createInvoice');
 const { log } = require('util');
