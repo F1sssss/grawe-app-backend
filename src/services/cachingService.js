@@ -46,9 +46,10 @@ async function get(key) {
 
 async function del(req, res, next) {
   try {
-    next(await client.flushAll());
+    await client.flushAll();
+    next();
   } catch (err) {
-    next(throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis'));
+    throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
   }
 }
 
