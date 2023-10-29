@@ -1,4 +1,4 @@
-select distinct 
+select distinct top 1
 kun_zuname + ' ' + isnull(kun_vorname,'')							[klijent],
 kun_geburtsdatum													[datum_rodjenja],
 case when kun_vorname is null then cast(kun_steuer_nr as varchar)
