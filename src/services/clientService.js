@@ -2,7 +2,6 @@ const cacheQuery = require('../utils/cacheQuery');
 const ClientQueries = require('../sql/Queries/clientQueries');
 const generateExcelFile = require('../utils/ExcelExport');
 const Invoice = require('../utils/createInvoice');
-const { log } = require('util');
 
 function seperateClientPolicies(client) {
   const arraysByPolisa = {};
@@ -11,6 +10,7 @@ function seperateClientPolicies(client) {
     const policy = item.polisa;
     !arraysByPolisa[policy] ? (arraysByPolisa[policy] = []) : undefined;
     arraysByPolisa[policy].push(item);
+    arraysByPolisa[policy].sort((a, b) => a.datum_dokumenta - b.datum_dokumenta);
   });
 
   return Object.values(arraysByPolisa);

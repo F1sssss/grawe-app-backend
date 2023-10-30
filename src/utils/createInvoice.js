@@ -198,8 +198,7 @@ function generateInvoiceTableRecap(doc, invoice) {
 
   for (i = 0; i < invoice.length; i++) {
     const item = invoice[i];
-    position = (invoiceTableTop + (i + 1) * 30) % 690;
-
+    position = (invoiceTableTop + i * 30) % 690;
     position = position < 30 ? (doc.addPage(), 30) : position + 30;
 
     generateTableRowRecap(
@@ -305,7 +304,7 @@ function extractClientInfo(client) {
       place: client[0][0].mjesto,
       phone1: client[0][0].telefon1,
       phone2: client[0][0].telefon2,
-      email: 'placeholder@gmal.com',
+      email: client[0][0].email,
     },
     items: [],
     broj_polise: client[0][0].polisa,
@@ -331,7 +330,7 @@ function extractClientPolicyInfo(client) {
       place: client[0].mjesto,
       phone1: client[0].telefon1,
       phone2: client[0].telefon2,
-      email: 'placeholder@gmal.com',
+      email: client[0].email,
     },
     items: [],
     broj_polise: client[0].polisa,
@@ -364,7 +363,7 @@ function getDistinctObjects(jsonArray, keys) {
     return result;
   }, {});
 
-  return Object.values(distinctObjects);
+  return Object.values(distinctObjects).sort((a, b) => (a.datum_dokumenta >= b.datum_dokumenta ? 1 : -1));
 }
 
 module.exports = {
