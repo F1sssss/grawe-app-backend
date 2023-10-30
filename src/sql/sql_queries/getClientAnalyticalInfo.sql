@@ -34,11 +34,11 @@ left join kunde k1 (nolock) on k1.kun_kundenkz=v.vtg_kundenkz_2
 left join vertrag_kunde vk(nolock) on vk.vtk_obnr=b.bra_obnr and vk.vtk_kundenkz=k.kun_kundenkz and vk.vtk_kundenrolle='PA'  --Ugovarac
 left join vertrag_kunde vk1(nolock) on vk.vtk_obnr=b.bra_obnr and vk1.vtk_kundenkz=k1.kun_kundenkz and vk.vtk_kundenrolle='VN' --Osiguranik
 where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
-      else
-      case when len(kun_yu_persnr)=12
-      	then '0' + FORMAT(kun_yu_persnr, '0')
-      else FORMAT(kun_yu_persnr, '0') end
-      end=@id
+else
+case when STR(kun_yu_persnr,12,0)<>'************'
+	then '0' + STR(kun_yu_persnr,12,0)
+else STR(kun_yu_persnr,13,0) end
+end			=@id
 and convert(varchar,convert(date,bra_vers_beginn,104),102) between @dateFrom and @dateTo
 
 

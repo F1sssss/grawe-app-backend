@@ -59,14 +59,10 @@ function createClientInvoice(client) {
 
     let clientData = extractClientInfo(client);
 
-    console.log(client.length);
-
     for (let i = 0; i < client.length; i++) {
       if (client[i][0].datum_dokumenta === null || !client[i][0].datum_dokumenta) {
         continue;
       }
-
-      console.log(i);
 
       clientData.items = getDistinctObjects(client[i], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
       clientData.broj_polise = client[i][0].polisa;

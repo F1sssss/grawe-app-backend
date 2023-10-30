@@ -15,7 +15,7 @@ const getClientHistory = CatchAsync(async (req, res) => {
 });
 
 const getClientInfo = CatchAsync(async (req, res) => {
-  await handleResponse(clientService.getClientInfoService(req.params.id), res, { statusCode: 200 }, 'succeess');
+  await handleResponse(clientService.getClientInfoService(req.params.id), res, { statusCode: 200 }, 'success');
 });
 
 const getClientAnalyticalInfo = CatchAsync(async (req, res) => {

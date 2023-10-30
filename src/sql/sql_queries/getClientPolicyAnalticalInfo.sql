@@ -110,7 +110,36 @@ DaniKasnjenja int
 )
 
 
+set @dateTo=CONVERT(varchar,CONVERT(date,@dateTo,102),104)
 
+
+declare @policy int
+
+DECLARE polise CURSOR FOR
+
+select distinct [Broj_Polise] from #temp
+
+
+OPEN polise
+FETCH NEXT FROM polise INTO @policy
+
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+
+	insert into #Kasnjenja
+	exec Dani_kasnjenja_polisa @dateTo,@policy
+
+	FETCH NEXT FROM polise INTO @policy
+END
+
+CLOSE polise
+DEALLOCATE polise
+
+update f
+set [Dani_Kasnjenja]=isnull((select DaniKasnjenja from #Kasnjenja where #Kasnjenja.polisa=f.[Broj_Polise]),0)
+from #temp f
 
 select
 broj_polise,

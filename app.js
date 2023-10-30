@@ -32,8 +32,9 @@ app.use(helmet());
 
 //Body parser, reading data from body into req.body
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+//Extending limit of data received
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 app.use(cookieParser());
 
 //Data sanitization against XSS

@@ -8,7 +8,7 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
   const client = await connection.executeQuery(queryFileName, params);
 
   if (!client && queryFileName === 'getclientInfo.sql') {
-    throw new AppError('Error during retrieving client', 404, 'error-getting-client-not-found');
+    throw new AppError('Error during retrieving client!', 404, 'error-getting-client-not-found');
   }
 
   return { client: client === undefined ? {} : client, statusCode: 200 };

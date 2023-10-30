@@ -32,6 +32,7 @@ services:
 
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
+    init: true
     environment:
       - ACCEPT_EULA=Y               # Accept the MSSQL EULA
       - SA_PASSWORD=Grawe123$
@@ -60,6 +61,9 @@ services:
     networks:
       mynetwork:
         ipv4_address: 172.23.0.22
+
+
+
 
 #<<<<<<< Updated upstream
 #  superset:

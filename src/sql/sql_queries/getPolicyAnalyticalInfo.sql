@@ -110,7 +110,8 @@ polisa int,
 DaniKasnjenja int
 )
 
-/*
+declare @policy2 int
+
 set @dateTo=CONVERT(varchar,CONVERT(date,@dateTo,102),104)
 
 DECLARE polise CURSOR FOR
@@ -119,7 +120,7 @@ select distinct [Broj_Polise] from #temp
 
 
 OPEN polise
-FETCH NEXT FROM polise INTO @policy
+FETCH NEXT FROM polise INTO @policy2
 
 
 WHILE @@FETCH_STATUS = 0
@@ -129,7 +130,7 @@ BEGIN
 	insert into #Kasnjenja
 	exec Dani_kasnjenja_polisa @dateTo,@policy
 
-	FETCH NEXT FROM polise INTO @policy
+	FETCH NEXT FROM polise INTO @policy2
 END
 
 CLOSE polise
@@ -139,6 +140,6 @@ update f
 set [Dani_Kasnjenja]=isnull((select DaniKasnjenja from #Kasnjenja where #Kasnjenja.polisa=f.[Broj_Polise]),0)
 from #temp f
 
-*/
+
 select distinct * from #temp
 
