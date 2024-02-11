@@ -1,5 +1,4 @@
-/** @namespace result.recordset**/
-/** @namespace result.recordsets**/
+/** @namespace result.recordset**/ /** @namespace result.recordsets**/
 const { ConnectionPool, Request } = require('mssql');
 const AppError = require('../utils/AppError');
 const loadSqlQueries = require('./sql_queries/loadSQL');

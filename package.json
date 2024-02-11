@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "start": "nodemon --legacy-watch --ignore node_modules/ server.js"
+    "start": "nodemon --legacy-watch --ignore node_modules/ server.js",
+    "prod": "node server.js"
   },
   "keywords": [],
   "author": "",

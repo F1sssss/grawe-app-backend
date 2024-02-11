@@ -155,9 +155,9 @@ const updateReportName = async (id, report) => {
 
 const deleteReport = async (id) => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  const user = await connection.executeQuery('deleteReport.sql', ReportId(id));
+  const report = await connection.executeQuery('deleteReport.sql', ReportId(id));
 
-  if (user) {
+  if (report) {
     throw new AppError('Error deleting report!', 404, 'error-deleting-report-not-found');
   }
 

@@ -218,7 +218,29 @@ function generateInvoiceTableRecap(doc, invoice) {
 
   const subtotalPosition = position + 30;
   doc.font('Helvetica-Bold');
-  generateTableRowRecap(doc, subtotalPosition, '', '', 'Ukupno', formatCurrency(invoice.ukupno));
+  generateTableRowRecap(
+    doc,
+    subtotalPosition,
+    '',
+    '',
+    'Ukupno',
+    formatCurrency(addUpRecap(invoice, 3)),
+    formatCurrency(addUpRecap(invoice, 4)),
+    formatCurrency(addUpRecap(invoice, 5)),
+    formatCurrency(addUpRecap(invoice, 6)),
+  );
+}
+
+function addUpRecap(invoice, position) {
+  let i;
+  let ukupno = 0;
+
+  for (i = 0; i < invoice.length; i++) {
+    const item = invoice[i];
+    ukupno += item[position];
+  }
+
+  return ukupno;
 }
 
 function generateTableRowRecap(doc, y, polisa, osiguranje, premija, duguje, potrazuje, saldo, dospjelo, nedospjelo) {
