@@ -33,10 +33,11 @@ services:
 
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    init: true
+#    init: true
     environment:
       - ACCEPT_EULA=Y               # Accept the MSSQL EULA
       - SA_PASSWORD=Grawe123$
+      - MSSQL_PID=Express           # Set the SQL Server Edition
     ports:
       - '1433:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
     volumes:
