@@ -32,8 +32,9 @@ process.on('unhandledRejection', async (err) => {
     process.exit(1);
   }
 });
-*/
 
+
+ */
 process.on('SIGTERM', async () => {
   console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
 

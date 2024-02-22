@@ -6,10 +6,8 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const xss = require('xss-clean');
 const compression = require('compression');
-const all_routes = require('express-list-endpoints');
 
 const errorController = require('./src/controllers/errorController');
-const RouteObject = require('./src/utils/RoutesObject');
 
 const userRouter = require('./src/routes/userRouter');
 const policyRouter = require('./src/routes/policyRouter');
@@ -17,7 +15,7 @@ const reportsRouter = require('./src/routes/reportsRouter');
 const clientRouter = require('./src/routes/clientRouter');
 const searchRouter = require('./src/routes/searchRouter');
 const employeeErrorRouter = require('./src/routes/employeeErrorRouter');
-const authRouter = require('./src/routes/authRouter');
+const permissionRouter = require('./src/routes/permissionRouter');
 
 //start express app
 const app = express();
@@ -60,11 +58,9 @@ app.use('/api/v1/clients', clientRouter);
 app.use('/api/v1/reports', reportsRouter);
 app.use('/api/v1/search', searchRouter);
 app.use('/api/v1/errors', employeeErrorRouter);
-app.use('/api/v1/permissions', authRouter);
+app.use('/api/v1/permissions', permissionRouter);
 
 //Error handling middleware
 app.use(errorController);
-
-const routes = new RouteObject(all_routes(app));
 
 module.exports = app;

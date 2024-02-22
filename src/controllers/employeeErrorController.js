@@ -4,9 +4,9 @@ const handleResponse = require('../utils/responseHandler');
 const catchAsync = require('../utils/CatchAsync');
 const employeeErrorQueries = require('../sql/Queries/employeeErrorQueries');
 
-const getAllEmployeeErrors = catchAsync(async (req, res) => {
+const getAllEmployeeErrors = async (req, res) => {
   await handleResponse(employeeErrorQueries.getEmployeeErrors(req.query.date), res, { statusCode: 200 }, 'employee_errors');
-});
+};
 
 const getAllExceptions = catchAsync(async (req, res) => {
   await handleResponse(employeeErrorQueries.getErrorExceptions(), res, { statusCode: 200 }, 'exceptions');
