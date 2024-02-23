@@ -4,8 +4,8 @@ begin
 end
 
 update gr_permission_properties
-set read_right = isnull(@read_right, read_right),
-    write_right = isnull(@write_right, write_right)
+set read_right = isnull(@read, read_right),
+    write_right = isnull(@write, write_right)
 where property_path_id = @id
 
 

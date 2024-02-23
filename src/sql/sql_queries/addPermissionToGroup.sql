@@ -1,9 +1,9 @@
-if @id_permission_group is null or id_permission_group = 0
+if @id_permission_group is null or @id_permission_group = 0
     begin
         throw 50000, 'id_permission_group is null or 0', 1;
     end
 
-if @id_permission is null or id_permission = 0
+if @id_permission is null or @id_permission = 0
     begin
         throw 50000, 'id_permission is null or 0', 1;
     end
@@ -20,8 +20,9 @@ pg.name permission_group_name,
 p.method,
 p.route,
 p.name,
-p.description
+p.description,
+pg_p.id_permission
 from gr_permission_groups pg
-join gr_pairing_permission_groups_permission pg_p ON pg_p.id_permission_group=pg.permission
-join gr_permission p ON p.id=pg_p.id_permission
+left join gr_pairing_permission_groups_permission pg_p ON pg_p.id_permission_group=pg.id
+left join gr_permission p ON p.id=pg_p.id_permission
 where pg.id = @id_permission_group

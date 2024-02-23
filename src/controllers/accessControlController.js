@@ -71,7 +71,7 @@ const addPermissionToGroup = CatchAsync(async (req, res) => {
 });
 
 const removePermissionFromGroup = CatchAsync(async (req, res) => {
-  await ResponseHandler(accessControlService.removePermissionFromGroupService(req.params.id, req.body.permission), res, {
+  await ResponseHandler(accessControlService.removePermissionFromGroupService(req.query.group, req.query.permission), res, {
     statusCode: 200,
     message: 'Permission removed from group successfully!',
   });

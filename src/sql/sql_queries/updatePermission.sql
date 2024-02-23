@@ -5,7 +5,7 @@ end
 
 update gr_permission
 set name = isnull(@name, name),
-    description = isnull(@description, description),
+    description = isnull(@description, description)
 where id = @id
 
 
