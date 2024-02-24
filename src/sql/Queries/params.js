@@ -135,8 +135,13 @@ const PermissionGroupName = (name) => {
   return [new SQLParam('name', name, sql.VarChar)];
 };
 
-const PermissionRights = (id, read, write) => {
-  return [new SQLParam('id', id, sql.Int), new SQLParam('read', read, sql.Int), new SQLParam('write', write, sql.Int)];
+const PermissionRights = (id, group, read, write) => {
+  return [
+    new SQLParam('id', id, sql.Int),
+    new SQLParam('group', group, sql.Int),
+    new SQLParam('read', read, sql.Int),
+    new SQLParam('write', write, sql.Int),
+  ];
 };
 
 const PermissionGroup = (id, name) => {
@@ -149,6 +154,10 @@ const PermissionID = (id) => {
 
 const PermissionGroupPairing = (id_permission_group, id_permission) => {
   return [new SQLParam('id_permission_group', id_permission_group, sql.Int), new SQLParam('id_permission', id_permission, sql.Int)];
+};
+
+const PermissionProperties = (id_permission, id_permission_group) => {
+  return [new SQLParam('id_permission', id_permission, sql.Int), new SQLParam('id_permission_group', id_permission_group, sql.Int)];
 };
 
 module.exports = {
@@ -179,4 +188,5 @@ module.exports = {
   PermissionUpdate,
   PermissionRights,
   PermissionGroupPairing,
+  PermissionProperties,
 };

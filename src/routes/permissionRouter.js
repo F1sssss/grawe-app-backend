@@ -10,6 +10,7 @@ router.delete('/groups/:id', accessControlController.deleteGroup);
 
 router.get('/properties', accessControlController.getPermissions);
 router.get('/properties/:id', accessControlController.getPermission);
+router.post('/properties/:id', accessControlController.createPermissionProperties);
 router.post('/properties', accessControlController.createPermission);
 router.patch('/properties/:id', accessControlController.updatePermission);
 

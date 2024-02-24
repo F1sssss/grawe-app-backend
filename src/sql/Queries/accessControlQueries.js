@@ -11,6 +11,7 @@ const {
   PermissionRights,
   PermissionGroupPairing,
   Client,
+  PermissionProperties,
 } = require('./params');
 
 const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
@@ -39,6 +40,16 @@ const createPermission = async (permission) => {
   return { permissions: data, statusCode };
 };
 
+const createPermissionProperties = async (id, group) => {
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('createPermissionProperties.sql', PermissionProperties(id, group));
+  return { permissions: data, statusCode };
+};
+
+const getPermissionsByGroup = async (id) => {
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionsByGroup.sql', PermissionGroupID(id));
+  return { permissions: data, statusCode };
+};
+
 const deletePermission = async (id) => {
   const data = await excecuteQueryAndHandleErrors('deletePermission.sql', PermissionID(id));
 
@@ -54,8 +65,8 @@ const updatePermission = async (id, permission) => {
   return { permissions: data, statusCode };
 };
 
-const updatePermissionRigths = async (id, read, write) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('updatePermissionRights.sql', PermissionRights(id, read, write));
+const updatePermissionRigths = async (id, group, read, write) => {
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('updatePermissionRights.sql', PermissionRights(id, group, read, write));
   return { permissions: data, statusCode };
 };
 
@@ -80,7 +91,16 @@ const getUsersGroups = async (id) => {
 };
 
 const getGroups = async () => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionGroups.sql');
+  let { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionGroups.sql');
+  data = await Promise.all(
+    data.map(async (group, acc) => {
+      group.permissions = [];
+      const { permissions, statusCode } = await getPermissionsByGroup(group.id);
+      group.permissions = Array.isArray(permissions) ? permissions : Object.keys(permissions).length > 0 ? [permissions] : [];
+      return group;
+    }),
+  );
+
   return { permission_groups: data, statusCode };
 };
 
@@ -124,4 +144,5 @@ module.exports = {
   removePermissionFromGroup,
   deletePermission,
   getUsersGroups,
+  createPermissionProperties,
 };

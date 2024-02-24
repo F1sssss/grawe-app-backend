@@ -49,6 +49,13 @@ const createPermission = CatchAsync(async (req, res) => {
   });
 });
 
+const createPermissionProperties = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.createPermissionPropertiesService(req.params.id, req.body.permission_group_id), res, {
+    statusCode: 201,
+    message: 'Permission properties created successfully!',
+  });
+});
+
 const updatePermission = CatchAsync(async (req, res) => {
   await ResponseHandler(accessControlService.updatePermissionService(req.params.id, req.body), res, {
     statusCode: 200,
@@ -57,7 +64,7 @@ const updatePermission = CatchAsync(async (req, res) => {
 });
 
 const updatePermissionRigths = CatchAsync(async (req, res) => {
-  await ResponseHandler(accessControlService.updatePermissionRigthsService(req.params.id, req.query.read, req.query.write), res, {
+  await ResponseHandler(accessControlService.updatePermissionRigthsService(req.params.id, req.query.group, req.query.read, req.query.write), res, {
     statusCode: 200,
     message: 'Permission rights updated successfully!',
   });
@@ -106,4 +113,5 @@ module.exports = {
   removePermissionFromGroup,
   deletePermission,
   getUsersGroups,
+  createPermissionProperties,
 };

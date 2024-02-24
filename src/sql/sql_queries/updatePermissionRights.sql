@@ -1,14 +1,21 @@
-if (select count(*) from gr_permission_properties where property_path_id = @id) = 0
+if not exists (select *  from gr_permission_properties pp
+                             left join gr_pairing_permisson_property_list pl on pp.permission_property_id=pl.id
+                             where id_permission_property = @id and group_id = @group)
 begin
-    throw 51000, 'property_path_id is required', 1
+
+    throw 50000, 'Permission not found', 1;
+
 end
 
-update gr_permission_properties
+update pp
 set read_right = isnull(@read, read_right),
     write_right = isnull(@write, write_right)
-where property_path_id = @id
+from gr_permission_properties pp
+left join gr_pairing_permisson_property_list pl on pp.permission_property_id=pl.id
+where id_permission_property = @id and group_id = @group
 
 
-select property_path_id,read_right,write_right from gr_permission_properties pp
-left join gr_property_lists pl on pp.property_path_id = pl.id
-where property_path_id = @id
+select id_permission_property,ppl.property_path,read_right,write_right,pp.group_id from gr_permission_properties pp
+left join gr_pairing_permisson_property_list pl on pp.permission_property_id=pl.id
+left join gr_property_lists ppl on ppl.id=pl.id_permission_property
+where id_permission_property = @id
