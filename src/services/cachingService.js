@@ -53,8 +53,18 @@ async function del(req, res, next) {
   }
 }
 
+// I think this function will cause crash if the key does not exist, test!!!
+async function delKey(key) {
+  try {
+    await client.del(key);
+  } catch (err) {
+    throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
+  }
+}
+
 module.exports = {
   setWithTTL,
   get,
   del,
+  delKey,
 };

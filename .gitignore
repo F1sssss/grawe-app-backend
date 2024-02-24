@@ -135,5 +135,6 @@ config.env
 
 /mssql-data/
 /.idea/
+ldap/
 
 cache/

@@ -12,10 +12,14 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
   return { permissions, statusCode: 200 };
 };
 
-const accessControlMiddleware = async (req, res, next) => {
+const accessControlMiddleware = CatchAsync(async (req, res, next) => {
   const route = req.originalUrl;
   const id = req.params.id;
-  const { user } = await userServices.getMeService(req);
+  const { user } = await userServices.getMeService(req, res, next);
+
+  if (!user) {
+    throw new AppError('User not logged in!', 404, 'error-access-control-middleware-user-not-logged-in');
+  }
 
   const { permissions } = await excecuteQueryAndHandleErrors('getPermissions.sql', AccessControl(route, user.ID, id));
 
@@ -34,6 +38,6 @@ const accessControlMiddleware = async (req, res, next) => {
   console.log('res.FilterFields', res.FilterFields);
 
   next();
-};
+});
 
 module.exports = accessControlMiddleware;

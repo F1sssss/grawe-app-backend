@@ -2,6 +2,7 @@ const reportsQueries = require('../sql/Queries/reportsQueries');
 const params = require('../sql/Queries/params');
 const cacheQuery = require('../utils/cacheQuery');
 const generateExcelFile = require('../utils/ExcelExport');
+const { delKey } = require('./cachingService');
 
 const executeReport = async (report_info, report_params, input_params) => {
   const cacheKey = `execute-report-${report_info['procedure_name']}-${JSON.stringify(input_params)}-${JSON.stringify(report_params)}`;
@@ -47,10 +48,12 @@ const createReportService = async (procedure) => {
 };
 
 const updateReportService = async (id, report) => {
+  await delKey(`get-report-${id}`);
   return ({ updatedReport, statusCode } = await reportsQueries.updateReport(id, report));
 };
 
 const deleteReportService = async (id) => {
+  await delKey(`get-report-${id}`);
   return ({ deletedReport, statusCode } = await reportsQueries.deleteReport(id));
 };
 

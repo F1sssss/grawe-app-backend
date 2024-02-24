@@ -65,6 +65,41 @@ services:
       mynetwork:
         ipv4_address: 172.23.0.22
 
+  ldap:
+    image: osixia/openldap
+    ports:
+      - '389:389'
+      - '636:636'
+    environment:
+      - LDAP_ORGANISATION="GRAWE"
+      - LDAP_DOMAIN="grawe.local"
+      - LDAP_ADMIN_PASSWORD=Grawe123$
+      - LDAP_CONFIG_PASSWORD=Grawe123$
+      - LDAP_READONLY_USER=false
+      - LDAP_READONLY_USER_USERNAME=grawe
+      - LDAP_READONLY_USER_PASSWORD=Grawe123$
+      - LDAP_TLS=false
+    volumes:
+      - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    restart: always
+
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.21
+
+  phpldapadmin:
+    image: osixia/phpldapadmin
+    ports:
+      - '8080:80'
+    environment:
+        - PHPLDAPADMIN_LDAP_HOSTS=ldap
+        - PHPLDAPADMIN_HTTPS=false
+    restart: always
+
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.23
+
 
 networks:
   mynetwork:

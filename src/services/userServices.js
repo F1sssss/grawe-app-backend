@@ -11,8 +11,9 @@ const getAccessTokenAndUser = async (req) => {
   } else if (req.cookies.token) {
     token = req.cookies.token;
   }
+
   if (!token || token === 'loggedOut') {
-    throw new AppError('You are not logged in! Please log in to get access.', 401, 'error-not-logged-in');
+    return new AppError('You are not logged in! Please log in to get access.', 401, 'error-not-logged-in');
   }
 
   const decoded = await promisify(jwt.verify)(token, DB_CONFIG.encrypt);
@@ -26,7 +27,7 @@ const getAccessTokenAndUser = async (req) => {
 };
 
 const getMeService = async (req) => {
-  return ({ token, user } = getAccessTokenAndUser(req));
+  return ({ token, user } = await getAccessTokenAndUser(req));
 };
 
 const updateMeService = async (data) => {

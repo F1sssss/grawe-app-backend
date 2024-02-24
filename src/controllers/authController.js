@@ -52,7 +52,7 @@ const emailVerification = CatchAsync(async (req, res) => {
 });
 
 const protect = CatchAsync(async (req, res, next) => {
-  const { user } = await userServices.getMeService(req);
+  const { user } = await userServices.getMeService(req, res, next);
   req.user = user;
   next();
 });

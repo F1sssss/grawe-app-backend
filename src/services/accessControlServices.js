@@ -1,5 +1,6 @@
 const accessControlQueries = require('../sql/Queries/accessControlQueries');
 const cacheQuery = require('../utils/cacheQuery');
+const { delKey } = require('./cachingService');
 
 const getGroupsService = async () => {
   const cacheKey = 'permission-groups';
@@ -14,16 +15,19 @@ const getGroupService = async (id) => {
 };
 
 const createGroupService = async (group) => {
+  await delKey('permission-groups');
   const { permission_group, statusCode } = await accessControlQueries.createGroup(group);
   return { permission_group, statusCode };
 };
 
 const updateGroupService = async (id, group) => {
+  await delKey(`permission-group-${id}`);
   const { permission_group, statusCode } = await accessControlQueries.updateGroup(id, group.permission_group);
   return { permission_group, statusCode };
 };
 
 const deleteGroupService = async (id) => {
+  await delKey('permission-groups');
   const { message, statusCode } = await accessControlQueries.deleteGroup(id);
   return { message, statusCode };
 };
@@ -41,37 +45,45 @@ const getPermissionService = async (id) => {
 };
 
 const createPermissionService = async (permission) => {
+  await delKey('permissions');
   const { permissions, statusCode } = await accessControlQueries.createPermission(permission);
   return { permissions, statusCode };
 };
 
 const updatePermissionService = async (id, permission) => {
+  await delKey(`permission-${id}`);
   const { permissions, statusCode } = await accessControlQueries.updatePermission(id, permission);
   return { permissions, statusCode };
 };
 
 const updatePermissionRigthsService = async (id, read, write) => {
+  await delKey(`permission-${id}`);
   const { permissions, statusCode } = await accessControlQueries.updatePermissionRigths(id, read, write);
   return { permissions, statusCode };
 };
 
 const addPermissionToGroupService = async (group, permission) => {
+  await delKey('permission-groups');
   const { permissions, statusCode } = await accessControlQueries.addPermissionToGroup(group, permission);
   return { permissions, statusCode };
 };
 
 const removePermissionFromGroupService = async (id, permission) => {
+  await delKey('permission-groups');
   const { message, statusCode } = await accessControlQueries.removePermissionFromGroup(id, permission);
   return { message, statusCode };
 };
 
 const deletePermissionService = async (id) => {
+  await delKey('permissions');
+  await delKey('permission-groups');
   const { message, statusCode } = await accessControlQueries.deletePermission(id);
   return { message, statusCode };
 };
 
 const getUsersGroupsService = async (id) => {
-  const { permissions, statusCode } = await accessControlQueries.getUsersGroups(id);
+  const cacheKey = `permission-groups-user-${id}`;
+  const { permissions, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getUsersGroups(id));
   return { permissions, statusCode };
 };
 
