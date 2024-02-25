@@ -68,7 +68,6 @@ services:
   ldap:
     image: osixia/openldap
     ports:
-      - '389:389'
       - '636:636'
     environment:
       - LDAP_ORGANISATION="GRAWE"
@@ -85,7 +84,7 @@ services:
 
     networks:
       mynetwork:
-        ipv4_address: 172.23.0.21
+
 
   phpldapadmin:
     image: osixia/phpldapadmin
@@ -98,7 +97,7 @@ services:
 
     networks:
       mynetwork:
-        ipv4_address: 172.23.0.23
+
 
 
 networks:

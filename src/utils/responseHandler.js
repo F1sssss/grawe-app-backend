@@ -1,6 +1,6 @@
 const AppError = require('./AppError');
 
-const handleResponse = async (promise, res, responseFields = {}, message = 'success', next) => {
+const handleResponse = async (promise, res, responseFields = {}) => {
   let data = await promise;
 
   /*
@@ -26,17 +26,14 @@ const handleResponse = async (promise, res, responseFields = {}, message = 'succ
 
   console.log('filteredObject', filteredObject);
 */
-  const { statusCode, ...fields } = responseFields;
+
+  const { statusCode } = responseFields;
 
   if (!data || data.length === 0) {
     throw new AppError('No data found', 404, 'error-controller-handler-no-data-found');
   }
 
-  res.status(statusCode).json({
-    status: message,
-    data,
-    ...fields,
-  });
+  res.status(statusCode).json(Object.keys(data).length > 2 ? data : Object.keys(data)[0] === 'statusCode' ? [] : data[Object.keys(data)[0]] || data);
 };
 
 function getValue(obj, keyPath) {

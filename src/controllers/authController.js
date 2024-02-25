@@ -36,19 +36,19 @@ const logout = CatchAsync(async (req, res) => {
 });
 
 const signUp = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.signupService(req.body), res, { statusCode: 201 }, 'Signup successful!');
+  await responseHandler(authServices.signupService(req.body), res, { statusCode: 201 });
 });
 
 const forgotPassword = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.forgotPasswordService(req.body.username), res, { statusCode: 200 }, 'Password reset email sent!');
+  await responseHandler(authServices.forgotPasswordService(req.body.username), res, { statusCode: 200 });
 });
 
 const setNewPassword = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.setNewPasswordService(req.body.newPassword, req.query.id), res, { statusCode: 200 }, 'Successful!');
+  await responseHandler(authServices.setNewPasswordService(req.body.newPassword, req.query.id), res, { statusCode: 200 });
 });
 
 const emailVerification = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.verifyUserService(req.query.id, req.query.token), res, { statusCode: 200 }, 'Email verification successful!');
+  await responseHandler(authServices.verifyUserService(req.query.id, req.query.token), res, { statusCode: 200 });
 });
 
 const protect = CatchAsync(async (req, res, next) => {
