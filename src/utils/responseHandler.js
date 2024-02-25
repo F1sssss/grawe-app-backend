@@ -33,7 +33,9 @@ const handleResponse = async (promise, res, responseFields = {}) => {
     throw new AppError('No data found', 404, 'error-controller-handler-no-data-found');
   }
 
-  res.status(statusCode).json(Object.keys(data).length > 2 ? data : Object.keys(data)[0] === 'statusCode' ? [] : data[Object.keys(data)[0]] || data);
+  delete data.statusCode;
+
+  res.status(statusCode).json(Object.keys(data).length > 1 ? data : data[Object.keys(data)[0]] || data);
 };
 
 function getValue(obj, keyPath) {
