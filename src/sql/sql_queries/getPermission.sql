@@ -1,5 +1,5 @@
 select
-p.id property_id,
+p.id permission_id,
 p.route,
 p.method,
 p.name,
