@@ -21,7 +21,10 @@ const createGroupService = async (group) => {
 };
 
 const updateGroupService = async (id, group) => {
-  await delKey(`permission-group-${id}`);
+  await delKey('permissions');
+  await delKey('permission-groups');
+  await delKey(`permission-group-${group}`);
+  await delKey(`permission-${id}`);
   const { permission_group, statusCode } = await accessControlQueries.updateGroup(id, group.permission_group);
   return { permission_group, statusCode };
 };
@@ -51,6 +54,9 @@ const createPermissionService = async (permission) => {
 };
 
 const createPermissionPropertiesService = async (id, group) => {
+  await delKey('permissions');
+  await delKey('permission-groups');
+  await delKey(`permission-group-${group}`);
   await delKey(`permission-${id}`);
   const { permissions, statusCode } = await accessControlQueries.createPermissionProperties(id, group);
   return { permissions, statusCode };
