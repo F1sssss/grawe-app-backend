@@ -1,7 +1,7 @@
 const sgMail = require('@sendgrid/mail');
-const emailRegister = require('./EmailTemplates/emailRegister');
-const emailForgotPassword = require('./EmailTemplates/emailForgotPassword');
-const AppError = require('./AppError');
+const emailRegister = require('../EmailTemplates/emailRegister');
+const emailForgotPassword = require('../EmailTemplates/emailForgotPassword');
+const AppError = require('../AppError');
 const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL } = process.env;
 
 module.exports = class Email {

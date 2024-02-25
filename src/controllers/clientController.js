@@ -3,7 +3,7 @@
 //TODO: Better naming for this controller
 const clientService = require('../services/clientService');
 const handleResponse = require('../utils/responseHandler');
-const CatchAsync = require('../utils/CatchAsync');
+const CatchAsync = require('../middlewares/CatchAsync');
 
 const getClientHistory = CatchAsync(async (req, res) => {
   await handleResponse(clientService.getClientHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });

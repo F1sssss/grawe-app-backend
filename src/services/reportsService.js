@@ -1,7 +1,7 @@
 const reportsQueries = require('../sql/Queries/reportsQueries');
 const params = require('../sql/Queries/params');
 const cacheQuery = require('../utils/cacheQuery');
-const generateExcelFile = require('../utils/ExcelExport');
+const generateExcelFile = require('../utils/Exports/ExcelExport');
 const { delKey } = require('./cachingService');
 
 const executeReport = async (report_info, report_params, input_params) => {

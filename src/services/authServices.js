@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const DB_CONFIG = require('../sql/DBconfig');
-const EmailValidator = require('../utils/Email');
+const EmailValidator = require('../utils/Email/Email');
 const SQLQueries = require('../sql/Queries/UserQueries');
 const AppError = require('../utils/AppError');
 const ValidationRegex = require('../utils/ValidationRegEx');

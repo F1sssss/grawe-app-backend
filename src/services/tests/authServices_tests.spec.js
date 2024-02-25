@@ -1,6 +1,6 @@
 const authService = require('../authServices');
 const { getUserByUsernameOrEmail, createUser, getUserById, updateUserVerification, updateUserPassword } = require('../../sql/Queries/UserQueries');
-const Email = require('../../utils/Email');
+const Email = require('../../utils/Email/Email');
 let {
   signupService,
   loginService,
@@ -14,7 +14,7 @@ const bcryptjs = require('bcryptjs');
 
 jest.mock('../../sql/Queries/UserQueries');
 jest.mock('bcryptjs');
-jest.mock('../../utils/Email');
+jest.mock('../../utils/Email/Email');
 
 const mockUser = {
   user: {

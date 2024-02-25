@@ -1,5 +1,5 @@
 const xlsx = require('xlsx');
-const AppError = require('./AppError');
+const AppError = require('../AppError');
 
 module.exports = generateExcelFile = async (data) => {
   const wb = xlsx.utils.book_new();

@@ -3,7 +3,7 @@
 /** @namespace req.query.dateFrom * **/
 /** @namespace req.query.dateTo * **/
 const policyService = require('../services/policiesServices');
-const CatchAsync = require('../utils/CatchAsync');
+const CatchAsync = require('../middlewares/CatchAsync');
 const handleResponse = require('../utils/responseHandler');
 
 const getPolicyInfo = CatchAsync(async (req, res) => {

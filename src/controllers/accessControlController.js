@@ -1,5 +1,5 @@
 const accessControlService = require('../services/accessControlServices');
-const CatchAsync = require('../utils/CatchAsync');
+const CatchAsync = require('../middlewares/CatchAsync');
 const ResponseHandler = require('../utils/ResponseHandler');
 
 const getGroups = CatchAsync(async (req, res) => {

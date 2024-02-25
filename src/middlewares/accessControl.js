@@ -1,9 +1,9 @@
-const DBConnection = require('../../sql/DBConnection');
-const DB_CONFIG = require('../../sql/DBconfig');
-const AppError = require('../AppError');
-const userServices = require('../../services/userServices');
-const { AccessControl } = require('../../sql/Queries/params');
-const CatchAsync = require('../CatchAsync');
+const DBConnection = require('../sql/DBConnection');
+const DB_CONFIG = require('../sql/DBconfig');
+const AppError = require('../utils/AppError');
+const userServices = require('../services/userServices');
+const { AccessControl } = require('../sql/Queries/params');
+const CatchAsync = require('./CatchAsync');
 
 const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
   const connection = new DBConnection(DB_CONFIG.sql);

@@ -1,7 +1,7 @@
 const AppError = require('../AppError');
-const catchAsync = require('../catchAsync');
+const catchAsync = require('../../middlewares/CatchAsync');
 
-const Email = require('../Email');
+const Email = require('../Email/Email');
 const sgMail = require('@sendgrid/mail');
 const emailRegister = require('../EmailTemplates/emailRegister');
 const emailForgotPassword = require('../EmailTemplates/emailForgotPassword');

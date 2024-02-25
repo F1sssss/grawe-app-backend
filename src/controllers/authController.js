@@ -10,7 +10,7 @@
 const authServices = require('../services/authServices');
 const userServices = require('../services/userServices');
 const AppError = require('../utils/AppError');
-const CatchAsync = require('../utils/CatchAsync');
+const CatchAsync = require('../middlewares/CatchAsync');
 const responseHandler = require('../utils/responseHandler');
 
 const login = CatchAsync(async (req, res) => {

@@ -1,5 +1,5 @@
 const PDFDocument = require('pdfkit');
-const AppError = require('./AppError');
+const AppError = require('../AppError');
 
 function createInvoice(policy) {
   return new Promise(async (resolve, reject) => {

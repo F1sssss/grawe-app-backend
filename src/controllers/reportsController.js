@@ -1,6 +1,6 @@
 //Controller for route creation, excecution and deletion
 
-const catchAsync = require('../utils/CatchAsync');
+const catchAsync = require('../middlewares/CatchAsync');
 const reportsQueries = require('../sql/Queries/reportsQueries');
 const reportService = require('../services/reportsService');
 const responseHandler = require('../utils/responseHandler');
