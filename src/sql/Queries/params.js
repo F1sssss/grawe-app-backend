@@ -11,6 +11,10 @@ const Policy = (id) => {
   return new SQLParam('policy', id, sql.Int);
 };
 
+const UserMigration = (username, password) => {
+  return [new SQLParam('username', username, sql.VarChar), new SQLParam('password', password, sql.VarChar)];
+};
+
 const searchField = (search) => {
   return [new SQLParam('search', search, sql.VarChar)];
 };
@@ -189,4 +193,5 @@ module.exports = {
   PermissionRights,
   PermissionGroupPairing,
   PermissionProperties,
+  UserMigration,
 };

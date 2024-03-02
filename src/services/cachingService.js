@@ -18,8 +18,8 @@ let client = redis.createClient({
   }
 })();
 
-client.on('error', (error) => {
-  throw new AppError(error, 500, 'unhandled-redis-error');
+client.on('error', async (error) => {
+  console.error('💰 Redis error: ', error);
 });
 
 client.on('connect', () => {

@@ -65,39 +65,42 @@ services:
       mynetwork:
         ipv4_address: 172.23.0.22
 
-  ldap:
-    image: osixia/openldap
+
+  superset:
+    build:
+      context: .
+      dockerfile: ./superset/Dockerfile
+    image: apache/superset
     ports:
-      - '636:636'
-    environment:
-      - LDAP_ORGANISATION="GRAWE"
-      - LDAP_DOMAIN="grawe.local"
-      - LDAP_ADMIN_PASSWORD=Grawe123$
-      - LDAP_CONFIG_PASSWORD=Grawe123$
-      - LDAP_READONLY_USER=false
-      - LDAP_READONLY_USER_USERNAME=grawe
-      - LDAP_READONLY_USER_PASSWORD=Grawe123$
-      - LDAP_TLS=false
+      - '8088:8088'
+    depends_on:
+      - superset-db
     volumes:
-      - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
-    restart: always
-
-    networks:
-      mynetwork:
-
-
-  phpldapadmin:
-    image: osixia/phpldapadmin
-    ports:
-      - '8080:80'
+      - ./superset/db:/app/superset/superset_home/
     environment:
-        - PHPLDAPADMIN_LDAP_HOSTS=ldap
-        - PHPLDAPADMIN_HTTPS=false
-    restart: always
+      - SUPERSET_LOAD_EXAMPLES=no
+      #- SUPERSET_DATABASE_URI=mssql+pymssql://sa:Grawe123$@192.168.192.1:1433/SUPERSET
+      #- SQLALCHEMY_DATABASE_URI=mssql+pymssql://sa:Grawe123$@192.168.192.1:1433/SUPERSET
+      #- 'mssql+pyodbc://@' + localhost + '/' + dbname + '?trusted_connection=yes&driver=ODBC+Driver+13+for+SQL+Server'
+      - SUPERSET_SECRET_KEY=grawe123$
+      - SUPERSET_WEBSERVER_PORT=8088
+      - SUPERSET_WEBSERVER_TIMEOUT=6000
+      - SUPERSET_WEBSERVER_WORKERS=10
+      - SUPERSET_WEBSERVER_THREADS=10
+      - SUPERSET_WEBSERVER_MAX_REQUESTS=1000
+      - ADMIN_USERNAME=admin
+      - SUPERSET_FEATURE_EMBEDDED_SUPERSET='true'
 
-    networks:
-      mynetwork:
-
+  superset-db:
+    env_file: ./superset/.env
+    image: postgres:15
+    container_name: superset_db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./superset/data:/var/lib/postgresql/data
+      - ./superset/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
 
 networks:
@@ -106,62 +109,3 @@ networks:
       driver: default
       config:
         - subnet: "172.23.0.0/24"
-        
-
-
-#<<<<<<< Updated upstream
-#  superset:
-#    build:
-#      context: .
-#      dockerfile: ./superset/Dockerfile
-#    image: apache/superset
-#    depends_on:
-#      - mssql-server
-#    ports:
-#      - '8088:8088'
-   # volumes:
-   #   - ./superset:/usr/src/app/superset/
-#    environment:
-#      - SUPERSET_LOAD_EXAMPLES=no
-#      - SUPERSET_DATABASE_URI=mssql+pymssql://sa:Grawe123$@172.23.0.23:1433/GRAWE
-      #-'mssql+pyodbc://@' + localhost + '/' + dbname + '?trusted_connection=yes&driver=ODBC+Driver+13+for+SQL+Server'
-#      - SUPERSET_SECRET_KEY=grawe123$
-#      - SUPERSET_WEBSERVER_PORT=8088
-#      - SUPERSET_WEBSERVER_TIMEOUT=6000
-#      - SUPERSET_WEBSERVER_WORKERS=10
-#      - SUPERSET_WEBSERVER_THREADS=10
-#      - SUPERSET_WEBSERVER_MAX_REQUESTS=1000
-        #- ADMIN_USERNAME=admin
-#=======
-  #superset:
-  #  build:
-  #    context: .
-  #    dockerfile: ./superset/Dockerfile
-  #  image: apache/superset
-  #  depends_on:
-  #    - mssql-server
-  #  ports:
-  #    - '8088:8088'
-  #  volumes:
-  #    - ./superset:/usr/src/app/superset/
-  #  environment:
-  #    - SUPERSET_LOAD_EXAMPLES=no
-  #    - SUPERSET_DATABASE_URI=mssql+pymssql://sa:Grawe123$@172.23.0.23:1433/GRAWE
-      #-'mssql+pyodbc://@' + localhost + '/' + dbname + '?trusted_connection=yes&driver=ODBC+Driver+13+for+SQL+Server'
-  #    - SUPERSET_SECRET_KEY=grawe123$
-  #    - SUPERSET_WEBSERVER_PORT=8088
-  #    - SUPERSET_WEBSERVER_TIMEOUT=6000
-  #    - SUPERSET_WEBSERVER_WORKERS=10
-  #    - SUPERSET_WEBSERVER_THREADS=10
-  #    - SUPERSET_WEBSERVER_MAX_REQUESTS=1000
-  #      #- ADMIN_USERNAME=admin
-#>>>>>>> Stashed changes
-        #- ADMIN_EMAIL=admin@superset.com
-        #- ADMIN_PASSWORD=admin
-
-
-  #  networks:
-   #   mynetwork:
-   #     ipv4_address: 172.23.0.18
-
-

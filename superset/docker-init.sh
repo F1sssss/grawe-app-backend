@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-set -e
+#set -e
 
 #
 # Always install local overrides first
@@ -37,12 +37,15 @@ Init Step ${1}/${STEP_CNT} [${2}] -- ${3}
 EOF
 }
 ADMIN_PASSWORD="admin"
+
+
 # If Cypress run – overwrite the password for admin and export env variables
 if [ "$CYPRESS_CONFIG" == "true" ]; then
     ADMIN_PASSWORD="general"
     export SUPERSET_CONFIG=tests.integration_tests.superset_test_config
     export SUPERSET_TESTENV=true
-    export SUPERSET_SQLALCHEMY_DATABASE_URI=mssql+pymssql://sa:Grawe123$@172.23.0.23:1433/GRAWE
+    export SUPERSET_SQLALCHEMY_DATABASE_URI=mssql+pymssql://sa:Grawe123$@192.168.192.1:1433/SUPERSET
+    export SQLALCHEMY_DATABASE_URI=mssql+pymssql://sa:Grawe123$@192.168.192.1:1433/SUPERSET
 fi
 # Initialize the database
 echo_step "1" "Starting" "Applying DB migrations"
@@ -77,9 +80,9 @@ if [ "$SUPERSET_LOAD_EXAMPLES" = "yes" ]; then
 fi
 
 # Start the dev web server
-echo_step "5" "Starting" "Starting dev webserver"
-superset run -p 8088
+#echo_step "5" "Starting" "Starting dev webserver"
+superset run -h 0.0.0.0 -p 8088
 
-while true; do
-    sleep 1
-done
+#while true; do
+ #   sleep 1
+#done

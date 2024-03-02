@@ -6,7 +6,7 @@ const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
-const { UserSignup } = require('./params');
+const { UserSignup, UserMigration } = require('./params');
 
 const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);
@@ -77,6 +77,21 @@ const getUserByUsernameOrEmail = async (username, email, requesttype) => {
   return { user, statusCode };
 };
 
+const migrateUserFromAD = async (uid, password) => {
+  try {
+    let { user: existingUser } = await getUserByUsername(uid);
+    if (existingUser) {
+      return { user: existingUser, statusCode: 200 };
+    }
+  } catch (error) {
+    let { user } = await excecuteUserQuery('migrateUserFromAD.sql', UserMigration(uid, await bcrypt.hash(password, 12)), 'signup');
+    if (!user) {
+      throw new AppError('Error creating user!', 401, 'error-creating-user');
+    }
+    return { user: { ...user, password: undefined }, statusCode: 200 };
+  }
+};
+
 const createUser = async (req) => {
   const { username, password, name, last_name, email, date_of_birth } = req;
   const verification_code = Math.floor(Math.random() * 1000000000);
@@ -144,4 +159,5 @@ module.exports = {
   updateUser,
   deleteUser,
   excecuteUserQuery,
+  migrateUserFromAD,
 };

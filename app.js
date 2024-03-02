@@ -6,8 +6,11 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const xss = require('xss-clean');
 const compression = require('compression');
+const morgan = require('morgan');
 
 const errorController = require('./src/controllers/errorController');
+const MigrateADUsers = require('./src/utils/updateAD');
+const logger = require('./src/logging/winstonSetup');
 
 const userRouter = require('./src/routes/userRouter');
 const policyRouter = require('./src/routes/policyRouter');
@@ -17,8 +20,13 @@ const searchRouter = require('./src/routes/searchRouter');
 const employeeErrorRouter = require('./src/routes/employeeErrorRouter');
 const permissionRouter = require('./src/routes/permissionRouter');
 
+//enable jobscheduler
+//MigrateADUsers.start();
+
 //start express app
 const app = express();
+
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message) } }));
 
 app.enable('trust proxy');
 
