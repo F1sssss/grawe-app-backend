@@ -23,6 +23,10 @@ const Client = (id) => {
   return [new SQLParam('id', id, sql.VarChar)];
 };
 
+const ClientGroup = (group, user) => {
+  return [new SQLParam('user', user, sql.Int), new SQLParam('group', group, sql.Int)];
+};
+
 const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
   return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.VarChar), new SQLParam('dateTo', dateTo, sql.VarChar)];
 };
@@ -194,4 +198,5 @@ module.exports = {
   PermissionGroupPairing,
   PermissionProperties,
   UserMigration,
+  ClientGroup,
 };

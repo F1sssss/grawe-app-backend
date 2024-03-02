@@ -147,6 +147,22 @@ const deleteUser = async (id) => {
   return { message: 'User Deleted!', statusCode: 200 };
 };
 
+const getAllUsers = async () => {
+  const connection = new DBConnection(DB_CONFIG.sql);
+  const users = await connection.executeQuery('select * from users (nolock)');
+
+  if (!users) {
+    throw new AppError('Error getting users!', 401, 'error-getting-users');
+  }
+
+  return { users, statusCode: 200 };
+};
+
+const getUser = async (id) => {
+  const { user, statusCode } = await excecuteUserQuery('select * from users (nolock) where id = @id', [new SQLParam('id', id, sql.Int)]);
+  return { user, statusCode };
+};
+
 module.exports = {
   getUserById,
   getUserByUsername,
@@ -160,4 +176,6 @@ module.exports = {
   deleteUser,
   excecuteUserQuery,
   migrateUserFromAD,
+  getAllUsers,
+  getUser,
 };

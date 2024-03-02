@@ -102,6 +102,22 @@ const getUsersGroupsService = async (id) => {
   return { permissions, statusCode };
 };
 
+const addUserToGroupService = async (id, user) => {
+  await delKey('permissions');
+  await delKey('permission-groups');
+  await delKey(`permission-groups-user-${id}`);
+  const { message, statusCode } = await accessControlQueries.addUserToGroup(id, user);
+  return { message, statusCode };
+};
+
+const removeUserFromGroupService = async (id, user) => {
+  await delKey('permissions');
+  await delKey('permission-groups');
+  await delKey(`permission-groups-user-${id}`);
+  const { message, statusCode } = await accessControlQueries.removeUserFromGroup(id, user);
+  return { message, statusCode };
+};
+
 module.exports = {
   getGroupsService,
   getGroupService,
@@ -118,4 +134,6 @@ module.exports = {
   deletePermissionService,
   getUsersGroupsService,
   createPermissionPropertiesService,
+  removeUserFromGroupService,
+  addUserToGroupService,
 };

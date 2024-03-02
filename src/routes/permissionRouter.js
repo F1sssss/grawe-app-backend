@@ -7,6 +7,8 @@ router.post('/groups', accessControlController.createGroup);
 router.patch('/groups/:id', accessControlController.updateGroup);
 router.delete('/groups/properties', accessControlController.removePermissionFromGroup);
 router.delete('/groups/:id', accessControlController.deleteGroup);
+router.post('/groups/:id/users', accessControlController.addUserToGroup);
+router.delete('/groups/:id/users', accessControlController.removeUserFromGroup);
 
 router.get('/properties', accessControlController.getPermissions);
 router.get('/properties/:id', accessControlController.getPermission);

@@ -38,8 +38,18 @@ const deleteMeService = async (data) => {
   return ({ message } = await SQLQueries.deleteUser(data.user.ID));
 };
 
+const getAllUsersService = async (req) => {
+  return ({ users } = await SQLQueries.getAllUsers());
+};
+
+const getUserService = async (req) => {
+  return ({ user } = await SQLQueries.getUser(req.params.id));
+};
+
 module.exports = {
   getMeService,
   updateMeService,
   deleteMeService,
+  getAllUsersService,
+  getUserService,
 };

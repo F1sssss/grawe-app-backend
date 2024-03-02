@@ -19,6 +19,12 @@ SECRET_KEY = '27893u1298sj189sj1298uej29m3u13p12mp31283u129083m1'
 # to enforce single-threaded access, which may be problematic in some edge cases
 SQLALCHEMY_DATABASE_URI = 'postgresql://superset:superset@host.docker.internal:5432/superset'
 
+FEATURE_FLAGS = {
+    "EMBEDDED_SUPERSET": True
+}
+
+HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
+
 # Flask-WTF flag for CSRF
 WTF_CSRF_ENABLED = True
 # Add endpoints that need to be exempt from CSRF protection

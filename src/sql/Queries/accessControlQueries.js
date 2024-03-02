@@ -12,6 +12,7 @@ const {
   PermissionGroupPairing,
   Client,
   PermissionProperties,
+  ClientGroup,
 } = require('./params');
 
 const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
@@ -127,6 +128,28 @@ const deleteGroup = async (id) => {
   return { message: 'Permission group Deleted!', statusCode: 200 };
 };
 
+const addUserToGroup = async (id, user) => {
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('addUserToGroup.sql', ClientGroup(id, user));
+
+  if (data === {}) {
+    throw new AppError('Error adding user to group!', 404, 'error-adding-user-to-group-not-found');
+  }
+
+  return { message: 'User added to group!', statusCode };
+};
+
+const removeUserFromGroup = async (id, user) => {
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('removeUserFromGroup.sql', ClientGroup(id, user));
+
+  console.log(data, statusCode);
+
+  if (data === {}) {
+    throw new AppError('Error removing user from group!', 404, 'error-removing-user-from-group-not-found');
+  }
+
+  return { message: 'User removed from group!', statusCode };
+};
+
 module.exports = {
   getGroups,
   getGroup,
@@ -143,4 +166,6 @@ module.exports = {
   deletePermission,
   getUsersGroups,
   createPermissionProperties,
+  addUserToGroup,
+  removeUserFromGroup,
 };

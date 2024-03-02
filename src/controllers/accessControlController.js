@@ -86,6 +86,18 @@ const getUsersGroups = CatchAsync(async (req, res) => {
   });
 });
 
+const addUserToGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.addUserToGroupService(req.params.id, req.query.user), res, {
+    statusCode: 200,
+  });
+});
+
+const removeUserFromGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.removeUserFromGroupService(req.params.id, req.query.user), res, {
+    statusCode: 200,
+  });
+});
+
 module.exports = {
   getGroups,
   getGroup,
@@ -102,4 +114,6 @@ module.exports = {
   deletePermission,
   getUsersGroups,
   createPermissionProperties,
+  addUserToGroup,
+  removeUserFromGroup,
 };
