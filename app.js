@@ -19,6 +19,7 @@ const clientRouter = require('./src/routes/clientRouter');
 const searchRouter = require('./src/routes/searchRouter');
 const employeeErrorRouter = require('./src/routes/employeeErrorRouter');
 const permissionRouter = require('./src/routes/permissionRouter');
+const dashboardRouter = require('./src/routes/dashboardRouter');
 
 //enable jobscheduler
 //MigrateADUsers.start();
@@ -67,6 +68,7 @@ app.use('/api/v1/reports', reportsRouter);
 app.use('/api/v1/search', searchRouter);
 app.use('/api/v1/errors', employeeErrorRouter);
 app.use('/api/v1/permissions', permissionRouter);
+app.use('/api/v1/dashboard', dashboardRouter);
 
 //Error handling middleware
 app.use(errorController);

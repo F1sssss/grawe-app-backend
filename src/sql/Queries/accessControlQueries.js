@@ -31,8 +31,9 @@ const getPermissions = async () => {
   return { permissions: data, statusCode };
 };
 
-const getPermission = async (id) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermission.sql', PermissionID(id));
+const getPermission = async (id, group) => {
+  console.log(id, group);
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermission.sql', PermissionProperties(id, group));
   return { permissions: data, statusCode };
 };
 

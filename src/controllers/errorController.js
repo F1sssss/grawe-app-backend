@@ -1,6 +1,7 @@
 // Desc: Error handler for the application
 
 const AppError = require('../utils/AppError');
+const logger = require('../logging/winstonSetup');
 
 module.exports = errorHandler = (err, req, res, next) => {
   handleOtherErrors(err, res);
@@ -17,6 +18,9 @@ module.exports = errorHandler = (err, req, res, next) => {
     statusCode: err.statusCode,
     error: err.name,
   });
+
+  logger.error(`${err.status} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+
   next();
 };
 

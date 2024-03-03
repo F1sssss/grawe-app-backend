@@ -8,6 +8,7 @@ let client = redis.createClient({
     host: process.env.REDIS_HOST,
   },
   password: process.env.REDIS_PASSWORD,
+  keepAlive: 500,
 });
 
 (async () => {

@@ -33,7 +33,7 @@ const getPermissions = CatchAsync(async (req, res) => {
 });
 
 const getPermission = CatchAsync(async (req, res) => {
-  await ResponseHandler(accessControlService.getPermissionService(req.params.id), res, {
+  await ResponseHandler(accessControlService.getPermissionService(req.params.id, req.query.group), res, {
     statusCode: 200,
   });
 });
