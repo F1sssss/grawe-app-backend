@@ -1,6 +1,28 @@
 # Superset specific config
 ROW_LIMIT = 5000
 
+# We added
+
+SESSION_COOKIE_SAMESITE = None
+ENABLE_PROXY_FIX = True
+PUBLIC_ROLE_LIKE_GAMMA = True
+FEATURE_FLAGS = {
+    "EMBEDDED_SUPERSET": True
+}
+SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@db:5432/superset'
+TALISMAN_ENABLED = False
+ENABLE_CORS = True
+CORS_OPTIONS = {
+  'supports_credentials': True,
+  'allow_headers': ['*'],
+  'resources':['*'],
+  'origins': ["*"]
+}
+SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = False
+WTF_CSRF_ENABLED = False
+
 # Flask App Builder configuration
 # Your App secret key will be used for securely signing the session cookie
 # and encrypting sensitive information on the database
@@ -26,8 +48,9 @@ FEATURE_FLAGS = {
 HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
 
 # Flask-WTF flag for CSRF
-WTF_CSRF_ENABLED = True
+# WTF_CSRF_ENABLED = True
 # Add endpoints that need to be exempt from CSRF protection
 WTF_CSRF_EXEMPT_LIST = []
 # A CSRF token that expires in 1 year
 WTF_CSRF_TIME_LIMIT = 60 * 60 * 24 * 365
+GUEST_ROLE_NAME = "Gamma"

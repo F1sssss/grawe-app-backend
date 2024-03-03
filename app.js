@@ -9,7 +9,7 @@ const compression = require('compression');
 const morgan = require('morgan');
 
 const errorController = require('./src/controllers/errorController');
-const MigrateADUsers = require('./src/utils/updateAD');
+//const MigrateADUsers = require('./src/utils/updateAD');
 const logger = require('./src/logging/winstonSetup');
 
 const userRouter = require('./src/routes/userRouter');
