@@ -1,5 +1,5 @@
  select
- pg.id permission_id,
+ p.id permission_id,
  pg.name permission_group_name,
  p.route,
  p.method,
