@@ -113,7 +113,7 @@ const getUsersGroupsService = async (id) => {
 const addUserToGroupService = async (id, user) => {
   await delKey('permissions');
   await delKey('permission-groups');
-  await delKey(`permission-groups-user-${id}`);
+  await delKey(`permission-groups-user-${user}`);
   const { message, statusCode } = await accessControlQueries.addUserToGroup(id, user);
   return { message, statusCode };
 };
