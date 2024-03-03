@@ -1,8 +1,8 @@
-select distinct
+select
 u.ID user_id,
 pg.id,
 pg.name
-from gr_pairing_users_groups_permission pug
-join users u on u.ID=pug.user_id
-join gr_permission_groups pg ON u.role = pg.id
-where u.ID= @id
+from users u
+left join gr_pairing_users_groups_permission pug on pug.user_id=u.ID
+left join gr_permission_groups pg on pg.id=pug.permission_group_id
+where u.ID=@id
