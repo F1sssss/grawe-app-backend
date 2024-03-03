@@ -24,12 +24,21 @@ values
 
 COMMIT
 
-select
-p.route,
-pl.property_path,
-pp.read_right,
-pp.write_right
-  from gr_permission_properties pp
+
+  select
+  distinct
+  pp.id property_id,
+  group_id,
+  id_permission,
+  id_permission_property,
+  route,
+  method,
+  name,
+  description,
+  property_path
+
+    from gr_permission_properties pp
   left join gr_pairing_permisson_property_list gpp on pp.permission_property_id=gpp.id
   left join gr_permission p on p.id=gpp.id_permission
   left join gr_property_lists pl on pl.id=gpp.id_permission_property
+  where group_id=@id_permission_group and id_permission=@id_permission

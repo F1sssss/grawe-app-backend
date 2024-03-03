@@ -79,7 +79,9 @@ const addPermissionToGroupService = async (group, permission) => {
   await delKey('permission-groups');
   await delKey(`permission-group-${group}`);
   await delKey(`permission-${permission}`);
-  const { permissions, statusCode } = await accessControlQueries.addPermissionToGroup(group, permission);
+  let { permissions, statusCode } = await accessControlQueries.addPermissionToGroup(group, permission);
+  await accessControlQueries.createPermissionProperties(permission, group);
+
   return { permissions, statusCode };
 };
 

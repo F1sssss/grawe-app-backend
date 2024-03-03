@@ -17,7 +17,7 @@ router.post('/properties', accessControlController.createPermission);
 router.patch('/properties/:id', accessControlController.updatePermission);
 
 router.patch('/properties/:id/rights', accessControlController.updatePermissionRigths);
-router.put('/groups/properties/', accessControlController.addPermissionToGroup);
+//router.put('/groups/properties/', accessControlController.addPermissionToGroup);
 router.delete('/properties/:id', accessControlController.deletePermission);
 
 router.get('/users/:id/groups', accessControlController.getUsersGroups);
