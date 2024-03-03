@@ -138,3 +138,5 @@ config.env
 ldap/
 
 cache/
+
+superset/data/
