@@ -1,7 +1,14 @@
 const AppError = require('./AppError');
+const logger = require('../logging/winstonSetup');
 
 const handleResponse = async (promise, res, responseFields = {}) => {
+  logger.debug('Got a promise in handleResponse, waiting for it to resolve...');
+
   let data = await promise;
+
+  logger.debug('Promise resolved!');
+
+  logger.debug('Filtering response...');
 
   /*
   const filteredObject = {};
@@ -34,6 +41,10 @@ const handleResponse = async (promise, res, responseFields = {}) => {
   }
 
   delete data.statusCode;
+
+  logger.debug('Response filtered!');
+
+  logger.debug('Sending response...');
 
   res.status(statusCode).json(Object.keys(data).length > 1 ? data : data[Object.keys(data)[0]] || data);
 };
