@@ -112,7 +112,7 @@ const deletePermissionService = async (id) => {
 const getUsersGroupsService = async (id) => {
   const cacheKey = `permission-groups-user-${id}`;
   const { permissions, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getUsersGroups(id));
-  return { permissions, statusCode };
+  return { permissions: permissions.id === null ? {} : permissions, statusCode };
 };
 
 const addUserToGroupService = async (id, user) => {
