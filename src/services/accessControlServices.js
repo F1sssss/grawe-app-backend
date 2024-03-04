@@ -126,7 +126,7 @@ const addUserToGroupService = async (id, user) => {
 const removeUserFromGroupService = async (id, user) => {
   await delKey('permissions');
   await delKey('permission-groups');
-  await delKey(`permission-groups-user-${id}`);
+  await delKey(`permission-groups-user-${user}`);
   const { message, statusCode } = await accessControlQueries.removeUserFromGroup(id, user);
   return { message, statusCode };
 };
