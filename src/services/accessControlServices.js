@@ -42,8 +42,8 @@ const getPermissionsService = async () => {
 };
 
 const getPermissionService = async (id, group) => {
-  const cacheKey = `permission-${id}-${group}`;
-  const { permissions, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getPermission(id, group));
+  //const cacheKey = `permission-${id}-${group}`;
+  const { permissions, statusCode } = await accessControlQueries.getPermission(id, group);
   return { permissions, statusCode };
 };
 
@@ -66,7 +66,6 @@ const updatePermissionService = async (id, permission) => {
   await delKey(`permission-${id}`);
   await delKey('permissions');
   await delKey('permission-groups');
-
   const { permissions, statusCode } = await accessControlQueries.updatePermission(id, permission);
   return { permissions, statusCode };
 };
@@ -76,7 +75,7 @@ const updatePermissionRigthsService = async (id, group, read, write) => {
   await delKey('permission-groups');
   await delKey(`permission-group-${group}`);
   await delKey(`permission-${id}`);
-  await delKey(`permission-${id}-${group}`);
+  await delKey(`permission-${group}-${id}`);
   const { permissions, statusCode } = await accessControlQueries.updatePermissionRigths(id, group, read, write);
   return { permissions, statusCode };
 };
