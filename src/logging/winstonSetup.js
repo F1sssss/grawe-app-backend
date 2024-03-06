@@ -2,8 +2,11 @@ const winston = require('winston');
 const ecsFormat = require('@elastic/ecs-winston-format');
 
 const logger = winston.createLogger({
-  level: 'info',
-  transports: [new winston.transports.Console(), new winston.transports.File({ filename: 'logs/combined.log' })],
+  level: 'debug',
+  transports: [
+    //new winston.transports.Console(),
+    new winston.transports.File({ filename: 'logs/combined.log' }),
+  ],
 });
 
 logger.format = ecsFormat({ convertReqRes: true });

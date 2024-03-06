@@ -19,7 +19,7 @@ module.exports = errorHandler = (err, req, res, next) => {
     error: err.name,
   });
 
-  logger.error(`${err.status} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+  logger.error(`${err.status} - ${err.message} - ${err.statusMessage}- ${req.originalUrl} - ${req.method} - ${req.ip}`);
 
   next();
 };

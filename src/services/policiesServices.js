@@ -1,5 +1,4 @@
 const PolicyQueries = require('../sql/Queries/PoliciesQueries');
-const clientQueries = require('../sql/Queries/clientQueries');
 const generateExcelFile = require('../utils/Exports/ExcelExport');
 const Invoice = require('../utils/Exports/createInvoice');
 const cacheQuery = require('../utils/cacheQuery');

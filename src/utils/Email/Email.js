@@ -1,7 +1,7 @@
 const sgMail = require('@sendgrid/mail');
 const emailRegister = require('../EmailTemplates/emailRegister');
 const emailForgotPassword = require('../EmailTemplates/emailForgotPassword');
-const AppError = require('../AppError');
+const logger = require('../../logging/winstonSetup');
 const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL } = process.env;
 
 module.exports = class Email {
@@ -21,10 +21,13 @@ module.exports = class Email {
       subject: '[GRAWE] Verifiction email',
       html: emailRegister(this.username, `${FRONTEND_URL}/api/v1/users/signup/verification/?id=${this.id}?token=${this.email_verification_token}`),
     };
-    const email = await sgMail.send(msg);
 
-    if (!email) {
-      throw new AppError('Error during sending email!', 500, 'error-email-sending');
+    try {
+      await sgMail.send(msg);
+      logger.info('Email sent successfully! To user: ' + this.username + ' with email: ' + this.emailTo + ' for email verification.');
+    } catch (err) {
+      logger.error(err);
+      console.log(err);
     }
 
     return { message: 'Email sent successfully!', statusCode: 200 };
@@ -39,9 +42,13 @@ module.exports = class Email {
       subject: '[GRAWE] Password reset',
       html: emailForgotPassword(this.username, `${FRONTEND_URL}/api/v1/users/forgot-password/?id=${this.id}&token=${this.email_verification_token}`),
     };
-    const email = await sgMail.send(msg);
-    if (!email) {
-      throw new AppError('Error during sending email!', 500, 'error-email-sending');
+
+    try {
+      await sgMail.send(msg);
+      logger.info('Email sent successfully! To user: ' + this.username + ' with email: ' + this.emailTo + ' for password reset.');
+    } catch (err) {
+      logger.error(err);
+      console.log(err);
     }
 
     return { message: 'Email sent successfully!', statusCode: 200 };

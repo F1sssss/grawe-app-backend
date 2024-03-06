@@ -1,5 +1,6 @@
 const PDFDocument = require('pdfkit');
 const AppError = require('../AppError');
+const logger = require('../../logging/winstonSetup');
 
 function createInvoice(policy) {
   return new Promise(async (resolve, reject) => {
@@ -7,9 +8,12 @@ function createInvoice(policy) {
     let buffers = [];
     let doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-    doc.on('error', () => {
+    doc.on('error', (err) => {
+      logger.error('Error during creating PDF', err);
       throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
     });
+
+    logger.info('Creating PDF...');
 
     // Collect the PDF buffers
     doc.on('data', (buffer) => {
@@ -32,6 +36,8 @@ function createInvoice(policy) {
     //generateFooter(doc);
 
     doc.end();
+
+    logger.info('PDF created');
   });
 }
 
@@ -119,6 +125,8 @@ function generateHeader(doc) {
 function generateCustomerInformation(doc, invoice) {
   doc.fillColor('#444444').fontSize(14).text('KONTO KARTICA', 50, 160);
 
+  doc.fillColor('#444444').fontSize(10).text(invoice.naziv_branse, 300, 170, { align: 'right' });
+
   generateHr(doc, 185);
 
   const customerInformationTop = 190;
@@ -143,7 +151,7 @@ function generateCustomerInformation(doc, invoice) {
     .font('Helvetica')
     .text('Nacin placanja:', 420, customerInformationTop + 60)
     .font('Helvetica')
-    .text(invoice.nacin_placanja, 500, customerInformationTop + 60, { align: 'right' })
+    .text(invoice.nacin_placanja, 420, customerInformationTop + 60, { align: 'right' })
     .font('Helvetica')
 
     .fontSize(9)
@@ -267,9 +275,8 @@ function generateInvoiceTable(doc, invoice) {
 
   for (i = 0; i < invoice.items.length; i++) {
     const item = invoice.items[i];
-    let position = (invoiceTableTop + (i + 1) * 30) % 690;
-
-    position = position < 30 ? (doc.addPage(), 30) : position;
+    let position = (invoiceTableTop + i * 30) % 750;
+    position = position < 30 ? (doc.addPage(), 30) : position + 30;
 
     generateTableRow(
       doc,
@@ -284,16 +291,16 @@ function generateInvoiceTable(doc, invoice) {
     generateHr(doc, position + 20);
   }
 
-  const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 690;
+  const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 750;
   generateTableRow(doc, subtotalPosition, '', '', 'Ukupno dospjelo', '', formatCurrency(invoice.ukupno_dospjelo));
 
-  const paidToDatePosition = (subtotalPosition + 20) % 690;
+  const paidToDatePosition = (subtotalPosition + 20) % 750;
   generateTableRow(doc, paidToDatePosition, '', '', 'Ukupno placeno', '', formatCurrency(invoice.ukupno_placeno));
 
-  const duePosition = (paidToDatePosition + 20) % 690;
+  const duePosition = (paidToDatePosition + 20) % 750;
   generateTableRow(doc, duePosition, '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_duguje));
 
-  const totalRemaining = (duePosition + 20) % 690;
+  const totalRemaining = (duePosition + 20) % 750;
   generateTableRow(doc, totalRemaining, '', '', 'Ukupno nedospjelo', '', formatCurrency(invoice.ukupno_nedospjelo));
 }
 

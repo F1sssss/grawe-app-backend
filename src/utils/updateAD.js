@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cron = require('node-cron');
 
 const UserQueries = require('../sql/Queries/UserQueries');
+const logger = require('../logging/winstonSetup');
 
 dotenv.config({
   path: './config.env',
@@ -19,14 +20,18 @@ const ldapOptions = {
 const client = ldap.createClient(ldapOptions);
 
 const MigrateADUsers = cron.schedule('*/60 * * * *', async () => {
+  logger.info('Migrating AD users...');
   // await migrateAD();
+  logger.info('AD users migrated');
 });
 
 const migrateAD = async () => {
   client.bind(ldapOptions.bindDN, ldapOptions.bindCredentials, (err) => {
     if (err) {
+      logger.error('LDAP bind failed:', err);
       console.error('LDAP bind failed:', err);
     } else {
+      logger.info('LDAP bind successful');
       console.log('LDAP bind successful');
     }
 
@@ -58,6 +63,7 @@ const migrateAD = async () => {
         });
 
         res.on('error', (err) => {
+          logger.error('error: ' + err.message);
           console.error('error: ' + err.message);
         });
 
@@ -66,6 +72,7 @@ const migrateAD = async () => {
             await UserQueries.migrateUserFromAD(user.uid, user.userPass);
           });
 
+          logger.info('status: ' + result.status);
           console.log('status: ' + result.status);
         });
       },

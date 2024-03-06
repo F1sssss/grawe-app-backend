@@ -31,7 +31,8 @@ RUN pip install \
     cx_oracle \
     psycopg2 \
     ldap3 \
-    xlrd
+    xlrd \
+    redis
 
 # Copy the docker-init.sh script to the container
 COPY ./superset/docker-init.sh /app/docker-init.sh

@@ -32,7 +32,6 @@ const getPermissions = async () => {
 };
 
 const getPermission = async (id, group) => {
-  console.log(id, group);
   const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermission.sql', PermissionProperties(id, group));
   return { permissions: data, statusCode };
 };
@@ -141,8 +140,6 @@ const addUserToGroup = async (id, user) => {
 
 const removeUserFromGroup = async (id, user) => {
   const { data, statusCode } = await excecuteQueryAndHandleErrors('removeUserFromGroup.sql', ClientGroup(id, user));
-
-  console.log(data, statusCode);
 
   if (data === {}) {
     throw new AppError('Error removing user from group!', 404, 'error-removing-user-from-group-not-found');

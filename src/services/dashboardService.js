@@ -36,7 +36,7 @@ const getDashboardService = async (id) => {
     { headers: { Authorization: `Bearer ${user_jwt_token}` } },
   );
 
-  return { dahboard_uuid: uuid, guest_token: GuestToken.data.token };
+  return { dashboard_uuid: uuid, guest_token: GuestToken.data.token };
 };
 
 module.exports = {
