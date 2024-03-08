@@ -46,6 +46,8 @@ const handleResponse = async (promise, res, responseFields = {}) => {
 
   logger.debug('Sending response...');
 
+  //console.log(data);
+
   res.status(statusCode).json(Object.keys(data).length > 1 ? data : data[Object.keys(data)[0]] || data);
 };
 

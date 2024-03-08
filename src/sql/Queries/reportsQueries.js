@@ -60,8 +60,9 @@ const getParamValues = async (procedure_id, report_id, param_name, order) => {
     throw new AppError('Params query is empty!', 404, 'error-param-query-empty');
   }
 
-  const values = await excecuteQueryAndHandleErrors(result['sql']);
-  return { param_values: values, statusCode };
+  const { result: param_values } = await excecuteQueryAndHandleErrors(result['sql']);
+
+  return { param_values, statusCode };
 };
 
 const executeReport = async (report, inputParams) => {

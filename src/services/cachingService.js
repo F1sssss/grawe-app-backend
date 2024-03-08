@@ -1,6 +1,6 @@
 const redis = require('redis');
 
-const AppError = require('../utils/AppError');
+//const AppError = require('../utils/AppError');
 const logger = require('../logging/winstonSetup');
 
 let client = redis.createClient({
@@ -9,53 +9,58 @@ let client = redis.createClient({
     host: process.env.REDIS_HOST,
   },
   password: process.env.REDIS_PASSWORD,
-  keepAlive: 500,
 });
 
 (async () => {
   try {
     await client.connect();
   } catch (err) {
-    throw new AppError('Could not connect to Redis', 500, 'error-connecting-to-redis-server');
+    logger.error(`Could not connect to Redis server: ${err}`);
+    //throw new AppError('Could not connect to Redis', 500, 'error-connecting-to-redis-server');
   }
 })();
 
-client.on('error', async (error) => {
-  console.error('💰 Redis error: ', error);
+client.on('error', (error) => {
+  logger.error(`Could not connect to Redis server: ${error}`);
+  console.log('Could not connect to Redis server');
+  //throw new AppError(error, 500, 'unhandled-redis-error');
 });
 
 client.on('connect', () => {
   console.log('💰 Connected to Redis server');
+  logger.info('Connected to Redis server');
 });
 
 async function setWithTTL(key, value, ttl = 6000) {
   try {
     const result = await client.set(key, value);
     await client.expire(key, ttl);
-    logger.info('💰 Redis set: ', key);
+    logger.info(`Set value in Redis for key: ${key}`);
     return result;
   } catch (err) {
-    throw new AppError('Could not set value in Redis', 500, 'error-setting-value-in-redis');
+    logger.error(`Could not set value in Redis: ${err}`);
+    //throw new AppError('Could not set value in Redis', 500, 'error-setting-value-in-redis');
   }
 }
 
 async function get(key) {
   try {
-    logger.info('💰 Redis get: ', key);
+    logger.info(`Getting value from Redis for key: ${key}`);
     return JSON.parse(await client.get(key));
   } catch (err) {
-    logger.error('💰 Redis get error: ', err);
-    throw new AppError('Could not get value from Redis', 500, 'error-getting-value-from-redis');
+    logger.error(`Could not get value from Redis: ${err}`);
+    //throw new AppError('Could not get value from Redis', 500, 'error-getting-value-from-redis');
   }
 }
 
 async function del(req, res, next) {
   try {
     await client.flushAll();
-    logger.info('💰 Redis flushed for all keys');
+    logger.info('Deleted all keys from Redis');
     next();
   } catch (err) {
-    throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
+    logger.error(`Could not delete value from Redis: ${err}`);
+    //throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
   }
 }
 
@@ -65,7 +70,8 @@ async function delKey(key) {
     await client.del(key);
     logger.info('💰 Redis key deleted: ', key);
   } catch (err) {
-    throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
+    logger.error(`Could not delete value from Redis: ${err}`);
+    //throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
   }
 }
 

@@ -1,3 +1,13 @@
+if not exists (select 1 from reports where id = @id)
+begin
+    throw 50000, 'report-not-found',2
+end
+
+if not exists (select 1 from sys.procedures where object_id = @procedure_id)
+begin
+    throw 50000, 'procedure-not-found',2
+end
+
 begin transaction
 
 update reports

@@ -8,6 +8,11 @@ if @id_permission is null or @id_permission = 0
         throw 50000, 'id_permission is null or 0', 1;
     end
 
+if exists (select 1 from gr_pairing_permission_groups_permission where id_permission_group = @id_permission_group and id_permission = @id_permission)
+    begin
+        throw 50000, 'permission-group-already-exists',2
+    end
+
 insert into gr_pairing_permission_groups_permission
     (id_permission_group, id_permission)
 values
