@@ -47,9 +47,37 @@ const getUserService = async (req) => {
 };
 
 const getMyPermissionsService = async (req) => {
-  const { user } = await getAccessTokenAndUser(req);
+  const {
+    user: { ID },
+  } = await getAccessTokenAndUser(req);
+  const { user } = await SQLQueries.getMyPermissions(ID);
 
-  const { permissions } = await SQLQueries.getMyPermissions(user.ID);
+  const permissions = user.reduce((result, item) => {
+    const existingEntry = result.find((entry) => entry.route === item.route && entry.methods[0] === item.method);
+
+    if (existingEntry) {
+      // If it exists, just push the property details to the existing entry
+      existingEntry.properties.push({
+        property_path: item.property_path,
+        read_right: item.read_right,
+        write_right: item.write_right,
+      });
+    } else {
+      // If entry does not exist, create entry
+      result.push({
+        route: item.route,
+        methods: [item.method],
+        properties: [
+          {
+            property_path: item.property_path,
+            read_right: item.read_right,
+            write_right: item.write_right,
+          },
+        ],
+      });
+    }
+    return result;
+  }, []);
 
   return { permissions };
 };
