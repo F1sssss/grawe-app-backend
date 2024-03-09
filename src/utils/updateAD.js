@@ -1,13 +1,8 @@
 const ldap = require('ldapjs');
-const dotenv = require('dotenv');
 const cron = require('node-cron');
 
 const UserQueries = require('../sql/Queries/UserQueries');
 const logger = require('../logging/winstonSetup');
-
-dotenv.config({
-  path: './config.env',
-});
 
 const ldapOptions = {
   url: process.env.LDAP_URL,

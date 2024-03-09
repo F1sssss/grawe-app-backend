@@ -200,7 +200,7 @@ function generateInvoiceTableRecap(doc, invoice) {
   let position = 0;
 
   doc.font('Helvetica-Bold');
-  generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Zaduzeno', 'Placeno', 'Dospjelo', 'Nedospjelo');
+  generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Zaduženo', 'Plaćeno', 'Dospjelo', 'Nedospjelo');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('Helvetica');
 
@@ -269,7 +269,7 @@ function generateInvoiceTable(doc, invoice) {
   const invoiceTableTop = 330;
 
   doc.font('Helvetica-Bold');
-  generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Polise', 'Zaduzeno', 'Uplaceno', 'Saldo');
+  generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Polise', 'Zaduženo', 'Uplaćeno', 'Saldo');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('Helvetica');
 
@@ -295,7 +295,7 @@ function generateInvoiceTable(doc, invoice) {
   generateTableRow(doc, subtotalPosition, '', '', 'Ukupno dospjelo', '', formatCurrency(invoice.ukupno_dospjelo));
 
   const paidToDatePosition = (subtotalPosition + 20) % 750;
-  generateTableRow(doc, paidToDatePosition, '', '', 'Ukupno placeno', '', formatCurrency(invoice.ukupno_placeno));
+  generateTableRow(doc, paidToDatePosition, '', '', 'Ukupno plaćeno', '', formatCurrency(invoice.ukupno_placeno));
 
   const duePosition = (paidToDatePosition + 20) % 750;
   generateTableRow(doc, duePosition, '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_duguje));
@@ -398,4 +398,5 @@ function getDistinctObjects(jsonArray, keys) {
 module.exports = {
   createInvoice,
   createClientInvoice,
+  getDistinctObjects,
 };

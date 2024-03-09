@@ -54,7 +54,7 @@ services:
 
   cache:
     image: redis:alpine
-    command: redis-server --save 20 1 --loglevel warning --requirepass Grawe123$
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
     ports:
       - '6379:6379'
     volumes:
@@ -82,7 +82,7 @@ services:
       #- SUPERSET_DATABASE_URI=mssql+pymssql://sa:Grawe123$@192.168.192.1:1433/SUPERSET
       #- SQLALCHEMY_DATABASE_URI=mssql+pymssql://sa:Grawe123$@192.168.192.1:1433/SUPERSET
       #- 'mssql+pyodbc://@' + localhost + '/' + dbname + '?trusted_connection=yes&driver=ODBC+Driver+13+for+SQL+Server'
-      - SUPERSET_SECRET_KEY=grawe123$
+      - SUPERSET_SECRET_KEY=${SUPERSET_SECRET_KEY}
       - SUPERSET_WEBSERVER_PORT=8088
       - SUPERSET_WEBSERVER_TIMEOUT=6000
       - SUPERSET_WEBSERVER_WORKERS=10

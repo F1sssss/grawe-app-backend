@@ -7,12 +7,13 @@ const DB_CONFIG = require('../DBconfig');
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
 const { UserSignup, UserMigration } = require('./params');
+const { getDistinctObjects } = require('../../utils/Exports/createInvoice');
 
 const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const user = await connection.executeQuery(query, param);
 
-  if (!user?.username && type !== 'signup') {
+  if (!user?.username && type !== 'signup' && type !== 'permissions') {
     throw new AppError(`User not found!`, 404, 'error-user-not-found');
   }
 
@@ -20,7 +21,11 @@ const excecuteUserQuery = async (query, param, type = '') => {
     throw new AppError('Email not verified', 401, 'not-verified');
   }
 
-  type !== 'signup' ? (user.password = type === 'login' ? user?.password : undefined) : undefined;
+  type !== 'signup' && type !== 'permissions'
+    ? (user.password = type === 'login' ? user?.password : undefined)
+    : type === 'permissions'
+    ? user
+    : undefined;
 
   return { user, statusCode: 200 };
 };
@@ -163,6 +168,39 @@ const getUser = async (id) => {
   return { user, statusCode };
 };
 
+const getMyPermissions = async (id) => {
+  const { user } = await excecuteUserQuery('getMyPermissions.sql', [new SQLParam('id', id, sql.Int)], 'permissions');
+
+  const permissions = user.reduce((result, item) => {
+    const existingEntry = result.find((entry) => entry.route === item.route && entry.methods[0] === item.method);
+
+    if (existingEntry) {
+      // If it exists, just push the property details to the existing entry
+      existingEntry.properties.push({
+        property_path: item.property_path,
+        read_right: item.read_right,
+        write_right: item.write_right,
+      });
+    } else {
+      // If entry does not exist, create entry
+      result.push({
+        route: item.route,
+        methods: [item.method],
+        properties: [
+          {
+            property_path: item.property_path,
+            read_right: item.read_right,
+            write_right: item.write_right,
+          },
+        ],
+      });
+    }
+    return result;
+  }, []);
+
+  return { permissions, statusCode: 200 };
+};
+
 module.exports = {
   getUserById,
   getUserByUsername,
@@ -178,4 +216,5 @@ module.exports = {
   migrateUserFromAD,
   getAllUsers,
   getUser,
+  getMyPermissions,
 };

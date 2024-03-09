@@ -13,7 +13,7 @@ const getAccessTokenAndUser = async (req) => {
   }
 
   if (!token || token === 'loggedOut') {
-    return new AppError('You are not logged in! Please log in to get access.', 401, 'error-not-logged-in');
+    throw new AppError('You are not logged in! Please log in to get access.', 401, 'error-not-logged-in');
   }
 
   const decoded = await promisify(jwt.verify)(token, DB_CONFIG.encrypt);
@@ -46,10 +46,19 @@ const getUserService = async (req) => {
   return ({ user } = await SQLQueries.getUser(req.params.id));
 };
 
+const getMyPermissionsService = async (req) => {
+  const { user } = await getAccessTokenAndUser(req);
+
+  const { permissions } = await SQLQueries.getMyPermissions(user.ID);
+
+  return { permissions };
+};
+
 module.exports = {
   getMeService,
   updateMeService,
   deleteMeService,
   getAllUsersService,
   getUserService,
+  getMyPermissionsService,
 };

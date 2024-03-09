@@ -2,7 +2,7 @@ const sgMail = require('@sendgrid/mail');
 const emailRegister = require('../EmailTemplates/emailRegister');
 const emailForgotPassword = require('../EmailTemplates/emailForgotPassword');
 const logger = require('../../logging/winstonSetup');
-const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL } = process.env;
+const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL, HOST_URL } = process.env;
 
 module.exports = class Email {
   constructor(user) {
@@ -40,7 +40,7 @@ module.exports = class Email {
       to: this.emailTo,
       from: EMAIL_FROM, // Change to your verified sender
       subject: '[GRAWE] Password reset',
-      html: emailForgotPassword(this.username, `${FRONTEND_URL}/api/v1/users/forgot-password/?id=${this.id}&token=${this.email_verification_token}`),
+      html: emailForgotPassword(this.username, `${HOST_URL}/api/v1/users/forgot-password/?id=${this.id}&token=${this.email_verification_token}`),
     };
 
     try {

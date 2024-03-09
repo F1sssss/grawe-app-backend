@@ -2,8 +2,8 @@ const axios = require('axios');
 
 const getDashboardService = async (id) => {
   const response = await axios.post('http://127.0.0.1:8088/api/v1/security/login', {
-    username: 'admin',
-    password: 'admin',
+    username: process.env.SUPERSET_USERNAME,
+    password: process.env.SUPERSET_PASSWORD,
     provider: 'db',
   });
 
@@ -28,9 +28,9 @@ const getDashboardService = async (id) => {
       ],
       rls: [],
       user: {
-        first_name: 'Test',
-        last_name: 'Test',
-        username: 'test',
+        first_name: process.env.USER_FIRST_NAME,
+        last_name: process.env.USER_LAST_NAME,
+        username: process.env.USER_USERNAME,
       },
     },
     { headers: { Authorization: `Bearer ${user_jwt_token}` } },

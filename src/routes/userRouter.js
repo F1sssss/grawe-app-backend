@@ -19,5 +19,6 @@ router.get('/me', userController.getMe);
 router.patch('/me', userController.updateMe);
 router.delete('/me', userController.deleteMe);
 router.get('/:id', userController.getUser);
+router.get('/me/permissions', userController.getMyPermissions);
 
 module.exports = router;

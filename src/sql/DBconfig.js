@@ -4,7 +4,7 @@ const assert = require('assert');
 const dotenv = require('dotenv');
 
 dotenv.config({
-  path: './config.env',
+  path: '.env',
 });
 
 // capture the environment variables the application needs

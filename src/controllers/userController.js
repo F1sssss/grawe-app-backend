@@ -21,10 +21,15 @@ const getUser = async (req, res) => {
   await responseHandler(userService.getUserService(req), res, { statusCode: 200 });
 };
 
+const getMyPermissions = async (req, res) => {
+  await responseHandler(userService.getMyPermissionsService(req), res, { statusCode: 200 });
+};
+
 module.exports = {
   getMe,
   updateMe,
   deleteMe,
   getAllUsers,
   getUser,
+  getMyPermissions,
 };
