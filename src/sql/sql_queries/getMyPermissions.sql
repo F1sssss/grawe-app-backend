@@ -8,7 +8,8 @@ pp.read_right,
 pp.write_right
 
 from users u
-left join gr_permission_groups pg ON u.role = pg.id
+join gr_pairing_users_groups_permission pup on pup.user_id=u.ID
+left join gr_permission_groups pg ON pup.permission_group_id = pg.id
 join gr_pairing_permission_groups_permission pg_p ON pg_p.id_permission_group=pg.permission
 left join gr_permission p ON p.id=pg_p.id_permission
 left join gr_pairing_permisson_property_list ppp on ppp.id_permission=p.id

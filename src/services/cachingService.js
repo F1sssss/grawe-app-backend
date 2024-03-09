@@ -9,6 +9,8 @@ let client = redis.createClient({
     host: process.env.REDIS_HOST,
   },
   password: process.env.REDIS_PASSWORD,
+  AutoReconnect: true,
+  KeepAlive: 1000,
 });
 
 (async () => {
@@ -22,8 +24,8 @@ let client = redis.createClient({
 
 client.on('error', (error) => {
   logger.error(`Could not connect to Redis server: ${error}`);
-  console.log('Could not connect to Redis server');
-  throw new AppError(error, 500, 'unhandled-redis-error');
+  console.log(error);
+  //throw new AppError(error, 500, 'unhandled-redis-error');
 });
 
 client.on('connect', () => {
