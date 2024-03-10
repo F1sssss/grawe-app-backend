@@ -14,7 +14,7 @@ router.get('/:id/history/pdf/download', clientController.getClientHistoryPDFDown
 
 router.get('/:id/analytics', clientController.getClientAnalyticalInfo);
 router.get('/policy/:id', clientController.getClientPolicyAnalyticalInfo);
-router.get('/:id/analytics/all', accessControlMiddleware, clientController.getAllClientAnalytics);
+router.get('/:id/analytics/all', clientController.getAllClientAnalytics);
 
 //This is just for testing, remove later
 router.get('/:id/analytics/allInfo', clientController.getAllClientInfo);
