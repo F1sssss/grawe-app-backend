@@ -15,7 +15,7 @@ end
 BEGIN TRANSACTION
 
 insert into gr_permission_properties (read_right,write_right,group_id,permission_property_id)
-select 0,0,@id_permission_group,id from gr_pairing_permisson_property_list
+select 1,1,@id_permission_group,id from gr_pairing_permisson_property_list
 where id_permission = @id_permission
 
 insert into gr_pairing_permission_groups_permission

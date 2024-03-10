@@ -113,6 +113,7 @@ function generateHeader(doc) {
     .fillColor('#444444')
     .fontSize(20)
     .fontSize(10)
+    .font('./src/assets/Roboto-Regular.ttf')
     .text('Grawe neživotno osiguranje a.d.', 200, 30, { align: 'right' })
     .text('Josipa Broza Tita 23a', 200, 45, { align: 'right' })
     .text('81000 Podgorica', 200, 60, { align: 'right' })
@@ -134,38 +135,38 @@ function generateCustomerInformation(doc, invoice) {
   doc
     .fontSize(8)
     .text('Broj Polise:', 420, customerInformationTop)
-    .font('Helvetica-Bold')
+    .font('./src/assets/Roboto-Bold.ttf')
     .text(invoice.broj_polise, 500, customerInformationTop, { align: 'right' })
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text('Pocetak osiguranja:', 420, customerInformationTop + 15)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.pocetak_osiguranja, 500, customerInformationTop + 15, { align: 'right' })
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text('Kraj osiguranja:', 420, customerInformationTop + 30)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.istek_osiguranja, 500, customerInformationTop + 30, { align: 'right' })
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text('Premija:', 420, customerInformationTop + 45)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(formatCurrency(invoice.premija), 500, customerInformationTop + 45, { align: 'right' })
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text('Nacin placanja:', 420, customerInformationTop + 60)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.nacin_placanja, 420, customerInformationTop + 60, { align: 'right' })
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
 
     .fontSize(9)
-    .font('Helvetica-Bold')
+    .font('./src/assets/Roboto-Bold.ttf')
     .text(invoice.clientInfo.name, 50, customerInformationTop)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.address, 50, customerInformationTop + 15)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.place, 50, customerInformationTop + 30)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.phone1 === '' ? invoice.clientInfo.phone2 : invoice.clientInfo.phone1, 50, customerInformationTop + 45)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.email, 50, customerInformationTop + 60)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .moveDown();
 
   generateHr(doc, 270);
@@ -178,17 +179,17 @@ function generateCustomerRecapInformation(doc, invoice) {
 
   doc
     .fontSize(9)
-    .font('Helvetica-Bold')
+    .font('./src/assets/Roboto-Bold.ttf')
     .text(invoice.clientInfo.name, 50, customerInformationTop)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.address, 50, customerInformationTop + 15)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.place, 50, customerInformationTop + 30)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.phone1 === '' ? invoice.clientInfo.phone2 : invoice.clientInfo.phone1, 50, customerInformationTop + 45)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .text(invoice.clientInfo.email, 50, customerInformationTop + 60)
-    .font('Helvetica')
+    .font('./src/assets/Roboto-Regular.ttf')
     .moveDown();
 
   generateHr(doc, 270);
@@ -199,10 +200,10 @@ function generateInvoiceTableRecap(doc, invoice) {
   const invoiceTableTop = 330;
   let position = 0;
 
-  doc.font('Helvetica-Bold');
+  doc.font('./src/assets/Roboto-Bold.ttf');
   generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Zaduženo', 'Plaćeno', 'Dospjelo', 'Nedospjelo');
   generateHr(doc, invoiceTableTop + 20);
-  doc.font('Helvetica');
+  doc.font('./src/assets/Roboto-Regular.ttf');
 
   for (i = 0; i < invoice.length; i++) {
     const item = invoice[i];
@@ -225,7 +226,7 @@ function generateInvoiceTableRecap(doc, invoice) {
   }
 
   const subtotalPosition = position + 30;
-  doc.font('Helvetica-Bold');
+  doc.font('./src/assets/Roboto-Bold.ttf');
   generateTableRowRecap(
     doc,
     subtotalPosition,
@@ -256,22 +257,22 @@ function generateTableRowRecap(doc, y, polisa, osiguranje, premija, duguje, potr
     .fontSize(8)
     .text(polisa, 50, y)
     .text(osiguranje, 100, y)
-    .text(premija, 300, y)
-    .text(duguje, 350, y)
-    .text(potrazuje, 400, y)
-    .text(saldo, 450, y)
-    .text(dospjelo, 500, y)
-    .text(nedospjelo, 550, y, { width: 90, align: 'right' });
+    .text(premija, 300, y, { encoding: 'utf8' })
+    .text(duguje, 350, y, { encoding: 'utf8' })
+    .text(potrazuje, 400, y, { encoding: 'utf8' })
+    .text(saldo, 450, y, { encoding: 'utf8' })
+    .text(dospjelo, 500, y, { encoding: 'utf8' })
+    .text(nedospjelo, 550, y, { width: 90, align: 'right', encoding: 'utf8' });
 }
 
 function generateInvoiceTable(doc, invoice) {
   let i;
   const invoiceTableTop = 330;
 
-  doc.font('Helvetica-Bold');
+  doc.font('./src/assets/Roboto-Bold.ttf');
   generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Polise', 'Zaduženo', 'Uplaćeno', 'Saldo');
   generateHr(doc, invoiceTableTop + 20);
-  doc.font('Helvetica');
+  doc.font('./src/assets/Roboto-Regular.ttf');
 
   for (i = 0; i < invoice.items.length; i++) {
     const item = invoice.items[i];
@@ -307,12 +308,12 @@ function generateInvoiceTable(doc, invoice) {
 function generateTableRow(doc, y, datum_dokumenta, broj_polise, duguje, potrazuje, saldo) {
   doc
     .fontSize(10)
-    .font('Helvetica')
-    .text(datum_dokumenta, 50, y)
-    .text(broj_polise, 150, y)
-    .text(duguje, 320, y, { width: 90, align: 'right' })
-    .text(potrazuje, 435, y, { width: 50, align: 'right' })
-    .text(saldo, 0, y, { align: 'right' });
+    .font('./src/assets/Roboto-Regular.ttf')
+    .text(datum_dokumenta, 50, y, { encoding: 'utf8' })
+    .text(broj_polise, 150, y, { encoding: 'utf8' })
+    .text(duguje, 320, y, { width: 90, align: 'right', encoding: 'utf8' })
+    .text(potrazuje, 435, y, { width: 50, align: 'right', encoding: 'utf8' })
+    .text(saldo, 0, y, { align: 'right', encoding: 'utf8' });
 }
 
 function generateHr(doc, y) {

@@ -44,6 +44,9 @@ const searchProcedureService = async (procedure_name) => {
 };
 
 const createReportService = async (procedure) => {
+  await delKey('get-reports');
+  await delKey('permissions');
+  await delKey('permission-groups');
   return ({ createdReport, statusCode } = await reportsQueries.createReport(procedure));
 };
 
