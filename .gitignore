@@ -139,4 +139,6 @@ ldap/
 
 cache/
 
+ssl/
+
 superset/data/

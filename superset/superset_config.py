@@ -56,9 +56,10 @@ WTF_CSRF_TIME_LIMIT = 60 * 60 * 24 * 365
 GUEST_ROLE_NAME = "Gamma"
 
 DATA_CACHE_CONFIG = {
-    "CACHE_TYPE": "SupersetMetastoreCache",
+    "CACHE_TYPE": "RedisCache",
     "CACHE_KEY_PREFIX": "superset_results",  # make sure this string is unique to avoid collisions
-    "CACHE_DEFAULT_TIMEOUT": 86400,  # 60 seconds * 60 minutes * 24 hours
+    "CACHE_REDIS_URL": "redis://:Grawe123$@192.168.1.64:6379/1",
+    "CACHE_DEFAULT_TIMEOUT": 35000,  # 60 seconds * 60 minutes * 24 hours
 }
 
 # FILTER_STATE_CACHE_CONFIG = {

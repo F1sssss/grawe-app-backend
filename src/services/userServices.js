@@ -3,6 +3,7 @@ const AppError = require('../utils/AppError');
 const jwt = require('jsonwebtoken');
 const DB_CONFIG = require('../sql/DBconfig');
 const SQLQueries = require('../sql/Queries/UserQueries');
+const { loggers } = require('winston');
 
 const getAccessTokenAndUser = async (req) => {
   let token;
@@ -51,6 +52,11 @@ const getMyPermissionsService = async (req) => {
     user: { ID },
   } = await getAccessTokenAndUser(req);
   const { user } = await SQLQueries.getMyPermissions(ID);
+
+  if (!user) {
+    return ['error-no-permissions'];
+    //throw new AppError('The user does not have any permissions.', 401, 'error-no-permissions');
+  }
 
   const permissions = user.reduce((result, item) => {
     const existingRoute = result.find((entry) => entry.route === item.route);

@@ -57,7 +57,7 @@ module.exports = class DBConnection {
 
       return result?.length === 1 ? result[0] : result?.length === 0 ? undefined : result;
     } catch (err) {
-      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
+      throw new AppError('Error executing query ' + err.message, 500, 'error-executing-query');
     }
   }
 
@@ -78,7 +78,7 @@ module.exports = class DBConnection {
 
       return result.recordsets[0];
     } catch (err) {
-      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
+      throw new AppError('Error executing query ' + err.message, 500, 'error-executing-query');
     }
   }
 };

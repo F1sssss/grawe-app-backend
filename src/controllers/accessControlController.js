@@ -1,6 +1,6 @@
 const accessControlService = require('../services/accessControlServices');
 const CatchAsync = require('../middlewares/CatchAsync');
-const ResponseHandler = require('../utils/ResponseHandler');
+const ResponseHandler = require('../utils/responseHandler');
 
 const getGroups = CatchAsync(async (req, res) => {
   await ResponseHandler(accessControlService.getGroupsService(), res, { statusCode: 200 });

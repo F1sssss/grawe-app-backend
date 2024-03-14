@@ -60,10 +60,26 @@ services:
     volumes:
       - ./cache:/data
     restart: always
+    environment:
+      - ProtectedMode=no
 
     networks:
       mynetwork:
         ipv4_address: 172.23.0.22
+
+#  nginx:
+#    build:
+#      context: .
+#      dockerfile: ./nginx/Dockerfile
+#    ports:
+#      - '80:80'
+#      - '443:443'
+#    volumes:
+#       - ./nginx:/etc/nginx
+##      - ./nginx/ssl/certificate.crt:/etc/nginx/ssl/certificate.crt
+##      - ./nginx/ssl/private.key:/etc/nginx/ssl/private.key
+##      - ./nginx/ssl/csr.pem:/etc/nginx/ssl/csr.pem
+#    restart: always
 
 
   superset:
