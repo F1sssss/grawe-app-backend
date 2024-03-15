@@ -4,7 +4,14 @@ const logger = require('../logging/winstonSetup');
 const handleResponse = async (promise, res, responseFields = {}) => {
   logger.debug('Got a promise in handleResponse, waiting for it to resolve...');
 
+  const startTime = process.hrtime();
+
   let data = await promise;
+
+  const elapsed = process.hrtime(startTime);
+  const elapsedTimeInMilliseconds = elapsed[0] * 1000 + elapsed[1] / 1000000;
+
+  console.log(`Nes processed in ${elapsedTimeInMilliseconds.toFixed(2)} ms`);
 
   logger.debug('Promise resolved!');
 
