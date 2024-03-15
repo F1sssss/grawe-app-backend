@@ -34,6 +34,7 @@ module.exports = class DBConnection {
 
   async executeQuery(query, params = [], multipleResultSets = false) {
     try {
+      const startTime = process.hrtime();
       const request = await this.pool.request();
 
       logger.info(`💰 SQL query: ${query}`);
@@ -54,6 +55,11 @@ module.exports = class DBConnection {
       result = multipleResultSets === false ? result.recordset : result.recordsets;
 
       logger.info(`💰 Successfully executed query: ${query}`);
+
+      const elapsed = process.hrtime(startTime);
+      const elapsedTimeInMilliseconds = elapsed[0] * 1000 + elapsed[1] / 1000000;
+
+      console.log(`Query finished in ${elapsedTimeInMilliseconds.toFixed(2)} ms`);
 
       return result?.length === 1 ? result[0] : result?.length === 0 ? undefined : result;
     } catch (err) {
