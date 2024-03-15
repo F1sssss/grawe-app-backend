@@ -7,6 +7,7 @@ const loadSqlQueries = require('./sql_queries/loadSQL');
 module.exports = class DBConnection {
   constructor(config) {
     if (DBConnection._instance) {
+      this.pool = new ConnectionPool(config);
       return DBConnection._instance;
     }
     this.pool = new ConnectionPool(config);
@@ -56,7 +57,7 @@ module.exports = class DBConnection {
 
       const elapsed2 = process.hrtime(startTime2);
       const elapsedTimeInMilliseconds2 = elapsed2[0] * 1000 + elapsed2[1] / 1000000;
-      console.log(`Just the query exec  finished in ${elapsedTimeInMilliseconds2.toFixed(2)} ms and started at ${startTime2}`);
+      console.log(`Just the query exec Query finished in ${elapsedTimeInMilliseconds2.toFixed(2)} ms and started at ${startTime2}`);
 
       result = multipleResultSets === false ? result.recordset : result.recordsets;
 
