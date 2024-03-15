@@ -50,7 +50,13 @@ module.exports = class DBConnection {
 
       request.multiple = multipleResultSets;
 
+      const startTime2 = process.hrtime();
+
       let result = await request.query(query);
+
+      const elapsed2 = process.hrtime(startTime2);
+      const elapsedTimeInMilliseconds2 = elapsed2[0] * 1000 + elapsed2[1] / 1000000;
+      console.log(`Just the query exec  finished in ${elapsedTimeInMilliseconds2.toFixed(2)} ms and started at ${startTime2}`);
 
       result = multipleResultSets === false ? result.recordset : result.recordsets;
 
@@ -59,7 +65,7 @@ module.exports = class DBConnection {
       const elapsed = process.hrtime(startTime);
       const elapsedTimeInMilliseconds = elapsed[0] * 1000 + elapsed[1] / 1000000;
 
-      console.log(`Query finished in ${elapsedTimeInMilliseconds.toFixed(2)} ms`);
+      console.log(`Query finished in ${elapsedTimeInMilliseconds.toFixed(2)} ms and started at ${startTime}`);
 
       return result?.length === 1 ? result[0] : result?.length === 0 ? undefined : result;
     } catch (err) {
