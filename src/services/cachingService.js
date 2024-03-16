@@ -7,6 +7,13 @@ let client = redis.createClient({
   socket: {
     port: 6379,
     host: process.env.REDIS_HOST,
+    reconnectStrategy: function (times, cause) {
+      logger.error(`Could not connect to Redis server: ${cause}`);
+      console.log(cause);
+      if (times >= 3) {
+        throw new AppError('Could not connect to Redis', 500, 'error-connecting-to-redis-server');
+      }
+    },
   },
   password: process.env.REDIS_PASSWORD,
   AutoReconnect: true,
@@ -25,7 +32,7 @@ let client = redis.createClient({
 client.on('error', (error) => {
   logger.error(`Could not connect to Redis server: ${error}`);
   console.log(error);
-  //throw new AppError(error, 500, 'unhandled-redis-error');
+  throw new AppError(error, 500, 'unhandled-redis-error');
 });
 
 client.on('connect', () => {

@@ -93,6 +93,9 @@ const getUsersGroups = async (id) => {
 
 const getGroups = async () => {
   let { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionGroups.sql');
+  if (!Array.isArray(data)) {
+    return { permission_groups: data ? [data] : [], statusCode: 200 };
+  }
   data = await Promise.all(
     data.map(async (group) => {
       const { permissions } = await getPermissionsByGroup(group.id);
@@ -100,6 +103,7 @@ const getGroups = async () => {
       return group;
     }),
   );
+
   return { permission_groups: data, statusCode };
 };
 

@@ -60,7 +60,7 @@ const getMyPermissionsService = async (req) => {
 
   const permissions = user.reduce((result, item) => {
     const existingRoute = result.find((entry) => entry.route === item.route);
-    const existingMethod = result.find((entry) => entry.methods[0] === item.method);
+    const existingMethod = result.find((entry) => entry.methods.includes(item.method) && entry.route === item.route);
 
     if (existingRoute && existingMethod) {
       // If it exists, just push the property details to the existing entry

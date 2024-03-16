@@ -74,23 +74,6 @@ app.use(xss());
 app.use(compression());
 
 //Routes
-
-app.use((req, res, next) => {
-  const startTime = process.hrtime();
-
-  // Function to execute after the response has been sent
-  res.on('finish', () => {
-    const elapsed = process.hrtime(startTime);
-    const elapsedTimeInMilliseconds = elapsed[0] * 1000 + elapsed[1] / 1000000;
-
-    // Log the request processing time
-    console.log(`Request processed in ${elapsedTimeInMilliseconds.toFixed(2)} ms`);
-  });
-
-  // Continue with the request processing
-  next();
-});
-
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/policies', policyRouter);
 app.use('/api/v1/clients', clientRouter);
