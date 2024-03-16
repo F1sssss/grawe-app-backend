@@ -10,7 +10,7 @@ pp.write_right
 from users u
 join gr_pairing_users_groups_permission pup on pup.user_id=u.ID
 left join gr_permission_groups pg ON pup.permission_group_id = pg.id
-join gr_pairing_permission_groups_permission pg_p ON pg_p.id_permission_group=pg.permission
+join gr_pairing_permission_groups_permission pg_p ON pup.permission_group_id = pg_p.id_permission_group
 left join gr_permission p ON p.id=pg_p.id_permission
 left join gr_pairing_permisson_property_list ppp on ppp.id_permission=p.id
 left join gr_property_lists pl ON pl.id = ppp.id_permission_property
