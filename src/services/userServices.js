@@ -62,16 +62,16 @@ const getMyPermissionsService = async (req) => {
     const existingRoute = result.find((entry) => entry.route === item.route);
     const existingMethod = result.find((entry) => entry.methods.includes(item.method) && entry.route === item.route);
 
-    if (existingRoute && existingMethod) {
-      // If it exists, just push the property details to the existing entry
+    if (existingRoute) {
+      // If route exists, add method and property to existing route
       existingRoute.properties.push({
         property_path: item.property_path,
         read_right: item.read_right,
         write_right: item.write_right,
       });
-    } else if (existingRoute && !existingMethod) {
-      // If entry exists, but method does not exist, add method and property details
-      existingRoute.methods.push(item.method);
+      if (!existingMethod) {
+        existingRoute.methods.push(item.method);
+      }
     } else {
       // If entry does not exist, create entry
       result.push({
