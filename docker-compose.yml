@@ -53,13 +53,18 @@ services:
 
 
   cache:
-    image: redis:alpine
-    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    build:
+      context: .
+      dockerfile: ./redis/Dockerfile
+    image: redis:7.2-alpine
+    command: sh -c "./init.sh"
     ports:
       - '6379:6379'
+    privileged: true
     volumes:
       - ./cache:/data
     restart: always
+
     environment:
       - ProtectedMode=no
 
@@ -117,6 +122,9 @@ services:
     volumes:
       - ./superset/data:/var/lib/postgresql/data
       - ./superset/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.23
 
 
 networks:
