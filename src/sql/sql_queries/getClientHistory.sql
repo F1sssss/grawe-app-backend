@@ -25,7 +25,6 @@ cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo
 from
 praemienkonto (nolock)
-where pko_obnr in ( select * from #client_policies )
+where exists( select * from #client_policies c where c.bra_obnr=pko_obnr)
 and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,102) and convert(date,@dateTo,102)
 order by pko_obnr,convert(date,pko_wertedatum,104) asc,pko_buch_nr asc
-
