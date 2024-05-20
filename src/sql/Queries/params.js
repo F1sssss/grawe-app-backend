@@ -109,8 +109,13 @@ const Date = (date) => {
   return [new SQLParam('date', date, sql.VarChar)];
 };
 
-const Exception = (policy, id, exception) => {
-  return [new SQLParam('policy', policy, sql.Int), new SQLParam('id', id, sql.Int), new SQLParam('exception', exception, sql.VarChar)];
+const Exception = (policy, id, exception, user) => {
+  return [
+    new SQLParam('policy', policy, sql.Int),
+    new SQLParam('id', id, sql.Int),
+    new SQLParam('exception', exception, sql.VarChar),
+    new SQLParam('user', user, sql.Int),
+  ];
 };
 
 const Permission = (permission) => {

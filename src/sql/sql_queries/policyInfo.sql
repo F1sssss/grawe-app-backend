@@ -4,9 +4,12 @@ select distinct
 	vtg_pol_kreis				[Pol_kreis],
 	bra_bran					[Bransa],
 	bra_vv_ueb					[Naziv_Branse],
-	convert(varchar,convert(date,bra_vers_beginn,104),102)   			[Pocetak_osiguranja],
-	convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[Istek_osiguranja],
-	convert(varchar,convert(date,bra_storno_ab,104),102)   			[Datum_storna],
+	bra_vers_beginn  			[Pocetak_osiguranja],
+    bra_vers_ablauf   			[Istek_osiguranja],
+    bra_storno_ab  			    [Datum_storna],
+	--convert(varchar,convert(date,bra_vers_beginn,104),102)   			[Pocetak_osiguranja],
+	--convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[Istek_osiguranja],
+	--convert(varchar,convert(date,bra_storno_ab,104),102)   			[Datum_storna],
 	case when bra_bran not in (10,11,56,8) then isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,'')) else /*PA*/ isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,''))  end [Ugovarac],
 	case when bra_bran not in (10,11,56,8) then isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,'')) else /*VA*/ isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,''))  end  [Osiguranik]
 	from branche b(nolock)

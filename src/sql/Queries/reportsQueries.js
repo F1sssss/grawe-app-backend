@@ -46,6 +46,8 @@ const getReportByName = async (report_name) => {
 const getProcedureInfo = async (procedure_name) => {
   const { result, statusCode } = await searchProcedure(procedure_name);
 
+  console.log(result);
+
   return {
     procedure_info: result[0][0],
     procedure_params: result[1],

@@ -32,7 +32,7 @@ else
 case when STR(kun_yu_persnr,12,0)<>'************'
 	then '0' + STR(kun_yu_persnr,12,0)
 else STR(kun_yu_persnr,13,0) end
-end																	[embg_pib],
+end																	[jmbg_pib],
 isnull(v.vtg_grund_adresse,'')										[adresa],
 isnull(v.vtg_grund_postort,'')										[mjesto],
 ISNULL(k.kun_telefon_1,'')											[telefon1],

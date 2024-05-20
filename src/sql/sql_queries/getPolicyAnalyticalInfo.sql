@@ -1,3 +1,21 @@
+if OBJECT_ID('tempdb..#NaciniPlacanja') is not null
+drop table #NaciniPlacanja
+
+
+CREATE TABLE #NaciniPlacanja (
+sifra int,
+opis varchar (50)
+)
+
+insert into #NaciniPlacanja
+values
+(0 , 'plaćanje odjednom'),
+(1 , 'godišnje plaćanje'),
+(2 , 'polugodisnje plaćanje'),
+(4 , 'kvartalno plaćanje'),
+(6 , 'mjesecno plaćanje')
+
+
 if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
 
@@ -14,7 +32,7 @@ select distinct
 	convert(varchar,convert(date,bra_storno_ab,104),102)   			[Datum_storna],
 	bra_storno_grund			[Storno_tip],
 	cast('' as vaRCHAR(400))							[StatusPolise],
-	vtg_zahlungsweise			[Nacin_Placanja],
+	np.opis			[Nacin_Placanja],
 	cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))		[Bruto_polisirana_premija],
 	cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[Neto_polisirana_premija],
 	cast(0 as decimal(18,2))							[Premija],
@@ -33,6 +51,7 @@ left join kunde k (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 left join kunde k1 (nolock) on k1.kun_kundenkz=v.vtg_kundenkz_2
 left join vertrag_kunde vk(nolock) on vk.vtk_obnr=b.bra_obnr and vk.vtk_kundenkz=k.kun_kundenkz and vk.vtk_kundenrolle='PA'  --Ugovarac
 left join vertrag_kunde vk1(nolock) on vk.vtk_obnr=b.bra_obnr and vk1.vtk_kundenkz=k1.kun_kundenkz and vk.vtk_kundenrolle='VN' --Osiguranik
+left join #NaciniPlacanja np on np.sifra=vtg_zahlungsweise
 where convert(varchar,convert(date,bra_vers_beginn,104),102) between @dateFrom and @dateTo
 and bra_obnr=@policy
 
@@ -140,6 +159,11 @@ update f
 set [Dani_Kasnjenja]=isnull((select DaniKasnjenja from #Kasnjenja where #Kasnjenja.polisa=f.[Broj_Polise]),0)
 from #temp f
 
+
+update #temp
+set [Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),104),
+[Istek_osiguranja]=convert(varchar,convert(date,[Istek_osiguranja],102),104),
+[Datum_storna]=convert(varchar,convert(date,[Datum_storna],102),104)
 
 select distinct * from #temp
 

@@ -3,6 +3,7 @@ const DBConnection = require('../DBConnection');
 const AppError = require('../../utils/AppError');
 const { getPolicyInfo } = require('./PoliciesQueries');
 const { Date, Exception } = require('../Queries/params');
+const { getMeService } = require('../../services/userServices');
 
 const excecuteQueryAndHandleErrors = async (query, params = []) => {
   const connection = new DBConnection(DB_CONFIG.sql);
@@ -21,13 +22,14 @@ const getEmployeeErrors = async (date) => {
 };
 
 const getErrorExceptions = async () => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('select * from gr_greske_izuzetci (nolock)');
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('getErrorExceptions.sql');
   return { exceptions: result, statusCode };
 };
 
-const addErrorException = async (policy, id, exception) => {
+const addErrorException = async (policy, id, exception, req) => {
   await getPolicyInfo(policy); // Check if policy exists
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('addErrorException.sql', Exception(policy, id, exception));
+  const { user } = await getMeService(req);
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('addErrorException.sql', Exception(policy, id, exception, user.ID));
   return { result, statusCode };
 };
 

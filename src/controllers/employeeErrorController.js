@@ -13,7 +13,7 @@ const getAllExceptions = catchAsync(async (req, res) => {
 });
 
 const addErrorException = catchAsync(async (req, res) => {
-  await handleResponse(employeeErrorQueries.addErrorException(req.query.policy, req.query.id, req.body.exception), res, { statusCode: 200 });
+  await handleResponse(employeeErrorQueries.addErrorException(req.query.policy, req.query.id, req.body.exception, req), res, { statusCode: 200 });
 });
 
 const deleteErrorException = catchAsync(async (req, res) => {

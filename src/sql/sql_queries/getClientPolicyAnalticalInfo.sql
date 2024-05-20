@@ -141,6 +141,8 @@ update f
 set [Dani_Kasnjenja]=isnull((select DaniKasnjenja from #Kasnjenja where #Kasnjenja.polisa=f.[Broj_Polise]),0)
 from #temp f
 
+
+
 select
 broj_polise,
 [Naziv_Branse],
