@@ -1,4 +1,4 @@
-select distinct
+select
 b.bra_obnr
 from kunde k(nolock)
 left join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
@@ -9,3 +9,4 @@ case when STR(kun_yu_persnr,12,0)<>'************'
 	then '0' + STR(kun_yu_persnr,12,0)
 else STR(kun_yu_persnr,13,0) end
 end			=@id
+GROUP BY b.bra_obnr

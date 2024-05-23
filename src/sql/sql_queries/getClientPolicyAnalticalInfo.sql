@@ -1,5 +1,25 @@
+
+if OBJECT_ID('tempdb..#NaciniPlacanja') is not null
+drop table #NaciniPlacanja
+
+
+CREATE TABLE #NaciniPlacanja (
+sifra int,
+opis varchar (50)
+)
+
+insert into #NaciniPlacanja
+values
+(0 , 'plaćanje odjednom'),
+(1 , 'godišnje plaćanje'),
+(2 , 'polugodisnje plaćanje'),
+(4 , 'kvartalno plaćanje'),
+(6 , 'mjesecno plaćanje')
+
+
 if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
+
 
 
 select distinct
@@ -13,9 +33,9 @@ select distinct
 	convert(varchar,convert(date,bra_storno_ab,104),102)   			[Datum_storna],
 	bra_storno_grund			[Storno_tip],
 	cast('' as vaRCHAR(400))							[StatusPolise],
-	vtg_zahlungsweise			[Nacin_Placanja],
-	(select sum(cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))) from branche b2 (nolock) where b2.bra_obnr=b.bra_obnr)		[Bruto_polisirana_premija],
-	(select sum(cast(replace(bra_nettopraemie1,',','.')as decimal(18,2)))  from branche b2 (nolock) where b2.bra_obnr=b.bra_obnr)			[Neto_polisirana_premija],
+	np.opis			[Nacin_Placanja],
+	cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))		[Bruto_polisirana_premija],
+	cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[Neto_polisirana_premija],
 	cast(0 as decimal(18,2))							[Premija],
 	vtg_pol_vkto				[Sifra_zastupnika],
 	isnull(ma_vorname,'')+ ' ' + isnull(ma_zuname,'') [Naziv_zastupnika],
@@ -32,18 +52,21 @@ left join kunde k (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 left join kunde k1 (nolock) on k1.kun_kundenkz=v.vtg_kundenkz_2
 left join vertrag_kunde vk(nolock) on vk.vtk_obnr=b.bra_obnr and vk.vtk_kundenkz=k.kun_kundenkz and vk.vtk_kundenrolle='PA'  --Ugovarac
 left join vertrag_kunde vk1(nolock) on vk.vtk_obnr=b.bra_obnr and vk1.vtk_kundenkz=k1.kun_kundenkz and vk.vtk_kundenrolle='VN' --Osiguranik
+left join #NaciniPlacanja np on np.sifra=vtg_zahlungsweise
 where convert(varchar,convert(date,bra_vers_beginn,104),102) between @dateFrom and @dateTo
-and bra_obnr=@id
-and v.vtg_pol_bran=bra_bran
+and bra_obnr=@policy
 
 
-if OBJECT_ID('tempdb..#praemienkonto') is not null
-drop table #praemienkonto
+
+create clustered index #tempIndx1
+on #temp([Broj_Polise])
 
 
-select * into #praemienkonto from praemienkonto p (nolock)
-where p.pko_obnr in (select distinct [Broj_Polise] from #temp)
-and convert(date,p.pko_wertedatum,104)<=convert(date,@dateTo,102)
+
+create nonclustered index #tempIndx2
+on #temp([Broj_Polise],Pocetak_osiguranja asc)
+INCLUDE ([Datum_storna],[Istek_osiguranja])
+
 
 
 
@@ -79,6 +102,14 @@ from #temp t
 where StatusPolise='Prekid' and Nacin_Placanja not in (0,1)
 
 
+--------- proporcionalno po bransama
+update t
+
+set Premija=case when (select sum(Bruto_polisirana_premija) from #temp t2 where t2.[Broj_Polise]=t.[Broj_Polise])=0 then 0 else  isnull((Premija*Bruto_polisirana_premija) /(select sum(Bruto_polisirana_premija) from #temp t2 where t2.[Broj_Polise]=t.[Broj_Polise]),0) end
+from #temp t
+where StatusPolise='Prekid' -- isnull([Datum_storna],'')<>isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo -- prekid
+and statuspolise<>'Stornirana od pocetka'
+
 
 
 ---Porez
@@ -109,19 +140,17 @@ polisa int,
 DaniKasnjenja int
 )
 
+declare @policy2 int
 
 set @dateTo=CONVERT(varchar,CONVERT(date,@dateTo,102),104)
 
-
-declare @policy int
-
 DECLARE polise CURSOR FOR
 
-select distinct [Broj_Polise] from #temp
+select  [Broj_Polise] from #temp group by [Broj_Polise]
 
 
 OPEN polise
-FETCH NEXT FROM polise INTO @policy
+FETCH NEXT FROM polise INTO @policy2
 
 
 WHILE @@FETCH_STATUS = 0
@@ -131,7 +160,7 @@ BEGIN
 	insert into #Kasnjenja
 	exec Dani_kasnjenja_polisa @dateTo,@policy
 
-	FETCH NEXT FROM polise INTO @policy
+	FETCH NEXT FROM polise INTO @policy2
 END
 
 CLOSE polise
@@ -142,15 +171,9 @@ set [Dani_Kasnjenja]=isnull((select DaniKasnjenja from #Kasnjenja where #Kasnjen
 from #temp f
 
 
+update #temp
+set [Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),104),
+[Istek_osiguranja]=convert(varchar,convert(date,[Istek_osiguranja],102),104),
+[Datum_storna]=convert(varchar,convert(date,[Datum_storna],102),104)
 
-select
-broj_polise,
-[Naziv_Branse],
-[Nacin_Placanja],
-Bruto_polisirana_premija,
-Neto_polisirana_premija,
-Dani_Kasnjenja,
-(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2) ukupna_potrazivanja,
-(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))-cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from #praemienkonto p2) dospjela_potrazivanja
-
-from #temp t
+select * from #temp

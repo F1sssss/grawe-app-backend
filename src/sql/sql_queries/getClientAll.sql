@@ -20,7 +20,7 @@ if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
 
 
-select distinct
+select 
 kun_zuname + ' ' + isnull(kun_vorname,'')							[klijent],
 kun_geburtsdatum													[datum_rodjenja],
 case when kun_vorname is null then cast(kun_steuer_nr as varchar)
@@ -55,16 +55,26 @@ kun_kundenkz,
 bra_vertragid
 into #temp
 from kunde k(nolock)
-left join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
-left join branche b (nolock) on b.bra_vertragid=v.vtg_vertragid
-left join #NaciniPlacanja np on np.sifra=vtg_zahlungsweise
+join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
+join branche b (nolock) on b.bra_vertragid=v.vtg_vertragid
+join #NaciniPlacanja np on np.sifra=vtg_zahlungsweise
 where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
       else
       case when STR(kun_yu_persnr,12,0)<>'************'
       	then '0' + STR(kun_yu_persnr,12,0)
       else STR(kun_yu_persnr,13,0) end
       end		=@id
+OPTION(MAXDOP 1)
 
+
+create clustered index #tempIndx1
+on #temp(polisa)
+
+
+
+create nonclustered index #tempIndx2
+on #temp(polisa,Pocetak_osiguranja asc)
+INCLUDE ([Datum_storna],[Istek_osiguranja])
 
 
 if OBJECT_ID('tempdb..#praemienkonto') is not null
@@ -74,6 +84,20 @@ drop table #praemienkonto
 select * into #praemienkonto from praemienkonto p (nolock)
 where p.pko_obnr in (select distinct polisa from #temp)
 and convert(date,p.pko_wertedatum,104)<=convert(date,@dateTo,102)
+
+
+
+CREATE NONCLUSTERED INDEX #indx1
+ON #praemienkonto (pko_obnr,pko_wertedatum)
+INCLUDE (
+pko_betragsoll,
+pko_betraghaben,
+pko_wertedatumsaldo
+)
+
+CREATE CLUSTERED INDEX #pko_clustered_inx_obnr
+ON #praemienkonto (pko_obnr)
+
 
 
 update t
@@ -134,34 +158,34 @@ from #temp t
 -- from #temp t
 
 delete from #temp
-where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid)
+where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid);
 
 
+
+WITH CTE_Praemienkonto AS (
 select t.*,
 convert(varchar,convert(date,pko_wertedatum,104),102) datum_dokumenta,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo,
 (select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_dospjelo,
-(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_placeno,
-cast(0 as decimal(18,2))		                                        ukupno_duguje,
-cast(0 as decimal(18,2))                                                ukupno_nedospjelo,
+(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
 (select SUM(neto_polisirana_premija) from #temp)                        klijent_neto_polisirana_premija,
 (select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))-cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from #praemienkonto p2) klijent_dospjela_potrazivanja,
 (select SUM(ukupna_potrazivanja) from #temp)                            klijent_ukupna_potrazivanja
-into #temp2
 from #praemienkonto p(nolock)
 right join #temp t on p.pko_obnr=t.polisa
-order by polisa,Pocetak_osiguranja asc,pko_buch_nr asc
-
-
-update t
-set ukupno_duguje=case when ukupno_dospjelo-ukupno_placeno<0 then 0.0 else ukupno_dospjelo-ukupno_placeno end
-from #temp2 t
-
-update #temp2
-set ukupno_nedospjelo = bruto_polisirana_premija - ukupno_placeno
-
-
-select * from #temp2
+),
+CTE_Final AS (
+    SELECT 
+        CTE_Praemienkonto.*,
+        CASE 
+            WHEN ukupno_dospjelo - ukupno_placeno < 0 THEN 0.0 
+            ELSE ukupno_dospjelo - ukupno_placeno 
+        END AS ukupno_duguje,
+        bruto_polisirana_premija - ukupno_placeno AS ukupno_nedospjelo
+    FROM CTE_Praemienkonto
+)
+SELECT * 
+FROM CTE_Final
