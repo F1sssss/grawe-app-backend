@@ -31,7 +31,7 @@ select distinct
 	convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[Istek_osiguranja],
 	convert(varchar,convert(date,bra_storno_ab,104),102)   			[Datum_storna],
 	bra_storno_grund			[Storno_tip],
-	cast('' as vaRCHAR(400))							[StatusPolise],
+	cast('' as vaRCHAR(400))							[Status_Polise],
 	np.opis			[Nacin_Placanja],
 	cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))		[Bruto_polisirana_premija],
 	cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[Neto_polisirana_premija],
@@ -73,7 +73,7 @@ from #temp t
 
 
 update t
-set StatusPolise=
+set Status_Polise=
 case when isnull([Datum_storna],'')=isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo then 'Aktivna' -- or isnull([Istek_osiguranja],'')>@dateTo  then 'Aktivna'
 	 when isnull([Datum_storna],'')<isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo then 'Aktivna'
 	 when isnull([Datum_storna],'')=isnull([Pocetak_osiguranja],'') then 'Stornirana od pocetka'
@@ -88,7 +88,7 @@ from #temp t
 update t
 set Premija=(select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr=t.[Broj_Polise])
 from #temp t
-where StatusPolise='Prekid' and Nacin_Placanja not in (0,1)
+where Status_Polise='Prekid' and Nacin_Placanja not in (0,1)
 
 
 --------- proporcionalno po bransama
@@ -96,8 +96,8 @@ update t
 
 set Premija=case when (select sum(Bruto_polisirana_premija) from #temp t2 where t2.[Broj_Polise]=t.[Broj_Polise])=0 then 0 else  isnull((Premija*Bruto_polisirana_premija) /(select sum(Bruto_polisirana_premija) from #temp t2 where t2.[Broj_Polise]=t.[Broj_Polise]),0) end
 from #temp t
-where StatusPolise='Prekid' -- isnull([Datum_storna],'')<>isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo -- prekid
-and statuspolise<>'Stornirana od pocetka'
+where Status_Polise='Prekid' -- isnull([Datum_storna],'')<>isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo -- prekid
+and status_polise<>'Stornirana od pocetka'
 
 
 

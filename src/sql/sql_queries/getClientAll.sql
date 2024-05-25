@@ -81,14 +81,14 @@ if OBJECT_ID('tempdb..#praemienkonto') is not null
 drop table #praemienkonto
 
 
-select * into #praemienkonto from praemienkonto p (nolock)
+select *,convert(date,p.pko_wertedatum,104) wertedatum into #praemienkonto from praemienkonto p (nolock)
 where p.pko_obnr in (select distinct polisa from #temp)
 and convert(date,p.pko_wertedatum,104)<=convert(date,@dateTo,102)
 
 
 
 CREATE NONCLUSTERED INDEX #indx1
-ON #praemienkonto (pko_obnr,pko_wertedatum)
+ON #praemienkonto (pko_obnr,wertedatum asc,pko_buch_nr desc)
 INCLUDE (
 pko_betragsoll,
 pko_betraghaben,
@@ -164,15 +164,16 @@ where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and 
 
 WITH CTE_Praemienkonto AS (
 select t.*,
-convert(varchar,convert(date,pko_wertedatum,104),102) datum_dokumenta,
-cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    duguje,
-cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    potrazuje,
+--convert(varchar,convert(date,pko_wertedatum,104),102) datum_dokumenta,
+pko_wertedatum                                                        datum_dokumenta,
+cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    duguje,
+cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo,
-(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_dospjelo,
-(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
+(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_dospjelo,
+(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
 (select SUM(neto_polisirana_premija) from #temp)                        klijent_neto_polisirana_premija,
-(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))-cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from #praemienkonto p2) klijent_dospjela_potrazivanja,
+(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))-cast(replace(pko_betraghaben,',','.') as decimal(18,2))) from #praemienkonto p2) klijent_dospjela_potrazivanja,
 (select SUM(ukupna_potrazivanja) from #temp)                            klijent_ukupna_potrazivanja
 from #praemienkonto p(nolock)
 right join #temp t on p.pko_obnr=t.polisa
@@ -184,7 +185,7 @@ CTE_Final AS (
             WHEN ukupno_dospjelo - ukupno_placeno < 0 THEN 0.0 
             ELSE ukupno_dospjelo - ukupno_placeno 
         END AS ukupno_duguje,
-        bruto_polisirana_premija - ukupno_placeno AS ukupno_nedospjelo
+        bruto_polisirana_premija - ukupno_dospjelo AS ukupno_nedospjelo
     FROM CTE_Praemienkonto
 )
 SELECT * 
