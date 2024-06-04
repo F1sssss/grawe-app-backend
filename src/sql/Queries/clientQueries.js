@@ -35,7 +35,7 @@ const getClientHistory = async (id, dateFrom, dateTo) => {
 const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
   let { client, statusCode } = await excecuteQueryAndHandleErrors('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   if (!Array.isArray(client)) client = [client];
-  const policies = await excecuteQueryAndHandleErrors('getclientActivePolicies.sql', Client(id));
+  const policies = await excecuteQueryAndHandleErrors('getclientActivePolicies.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
 
   const {
     klijent_bruto_polisirana_premija,
