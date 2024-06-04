@@ -54,7 +54,7 @@ left join vertrag_kunde vk(nolock) on vk.vtk_obnr=b.bra_obnr and vk.vtk_kundenkz
 left join vertrag_kunde vk1(nolock) on vk.vtk_obnr=b.bra_obnr and vk1.vtk_kundenkz=k1.kun_kundenkz and vk.vtk_kundenrolle='VN' --Osiguranik
 left join #NaciniPlacanja np on np.sifra=vtg_zahlungsweise
 where convert(varchar,convert(date,bra_vers_beginn,104),102) between @dateFrom and @dateTo
-and bra_obnr=@policy
+and bra_obnr=@id
 
 
 
@@ -158,7 +158,7 @@ BEGIN
 
 
 	insert into #Kasnjenja
-	exec Dani_kasnjenja_polisa @dateTo,@policy
+	exec Dani_kasnjenja_polisa @dateTo,@id
 
 	FETCH NEXT FROM polise INTO @policy2
 END
