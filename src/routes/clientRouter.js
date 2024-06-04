@@ -11,6 +11,7 @@ router.get('/:id/info', clientController.getClientInfo);
 
 router.get('/:id/history/xls/download', clientController.getClientHistoryExcelDownload);
 router.get('/:id/history/pdf/download', clientController.getClientHistoryPDFDownload);
+router.get('/:id/finhistory/pdf/download', clientController.getClientFinancialHistoryPDFDownload);
 
 router.get('/:id/analytics', clientController.getClientAnalyticalInfo);
 router.get('/policy/:id', clientController.getClientPolicyAnalyticalInfo);

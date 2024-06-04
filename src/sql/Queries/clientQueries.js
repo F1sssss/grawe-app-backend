@@ -35,6 +35,8 @@ const getClientHistory = async (id, dateFrom, dateTo) => {
 const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
   let { client, statusCode } = await excecuteQueryAndHandleErrors('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   if (!Array.isArray(client)) client = [client];
+  const policies = await excecuteQueryAndHandleErrors('getclientActivePolicies.sql', Client(id));
+
   const {
     klijent_bruto_polisirana_premija,
     klijent_neto_polisirana_premija,
@@ -50,6 +52,7 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
       dani_kasnjenja,
       klijent_ukupna_potrazivanja,
       klijent_dospjela_potrazivanja,
+      policies: Array.isArray(policies['client']) ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? [] : [policies['client']['bra_obnr']],
     },
     statusCode,
   };
@@ -65,10 +68,22 @@ const getClientPolicyAnalticalInfo = async (id, dateFrom, dateTo) => {
   return { client, statusCode };
 };
 
+const getClientFinancialHistory = async (id, dateFrom, dateTo) => {
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientFinancialHistory.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  return { clientFinHistory: client, statusCode };
+};
+
+const getClientFinancialInfo = async (id, dateFrom, dateTo) => {
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientFinancialInfo.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  return { clientFinInfo: client, statusCode };
+};
+
 module.exports = {
   getClientInfo,
   getClientHistory,
   getClientAnalyticalInfo,
   getAllClientInfo,
   getClientPolicyAnalticalInfo,
+  getClientFinancialHistory,
+  getClientFinancialInfo,
 };

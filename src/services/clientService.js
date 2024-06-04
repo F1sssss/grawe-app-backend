@@ -2,6 +2,7 @@ const cacheQuery = require('../utils/cacheQuery');
 const ClientQueries = require('../sql/Queries/clientQueries');
 const generateExcelFile = require('../utils/Exports/ExcelExport');
 const Invoice = require('../utils/Exports/createInvoice');
+const FinancialInvoice = require('../utils/Exports/createFinancialInvoice');
 
 function seperateClientPolicies(client) {
   const arraysByPolisa = {};
@@ -76,6 +77,26 @@ const getAllClientInfoService = async (id, dateFrom, dateTo) => {
   return { client, statusCode: 200 };
 };
 
+const getClientFinancialHistoryPDFDownloadService = async (res, id, dateFrom, dateTo) => {
+  res.setHeader('Content-Type', 'application/pdf');
+  let filename = `attachment; filename="KarticaKlijenta-${id}-${dateTo}.pdf"`;
+  res.setHeader('Content-Disposition', filename);
+  const cacheKey = `client-anlaytics-all-${id}-${dateFrom}-${dateTo}`;
+  let { client } = await getClientFinancialInfoService(id, dateFrom, dateTo);
+  return ({ pdfBuffer, statusCode } = await FinancialInvoice.createClientInvoice(client));
+};
+
+const getClientFinancialInfoService = async (id, dateFrom, dateTo) => {
+  // const cacheKey = `client-financial-info-${id}-${dateFrom}-${dateTo}`;
+  //  let { client } = await cacheQuery(cacheKey, ClientQueries.getClientFinancialHistory(id, dateFrom, dateTo));
+  let { clientFinHistory } = await ClientQueries.getClientFinancialHistory(id, dateFrom, dateTo);
+
+  let { clientFinInfo } = await ClientQueries.getClientFinancialInfo(id, dateFrom, dateTo);
+  const { client } = await getClientInfoService(id);
+
+  return { client: { finHistory: clientFinHistory, info: { ...client }, finInfo: clientFinInfo } };
+};
+
 module.exports = {
   getClientHistoryService,
   getClientInfoService,
@@ -85,4 +106,6 @@ module.exports = {
   getAllClientAnalyticsService,
   getAllClientInfoService,
   getClientPolicyAnalyticalInfoService,
+  getClientFinancialHistoryPDFDownloadService,
+  getClientFinancialInfoService,
 };

@@ -1,3 +1,22 @@
+if OBJECT_ID('tempdb..#NaciniPlacanja') is not null
+drop table #NaciniPlacanja
+
+
+CREATE TABLE #NaciniPlacanja (
+sifra int,
+opis varchar (50)
+)
+
+insert into #NaciniPlacanja
+values
+(0 , 'plaćanje odjednom'),
+(1 , 'godišnje plaćanje'),
+(2 , 'polugodisnje plaćanje'),
+(4 , 'kvartalno plaćanje'),
+(6 , 'mjesecno plaćanje')
+
+
+
 
 if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
@@ -22,7 +41,7 @@ convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja]
 convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
 convert(varchar,convert(date,bra_storno_ab,104),102)   				[datum_storna],
 cast(0 as decimal(18,2))											[premija],
-vtg_zahlungsweise													[nacin_placanja],
+np.opis																[nacin_placanja],
 bra_vv_ueb															[naziv_branse],
 cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))			[bruto_polisirana_premija],
 cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[neto_polisirana_premija],
@@ -37,6 +56,7 @@ into #temp
 from kunde k(nolock)
 left join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 left join branche b (nolock) on b.bra_vertragid=v.vtg_vertragid
+left join #NaciniPlacanja np on np.sifra=vtg_zahlungsweise
 where bra_obnr=@policy
 and v.vtg_pol_bran=bra_bran
 
@@ -101,14 +121,14 @@ convert(varchar,convert(date,pko_wertedatum,104),102) datum_dokumenta,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo,
-(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_dospjelo,
-(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_placeno,
-cast(0 as decimal(18,2))		                                        ukupno_dug,
-cast(0 as decimal(18,2))                                                ukupno_nedospjelo,
-(select SUM(bruto_polisirana_premija) from (select polisa,max(bruto_polisirana_premija) bruto_polisirana_premija  from #temp group by polisa)a) klijent_bruto_polisirana_premija,
-(select SUM(neto_polisirana_premija) from (select polisa,max(neto_polisirana_premija) neto_polisirana_premija  from #temp group by polisa)a) klijent_neto_polisirana_premija,
-(select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))-cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from #praemienkonto p2) klijent_dospjela_potrazivanja,
-(select SUM(ukupna_potrazivanja) from (select polisa,max(ukupna_potrazivanja) ukupna_potrazivanja  from #temp group by polisa)a) klijent_ukupna_potrazivanja
+ISNULL((select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr),0) ukupno_dospjelo,
+ISNULL((select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr),0) ukupno_placeno,
+ISNULL(cast(0 as decimal(18,2)),0)		                                            ukupno_duguje,
+ISNULL(cast(0 as decimal(18,2)),0)                                                  ukupno_nedospjelo,
+ISNULL((select SUM(bruto_polisirana_premija) from (select polisa,max(bruto_polisirana_premija) bruto_polisirana_premija  from #temp group by polisa)a),0) klijent_bruto_polisirana_premija,
+ISNULL((select SUM(neto_polisirana_premija) from (select polisa,max(neto_polisirana_premija) neto_polisirana_premija  from #temp group by polisa)a),0) klijent_neto_polisirana_premija,
+ISNULL((select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))-cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from #praemienkonto p2),0) klijent_dospjela_potrazivanja,
+ISNULL((select SUM(ukupna_potrazivanja) from (select polisa,max(ukupna_potrazivanja) ukupna_potrazivanja  from #temp group by polisa)a),0) klijent_ukupna_potrazivanja
 from #praemienkonto p(nolock)
 right join #temp t on p.pko_obnr=t.polisa
 order by polisa,Pocetak_osiguranja asc,pko_buch_nr asc

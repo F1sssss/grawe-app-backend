@@ -292,16 +292,16 @@ function generateInvoiceTable(doc, invoice) {
     generateHr(doc, position + 20);
   }
 
-  const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 750;
+  const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 750 < 10 ? (doc.addPage(), 30) : (invoiceTableTop + (i + 1) * 30) % 750;
   generateTableRow(doc, subtotalPosition, '', '', 'Ukupno dospjelo', '', formatCurrency(invoice.ukupno_dospjelo));
 
-  const paidToDatePosition = (subtotalPosition + 20) % 750;
+  const paidToDatePosition = (subtotalPosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
   generateTableRow(doc, paidToDatePosition, '', '', 'Ukupno plaćeno', '', formatCurrency(invoice.ukupno_placeno));
 
-  const duePosition = (paidToDatePosition + 20) % 750;
+  const duePosition = (paidToDatePosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (paidToDatePosition + 20) % 750;
   generateTableRow(doc, duePosition, '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_duguje));
 
-  const totalRemaining = (duePosition + 20) % 750;
+  const totalRemaining = (duePosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (duePosition + 20) % 750;
   generateTableRow(doc, totalRemaining, '', '', 'Ukupno nedospjelo', '', formatCurrency(invoice.ukupno_nedospjelo));
 }
 

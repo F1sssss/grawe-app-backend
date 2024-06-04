@@ -7,7 +7,6 @@ const DB_CONFIG = require('../DBconfig');
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
 const { UserSignup, UserMigration } = require('./params');
-const { getDistinctObjects } = require('../../utils/Exports/createInvoice');
 
 const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);

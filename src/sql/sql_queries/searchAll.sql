@@ -9,6 +9,7 @@ right join kunde k (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
 
 */
 
+/*
 WITH CTE_Kunde AS (
     SELECT
         k.kun_kundenkz,
@@ -61,6 +62,8 @@ JOIN
     CTE_Vertrag v ON k.kun_kundenkz = v.vtg_kundenkz_1
 LEFT JOIN
     CTE_Branche b ON b.bra_vertragid = v.vtg_vertragid
+*/
 
+select * from gr_clients_all
 
 --	select * from gr_v_clients_all
