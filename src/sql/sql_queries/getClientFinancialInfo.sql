@@ -23,6 +23,9 @@ into #temp
 from gr_clients_all a
 left join branche b on b.bra_obnr=a.polisa
 where a.[embg/pib]=@id
+and
+(exists (select 1 from praemienkonto pk where pk.pko_obnr=b.bra_obnr  and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,104) and convert(date,@dateTo,104)) or
+isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,104) and p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
 OPTION(MAXDOP 1)
 
 
@@ -76,10 +79,15 @@ from #temp t
 where Bransa in (78,79)
 
 
-select
-sum(bruto_polisirana_premija)   ukupno_dospjelo,
-sum(dospjela_potrazivanja)      ukupno_nedospjelo
-from #temp
+
+
+;WITH CTE AS(
+select polisa,MAX(bruto_polisirana_premija) premija,max(dospjela_potrazivanja) dospjela_potrazivanja from #temp
+group by polisa
+)
+select sum(premija) - (select sum(cast(replace(pko_betraghaben,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) ukupno_nedospjelo,
+sum(dospjela_potrazivanja) ukupno_dospjelo  from CTE
+
 
 
 

@@ -11,7 +11,6 @@ function seperateClientPolicies(client) {
     const policy = item.polisa;
     !arraysByPolisa[policy] ? (arraysByPolisa[policy] = []) : undefined;
     arraysByPolisa[policy].push(item);
-    arraysByPolisa[policy].sort((a, b) => a.datum_dokumenta - b.datum_dokumenta);
   });
 
   return Object.values(arraysByPolisa);

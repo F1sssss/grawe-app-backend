@@ -109,9 +109,25 @@ function generateInvoiceTable(doc, invoice) {
     );
 
     generateHr(doc, position + 20);
+
+    if (i === invoice.length - 1) {
+      let position2 = (position + 30) % 750 < 20 ? (doc.addPage(), 30) : (position + 30) % 750;
+
+      generateTableRow(
+        doc,
+        position2,
+        'TOTAL:',
+        '',
+        formatCurrency(addUpRecap(invoice, 3)),
+        formatCurrency(addUpRecap(invoice, 4)),
+        formatCurrency(item.saldo),
+      );
+
+      generateHr(doc, position2 + 20);
+    }
   }
 
-  const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 750 < 20 ? (doc.addPage(), 30) : (invoiceTableTop + (i + 1) * 30) % 750;
+  const subtotalPosition = (invoiceTableTop + (i + 2) * 30) % 750 < 20 ? (doc.addPage(), 30) : (invoiceTableTop + (i + 2) * 30) % 750;
   generateTableRow(doc, subtotalPosition, '', '', 'Ukupni dug', '', formatCurrency(invoice[invoice.length - 1].saldo));
 
   const paidToDatePosition = (subtotalPosition + 20) % 750 < 20 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
@@ -133,7 +149,24 @@ function generateTableRow(doc, y, datum_dokumenta, broj_polise, duguje, potrazuj
 }
 
 function formatCurrency(cents) {
-  return '€' + (cents / 1).toFixed(2);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 1);
+}
+function addUpRecap(invoice, position) {
+  let i;
+  let ukupno = 0;
+
+  for (i = 0; i < invoice.length; i++) {
+    const item = invoice[i];
+    const keys = Object.keys(item);
+    ukupno += item[keys[position]];
+  }
+
+  return ukupno;
 }
 
 module.exports = { createClientInvoice };

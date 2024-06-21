@@ -78,7 +78,7 @@ function createClientInvoice(client) {
       clientData.ukupno_placeno = client[i][0].ukupno_placeno;
       clientData.ukupno_duguje = client[i][0].ukupno_duguje;
       clientData.ukupno_nedospjelo = client[i][0].ukupno_nedospjelo;
-      clientData.premija = client[i][0].bruto_polisirana_premija;
+      clientData.premija = client[i][0].premija;
       clientData.nacin_placanja = client[i][0].nacin_placanja;
       clientData.naziv_branse = client[i][0].naziv_branse;
 
@@ -86,10 +86,10 @@ function createClientInvoice(client) {
         clientData.broj_polise,
         clientData.naziv_branse,
         clientData.premija,
-        clientData.ukupno_dospjelo,
         clientData.ukupno_placeno,
-        clientData.ukupno_duguje,
+        clientData.ukupno_dospjelo,
         clientData.ukupno_nedospjelo,
+        clientData.ukupno_duguje,
       ]);
 
       generateHeader(doc);
@@ -201,7 +201,7 @@ function generateInvoiceTableRecap(doc, invoice) {
   let position = 0;
 
   doc.font('./src/assets/Roboto-Bold.ttf');
-  generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Zaduženo', 'Plaćeno', 'Dospjelo', 'Nedospjelo');
+  generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Uplaćeno', 'Dospjelo', 'Nedospjelo', 'Duguje');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('./src/assets/Roboto-Regular.ttf');
 
@@ -215,11 +215,11 @@ function generateInvoiceTableRecap(doc, invoice) {
       position,
       item[0],
       item[1],
-      formatCurrency(item[2]),
-      formatCurrency(item[3]),
-      formatCurrency(item[4]),
-      formatCurrency(item[5]),
-      formatCurrency(item[6]),
+      formatCurrency(item[2]), // Premija
+      formatCurrency(item[3]), // Uplaćeno
+      formatCurrency(item[4]), // Dospjelo
+      formatCurrency(item[5]), // Nedospjelo
+      formatCurrency(item[6]), // Duguje
     );
 
     generateHr(doc, position + 20);
@@ -293,16 +293,16 @@ function generateInvoiceTable(doc, invoice) {
   }
 
   const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 750 < 10 ? (doc.addPage(), 30) : (invoiceTableTop + (i + 1) * 30) % 750;
-  generateTableRow(doc, subtotalPosition, '', '', 'Ukupno dospjelo', '', formatCurrency(invoice.ukupno_dospjelo));
+  generateTableRow(doc, subtotalPosition, '', '', 'Ukupno uplaćeno', '', formatCurrency(invoice.ukupno_placeno));
 
   const paidToDatePosition = (subtotalPosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
-  generateTableRow(doc, paidToDatePosition, '', '', 'Ukupno plaćeno', '', formatCurrency(invoice.ukupno_placeno));
+  generateTableRow(doc, paidToDatePosition, '', '', 'Ukupni dug', '', formatCurrency(invoice.ukupno_duguje));
 
   const duePosition = (paidToDatePosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (paidToDatePosition + 20) % 750;
-  generateTableRow(doc, duePosition, '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_duguje));
+  generateTableRow(doc, duePosition, '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_dospjelo));
 
   const totalRemaining = (duePosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (duePosition + 20) % 750;
-  generateTableRow(doc, totalRemaining, '', '', 'Ukupno nedospjelo', '', formatCurrency(invoice.ukupno_nedospjelo));
+  generateTableRow(doc, totalRemaining, '', '', 'Nedospjeli dug', '', formatCurrency(invoice.ukupno_nedospjelo));
 }
 
 function generateTableRow(doc, y, datum_dokumenta, broj_polise, duguje, potrazuje, saldo) {
@@ -321,7 +321,12 @@ function generateHr(doc, y) {
 }
 
 function formatCurrency(cents) {
-  return '€' + (cents / 1).toFixed(2);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 1);
 }
 
 function extractClientInfo(client) {
@@ -393,7 +398,14 @@ function getDistinctObjects(jsonArray, keys) {
     return result;
   }, {});
 
-  return Object.values(distinctObjects).sort((a, b) => (a.datum_dokumenta >= b.datum_dokumenta ? 1 : -1));
+  return Object.values(distinctObjects).sort((a, b) => {
+    const toDate = (dateStr) => {
+      const [day, month, year] = dateStr.split('.').map(Number);
+      return new Date(year, month - 1, day + 1);
+    };
+
+    toDate(a.datum_dokumenta) >= toDate(b.datum_dokumenta) ? 1 : -1;
+  });
 }
 
 module.exports = {

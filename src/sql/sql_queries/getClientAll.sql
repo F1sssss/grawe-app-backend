@@ -160,15 +160,49 @@ from #temp t
 delete from #temp
 where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid);
 
+update t
+set Premija=
+case
+	 when isnull([Datum_storna],'')=isnull([Istek_osiguranja],'') then Bruto_polisirana_premija
+	 when isnull([Datum_storna],'')=isnull([Pocetak_osiguranja],'') then 0
+	 when isnull([Datum_storna],'')>isnull([Pocetak_osiguranja],'') and isnull([Datum_storna],'')<=isnull([Istek_osiguranja],'') then isnull(ABS((select sum(Bruto_polisirana_premija) from #temp t2 where t2.polisa=t.polisa)-
+	 (select ABS(sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2)))) from praemienkonto pk (nolock) where convert(varchar,convert(date,pko_wertedatum,104),102)>=cast(t.Datum_storna as varchar) and t.polisa=pk.pko_obnr and cast(replace(pko_betragsoll,',','.') as decimal(18,2))<0 )),0)
+	 else 0
+end
+from #temp t
 
 
-WITH CTE_Praemienkonto AS (
+update t
+set Premija=(select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr=t.polisa and pko_g_fall<>'SVOR')
+from #temp t
+where status_polise='Prekid' --and Nacin_Placanja not in (0,1)
+
+
+update t
+
+set Premija=Neto_polisirana_premija
+from #temp t
+where storno_tip=2 and Bransa=11 -- and Nacin_Placanja in (0,1)
+
+
+update t
+
+set Premija=Premija * cast(CEILING(cast(DATEDIFF(day,convert(date,[Pocetak_osiguranja],102),convert(date,@dateTo,102)) as decimal(18,2))/365) as int)
+from #temp t
+where Bransa in (78,79)
+
+update #temp
+set [Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),104),
+[Istek_osiguranja]=convert(varchar,convert(date,[Istek_osiguranja],102),104),
+[Datum_storna]=convert(varchar,convert(date,[Datum_storna],102),104)
+
+;WITH CTE_Praemienkonto AS (
 select t.*,
---convert(varchar,convert(date,pko_wertedatum,104),102) datum_dokumenta,
-pko_wertedatum                                                        datum_dokumenta,
+--convert(varchar,convert(date,pko_wertedatum,104),102)                   datum_dokumenta,
+pko_wertedatum                                                          datum_dokumenta,
 cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    potrazuje,
-cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))		        saldo,
+cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1	        saldo,
 (select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_dospjelo,
 (select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
@@ -181,12 +215,19 @@ right join #temp t on p.pko_obnr=t.polisa
 CTE_Final AS (
     SELECT 
         CTE_Praemienkonto.*,
-        CASE 
-            WHEN ukupno_dospjelo - ukupno_placeno < 0 THEN 0.0 
-            ELSE ukupno_dospjelo - ukupno_placeno 
-        END AS ukupno_duguje,
-        bruto_polisirana_premija - ukupno_dospjelo AS ukupno_nedospjelo
+ --       CASE
+ --           WHEN ukupno_dospjelo - ukupno_placeno < 0 THEN 0.0
+ --           ELSE ukupno_dospjelo - ukupno_placeno
+ --       END AS ukupno_duguje,
+        case when premija - ukupno_dospjelo <0 then 0
+        else premija - ukupno_dospjelo
+        END AS ukupno_nedospjelo,
+        case when premija - ukupno_placeno < 0 then 0
+        else premija - ukupno_placeno
+        END AS ukupno_duguje
+
     FROM CTE_Praemienkonto
 )
-SELECT * 
+SELECT *
 FROM CTE_Final
+order by polisa,convert(date,datum_dokumenta,104) asc
