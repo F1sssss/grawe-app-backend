@@ -20,7 +20,7 @@ if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
 
 
-select 
+select
 kun_zuname + ' ' + isnull(kun_vorname,'')							[klijent],
 kun_geburtsdatum													[datum_rodjenja],
 case when kun_vorname is null then cast(kun_steuer_nr as varchar)
@@ -64,6 +64,9 @@ where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
       	then '0' + STR(kun_yu_persnr,12,0)
       else STR(kun_yu_persnr,13,0) end
       end		=@id
+and
+(exists (select 1 from praemienkonto pk where pk.pko_obnr=b.bra_obnr  and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,102) and convert(date,@dateTo,102)) or
+isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,102) and p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
 OPTION(MAXDOP 1)
 
 
@@ -203,7 +206,8 @@ pko_wertedatum                                                          datum_do
 cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1	        saldo,
-(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_dospjelo,
+(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_zaduzeno,
+(select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr order by convert(date,pko_wertedatum,104) desc) ukupno_dospjelo,
 (select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
 (select SUM(neto_polisirana_premija) from #temp)                        klijent_neto_polisirana_premija,
@@ -213,14 +217,14 @@ from #praemienkonto p(nolock)
 right join #temp t on p.pko_obnr=t.polisa
 ),
 CTE_Final AS (
-    SELECT 
+    SELECT
         CTE_Praemienkonto.*,
  --       CASE
  --           WHEN ukupno_dospjelo - ukupno_placeno < 0 THEN 0.0
  --           ELSE ukupno_dospjelo - ukupno_placeno
  --       END AS ukupno_duguje,
-        case when premija - ukupno_dospjelo <0 then 0
-        else premija - ukupno_dospjelo
+        case when premija - ukupno_placeno - ukupno_dospjelo <0 then 0
+        else premija - ukupno_placeno - ukupno_dospjelo
         END AS ukupno_nedospjelo,
         case when premija - ukupno_placeno < 0 then 0
         else premija - ukupno_placeno
