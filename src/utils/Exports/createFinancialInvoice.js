@@ -89,7 +89,7 @@ function generateInvoiceTable(doc, invoice) {
   const invoiceTableTop = 330;
 
   doc.font('./src/assets/Roboto-Bold.ttf');
-  generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Polise', 'Zaduženo', 'Uplaćeno', 'Saldo');
+  generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Polise', 'Broj Ponude', 'Zaduženo', 'Uplaćeno', 'Saldo');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('./src/assets/Roboto-Regular.ttf');
 
@@ -103,6 +103,7 @@ function generateInvoiceTable(doc, invoice) {
       position,
       item.datum_dokumenta,
       item.broj_dokumenta,
+      item.broj_ponude,
       formatCurrency(item.zaduzeno),
       formatCurrency(item.uplaceno),
       formatCurrency(item.saldo),
@@ -118,8 +119,9 @@ function generateInvoiceTable(doc, invoice) {
         position2,
         'TOTAL:',
         '',
-        formatCurrency(addUpRecap(invoice, 3)),
+        '',
         formatCurrency(addUpRecap(invoice, 4)),
+        formatCurrency(addUpRecap(invoice, 5)),
         formatCurrency(item.saldo),
       );
 
@@ -128,21 +130,22 @@ function generateInvoiceTable(doc, invoice) {
   }
 
   const subtotalPosition = (invoiceTableTop + (i + 2) * 30) % 750 < 20 ? (doc.addPage(), 30) : (invoiceTableTop + (i + 2) * 30) % 750;
-  generateTableRow(doc, subtotalPosition, '', '', 'Ukupni dug', '', formatCurrency(invoice[invoice.length - 1].saldo));
+  generateTableRow(doc, subtotalPosition, '', '', '', 'Ukupni dug', '', formatCurrency(invoice[invoice.length - 1].saldo));
 
   const paidToDatePosition = (subtotalPosition + 20) % 750 < 20 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
-  generateTableRow(doc, paidToDatePosition, '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_dospjelo));
+  generateTableRow(doc, paidToDatePosition, '', '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_dospjelo));
 
   const duePosition = (paidToDatePosition + 20) % 750 < 20 ? (doc.addPage(), 30) : (paidToDatePosition + 20) % 750;
-  generateTableRow(doc, duePosition, '', '', 'Nedospjeli dug', '', formatCurrency(invoice.ukupno_nedospjelo));
+  generateTableRow(doc, duePosition, '', '', '', 'Nedospjeli dug', '', formatCurrency(invoice.ukupno_nedospjelo));
 }
 
-function generateTableRow(doc, y, datum_dokumenta, broj_polise, duguje, potrazuje, saldo) {
+function generateTableRow(doc, y, datum_dokumenta, broj_polise, broj_ponude, duguje, potrazuje, saldo) {
   doc
     .fontSize(10)
     .font('./src/assets/Roboto-Regular.ttf')
     .text(datum_dokumenta.substring(0, 6) === '01.01.' ? 'PS ' + datum_dokumenta : datum_dokumenta, 50, y, { encoding: 'utf8' })
     .text(broj_polise, 150, y, { encoding: 'utf8' })
+    .text(broj_ponude, 250, y, { encoding: 'utf8' })
     .text(duguje, 320, y, { width: 90, align: 'right', encoding: 'utf8' })
     .text(potrazuje, 435, y, { width: 50, align: 'right', encoding: 'utf8' })
     .text(saldo, 0, y, { align: 'right', encoding: 'utf8' });

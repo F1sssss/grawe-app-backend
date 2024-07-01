@@ -11,6 +11,10 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
     throw new AppError('Error during retrieving client!', 404, 'error-getting-client-not-found');
   }
 
+  if (!client && queryFileName === 'getClientAll.sql') {
+    throw new AppError('Error during retrieving client!', 404, 'error-getting-client-not-found');
+  }
+
   return { client: client === undefined ? {} : client, statusCode: 200 };
 };
 
