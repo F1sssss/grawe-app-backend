@@ -18,7 +18,7 @@ bra_obnr															polisa,
 convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja],
 convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
 convert(varchar,convert(date,bra_storno_ab,104),102)   				[datum_storna],
-ABS(isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,104) and p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0))											[dospjela_potrazivanja],
+isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,104) and p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0)										[dospjela_potrazivanja],
 cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))			[bruto_polisirana_premija],
 cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))			[premija],
 cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[Neto_polisirana_premija],
@@ -143,5 +143,7 @@ from #temp t
 ;WITH CTE AS(
 select polisa, premija,dospjela_potrazivanja dospjela_potrazivanja from #temp
 )
-select sum(premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) ukupno_nedospjelo,
-sum(dospjela_potrazivanja) ukupno_dospjelo  from CTE
+select
+case when sum(premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) <0 then 0
+else sum(premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) end ukupno_nedospjelo,
+ABS(sum(dospjela_potrazivanja)) ukupno_dospjelo  from CTE

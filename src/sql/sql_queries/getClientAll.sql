@@ -173,7 +173,7 @@ cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1	        saldo,
 (select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_zaduzeno,
-(select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr order by convert(date,pko_wertedatum,104) desc) ukupno_dospjelo,
+--(select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr order by convert(date,pko_wertedatum,104) desc) ukupno_dospjelo,
 (select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
 (select SUM(neto_polisirana_premija) from #temp)                        klijent_neto_polisirana_premija,
@@ -185,16 +185,18 @@ right join #temp t on p.pko_obnr=t.polisa
 CTE_Final AS (
     SELECT
         CTE_Praemienkonto.*,
+        case when premija - ukupno_placeno<0 then 0
+        else (select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=CTE_Praemienkonto.polisa order by convert(date,pko_wertedatum,104) desc) end ukupno_dospjelo,
+
  --       CASE
  --           WHEN ukupno_dospjelo - ukupno_placeno < 0 THEN 0.0
  --           ELSE ukupno_dospjelo - ukupno_placeno
  --       END AS ukupno_duguje,
-        case when premija - ukupno_placeno - ukupno_dospjelo <0 then 0
-        else premija - ukupno_placeno - ukupno_dospjelo
+        case when premija - ukupno_placeno - (select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=CTE_Praemienkonto.polisa order by convert(date,pko_wertedatum,104) desc) <0 or premija - ukupno_placeno<0 then 0
+        else premija - ukupno_placeno - (select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=CTE_Praemienkonto.polisa order by convert(date,pko_wertedatum,104) desc)
         END AS ukupno_nedospjelo,
-        case when premija - ukupno_placeno < 0 then 0
-        else premija - ukupno_placeno
-        END AS ukupno_duguje
+        premija - ukupno_placeno
+        AS ukupno_duguje
 
     FROM CTE_Praemienkonto
 )

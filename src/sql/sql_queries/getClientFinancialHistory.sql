@@ -5,7 +5,6 @@ declare @policy int=9000664,
 @dateTo varchar (10)='31.12.2023'
 */
 
-
 set @dateFrom = case when substring(@dateFrom,1,4) like '[0-9][0-9][0-9][0-9]' then convert(varchar,convert(date,@dateFrom,102),104) else @dateFrom end
 set @dateTo = case when substring(@dateTo,1,4) like '[0-9][0-9][0-9][0-9]' then convert(varchar,convert(date,@dateTo,102),104) else @dateTo end
 
@@ -36,6 +35,7 @@ JOIN gr_clients_all c on c.polisa=branche.bra_obnr
 where c.[embg/pib]=@id and
 (exists (select 1 from praemienkonto pk where pk.pko_obnr=branche.bra_obnr  and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,104) and convert(date,@dateTo,104)) or
 isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,104) and p.pko_obnr=branche.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
+
 
 
 update #branche
@@ -128,9 +128,10 @@ uplaceno
 from #branche
 where convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104)
 UNION
-select pko_wertedatum, pko_obnr,0, 0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
+select pko_wertedatum, pko_obnr,b.broj_ponude, 0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
+left join #branche b on b.polisa=c.polisa
 where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)>0
 and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,104) and convert(date,@dateTo,104)
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and  convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104))

@@ -86,6 +86,7 @@ function generateCustomerInformation(doc, invoice, datum_od, datum_do) {
 
 function generateInvoiceTable(doc, invoice) {
   let i;
+  let position2 = 0;
   const invoiceTableTop = 330;
 
   doc.font('./src/assets/Roboto-Bold.ttf');
@@ -112,7 +113,7 @@ function generateInvoiceTable(doc, invoice) {
     generateHr(doc, position + 20);
 
     if (i === invoice.length - 1) {
-      let position2 = (position + 30) % 750 < 20 ? (doc.addPage(), 30) : (position + 30) % 750;
+      position2 = (position + 30) % 750 < 20 ? (doc.addPage(), 30) : (position + 30) % 750;
 
       generateTableRow(
         doc,
@@ -129,7 +130,7 @@ function generateInvoiceTable(doc, invoice) {
     }
   }
 
-  const subtotalPosition = (invoiceTableTop + (i + 2) * 30) % 750 < 20 ? (doc.addPage(), 30) : (invoiceTableTop + (i + 2) * 30) % 750;
+  const subtotalPosition = (position2 + 30) % 750 < 20 ? (doc.addPage(), 30) : (position2 + 30) % 750;
   generateTableRow(doc, subtotalPosition, '', '', '', 'Ukupni dug', '', formatCurrency(invoice[invoice.length - 1].saldo));
 
   const paidToDatePosition = (subtotalPosition + 20) % 750 < 20 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
@@ -145,7 +146,7 @@ function generateTableRow(doc, y, datum_dokumenta, broj_polise, broj_ponude, dug
     .font('./src/assets/Roboto-Regular.ttf')
     .text(datum_dokumenta.substring(0, 6) === '01.01.' ? 'PS ' + datum_dokumenta : datum_dokumenta, 50, y, { encoding: 'utf8' })
     .text(broj_polise, 150, y, { encoding: 'utf8' })
-    .text(broj_ponude, 250, y, { encoding: 'utf8' })
+    .text(broj_ponude === 0 ? '-' : broj_ponude, 250, y, { encoding: 'utf8' })
     .text(duguje, 320, y, { width: 90, align: 'right', encoding: 'utf8' })
     .text(potrazuje, 435, y, { width: 50, align: 'right', encoding: 'utf8' })
     .text(saldo, 0, y, { align: 'right', encoding: 'utf8' });

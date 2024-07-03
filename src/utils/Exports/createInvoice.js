@@ -88,9 +88,9 @@ function createClientInvoice(client) {
         clientData.naziv_branse,
         clientData.premija,
         clientData.ukupno_placeno,
+        clientData.ukupno_duguje,
         clientData.ukupno_dospjelo,
         clientData.ukupno_nedospjelo,
-        clientData.ukupno_duguje,
       ]);
 
       generateHeader(doc);
@@ -202,7 +202,7 @@ function generateInvoiceTableRecap(doc, invoice) {
   let position = 0;
 
   doc.font('./src/assets/Roboto-Bold.ttf');
-  generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Uplaćeno', 'Dospjelo', 'Nedospjelo', 'Duguje');
+  generateTableRowRecap(doc, invoiceTableTop, 'Polisa', 'Osiguranje', 'Premija', 'Uplaćeno', 'Ukupan dug', 'Dospjelo', 'Nedospjelo');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('./src/assets/Roboto-Regular.ttf');
 
@@ -218,9 +218,9 @@ function generateInvoiceTableRecap(doc, invoice) {
       item[1],
       formatCurrency(item[2]), // Premija
       formatCurrency(item[3]), // Uplaćeno
-      formatCurrency(item[4]), // Dospjelo
+      formatCurrency(item[4]), // Ukupan dug
       formatCurrency(item[5]), // Nedospjelo
-      formatCurrency(item[6]), // Duguje
+      formatCurrency(item[6]), // Dospjelo
     );
 
     generateHr(doc, position + 20);
@@ -231,9 +231,9 @@ function generateInvoiceTableRecap(doc, invoice) {
   generateTableRowRecap(
     doc,
     subtotalPosition,
+    'TOTAL:',
     '',
-    '',
-    'Ukupno',
+    formatCurrency(addUpRecap(invoice, 3)),
     formatCurrency(addUpRecap(invoice, 3)),
     formatCurrency(addUpRecap(invoice, 4)),
     formatCurrency(addUpRecap(invoice, 5)),
@@ -269,6 +269,7 @@ function generateTableRowRecap(doc, y, polisa, osiguranje, premija, duguje, potr
 function generateInvoiceTable(doc, invoice) {
   let i;
   const invoiceTableTop = 330;
+  let position2 = 0;
 
   doc.font('./src/assets/Roboto-Bold.ttf');
   generateTableRow(doc, invoiceTableTop, 'Datum Dokumenta', 'Broj Polise', 'Broj Ponude', 'Zaduženo', 'Uplaćeno', 'Saldo');
@@ -292,19 +293,33 @@ function generateInvoiceTable(doc, invoice) {
     );
 
     generateHr(doc, position + 20);
+
+    if (i === invoice.items.length - 1) {
+      position2 = (position + 30) % 750 < 20 ? (doc.addPage(), 30) : (position + 30) % 750;
+
+      generateBoldedTableRow(
+        doc,
+        position2,
+        'TOTAL:',
+        '',
+        '',
+        formatCurrency(item.ukupno_zaduzeno),
+        formatCurrency(item.ukupno_placeno),
+        formatCurrency(item.saldo),
+      );
+
+      generateHr(doc, position2 + 20);
+    }
   }
 
-  const subtotalPosition = (invoiceTableTop + (i + 1) * 30) % 750 < 10 ? (doc.addPage(), 30) : (invoiceTableTop + (i + 1) * 30) % 750;
-  generateTableRow(doc, subtotalPosition, '', '', '', 'Ukupno uplaćeno', '', formatCurrency(invoice.ukupno_placeno));
+  const subtotalPosition = (position2 + 30) % 750 < 10 ? (doc.addPage(), 30) : (position2 + 30) % 750;
+  generateBoldedTableRow(doc, subtotalPosition, '', '', '', 'Ukupni dug', '', formatCurrency(invoice.ukupno_duguje));
 
   const paidToDatePosition = (subtotalPosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
-  generateTableRow(doc, paidToDatePosition, '', '', '', 'Ukupni dug', '', formatCurrency(invoice.ukupno_duguje));
+  generateBoldedTableRow(doc, paidToDatePosition, '', '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_dospjelo));
 
   const duePosition = (paidToDatePosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (paidToDatePosition + 20) % 750;
-  generateTableRow(doc, duePosition, '', '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_dospjelo));
-
-  const totalRemaining = (duePosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (duePosition + 20) % 750;
-  generateTableRow(doc, totalRemaining, '', '', '', 'Nedospjeli dug', '', formatCurrency(invoice.ukupno_nedospjelo));
+  generateBoldedTableRow(doc, duePosition, '', '', '', 'Nedospjeli dug', '', formatCurrency(invoice.ukupno_nedospjelo));
 }
 
 function generateTableRow(doc, y, datum_dokumenta, broj_polise, broj_ponude, duguje, potrazuje, saldo) {
@@ -313,7 +328,19 @@ function generateTableRow(doc, y, datum_dokumenta, broj_polise, broj_ponude, dug
     .font('./src/assets/Roboto-Regular.ttf')
     .text(datum_dokumenta, 50, y, { encoding: 'utf8' })
     .text(broj_polise, 150, y, { encoding: 'utf8' })
-    .text(broj_ponude, 250, y, { encoding: 'utf8' })
+    .text(broj_ponude === 0 ? '-' : broj_ponude, 250, y, { encoding: 'utf8' })
+    .text(duguje, 320, y, { width: 90, align: 'right', encoding: 'utf8' })
+    .text(potrazuje, 435, y, { width: 50, align: 'right', encoding: 'utf8' })
+    .text(saldo, 0, y, { align: 'right', encoding: 'utf8' });
+}
+
+function generateBoldedTableRow(doc, y, datum_dokumenta, broj_polise, broj_ponude, duguje, potrazuje, saldo) {
+  doc
+    .fontSize(10)
+    .font('./src/assets/Roboto-Bold.ttf')
+    .text(datum_dokumenta, 50, y, { encoding: 'utf8' })
+    .text(broj_polise, 150, y, { encoding: 'utf8' })
+    .text(broj_ponude === 0 ? '-' : broj_ponude, 250, y, { encoding: 'utf8' })
     .text(duguje, 320, y, { width: 90, align: 'right', encoding: 'utf8' })
     .text(potrazuje, 435, y, { width: 50, align: 'right', encoding: 'utf8' })
     .text(saldo, 0, y, { align: 'right', encoding: 'utf8' });
