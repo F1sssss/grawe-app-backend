@@ -27,13 +27,16 @@ function authenticateUser(username, password) {
     if (auth) {
       const { user } = await SQLQueries.getUserByUsernameOrEmail(username, null, 'signup');
       if (!user) {
-        let results,
-          err = findADUser(username);
-        if (err) {
+        try {
+          const ad_user = await findADUser(username);
+          const { user: new_ad_user, statusCode } = await SQLQueries.createADUser(ad_user);
+          return new_ad_user, null;
+        } catch (err) {
+          logger.error(`Error creating user from AD ${username}: ${err}`);
           return null, err;
         }
-        const { user: new_ad_user, statusCode } = await SQLQueries.createADUser(results);
-        return new_ad_user, null;
+      } else {
+        return user, null;
       }
     } else {
       logger.error(`Authentication failed for user from AD ${username}`);
@@ -42,35 +45,39 @@ function authenticateUser(username, password) {
   });
 }
 
-function findADUser(ad_username) {
-  return ad.authenticate(config.username, config.password, (err, auth) => {
-    if (err) {
-      logger.error(`Error authenticating user from AD ${ad_username}: ${err}`);
-      return null, err;
-    }
+async function findADUser(ad_username) {
+  await new Promise((resolve, reject) => {
+    ad.authenticate(config.username, config.password, (err, auth) => {
+      if (err) {
+        logger.error(`Error authenticating service account: ${err}`);
+        return reject(err);
+      }
 
-    if (auth) {
-      console.log('Authenticated successfully!');
-      // Perform a search
-      const query = `(&(objectCategory=Person)(sAMAccountName=${ad_username})(memberOf=CN=ME_ReportingApp_Users,OU=Groups,OU=ME,OU=GRAWE,DC=grawe,DC=at))`;
-      ad.find(query, (err, results) => {
-        if (err) {
-          logger.error(`Error searching for user from AD ${ad_username}: ${err}`);
-          return null, err;
-        }
+      if (!auth) {
+        logger.error('Service account authentication failed');
+        return reject(new Error('Service account authentication failed'));
+      }
 
-        if (!results || results.length === 0) {
-          logger.error(`No entries found for user from AD ${ad_username}`);
-          return null, 'No entries found';
-        } else {
-          return results.users[0], null;
-        }
-      });
-    } else {
-      logger.error(`Authentication failed for user from AD ${ad_username}`);
-      return null, 'Authentication failed';
-    }
+      console.log('Service account authenticated successfully!');
+      resolve();
+    });
+  });
+
+  const query = `(&(objectCategory=Person)(sAMAccountName=${ad_username})(memberOf=CN=ME_ReportingApp_Users,OU=Groups,OU=ME,OU=GRAWE,DC=grawe,DC=at))`;
+  return await new Promise((resolve, reject) => {
+    ad.find(query, (err, results) => {
+      if (err) {
+        logger.error(`Error searching for user ${ad_username}: ${err}`);
+        return reject(err);
+      }
+
+      if (!results || results.users.length === 0) {
+        logger.error(`No entries found for user ${ad_username}`);
+        return reject(new Error('No entries found'));
+      } else {
+        resolve(results.users[0]);
+      }
+    });
   });
 }
-
 module.exports = { authenticateUser };
