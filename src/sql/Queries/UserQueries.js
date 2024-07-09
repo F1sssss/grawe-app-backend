@@ -117,6 +117,27 @@ const createUser = async (req) => {
   return { user: { ...user, password: undefined }, statusCode: 200 };
 };
 
+const createADUser = async (ad_user) => {
+  const { sAMAccountName: username, givenName: name, sn: last_name, mail: email } = ad_user;
+  const verification_code = Math.floor(Math.random() * 1000000000);
+
+  if (!username || !name || !last_name || !email) {
+    throw new AppError('Missing fields!', 401, 'error-missing-fields');
+  }
+
+  const { user } = await excecuteUserQuery(
+    'createUserFromAD.sql',
+    UserSignup(username, null, name, last_name, email, null, verification_code),
+    'signup',
+  );
+
+  if (!user) {
+    throw new AppError('Error creating user!', 401, 'error-creating-user');
+  }
+
+  return { user: { ...user, password: undefined }, statusCode: 200 };
+};
+
 const updateUserVerification = async (id, value) => {
   const { newValue, statusCode } = await updateUserField(id, 'verified', value);
   return { newValue, statusCode };
@@ -188,4 +209,5 @@ module.exports = {
   getAllUsers,
   getUser,
   getMyPermissions,
+  createADUser,
 };

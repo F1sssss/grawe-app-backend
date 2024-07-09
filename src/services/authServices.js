@@ -21,7 +21,8 @@ const signJWT = (username) => {
 };
 
 const loginService = async (username, password) => {
-  const { ad_user, err } = await AdAuth.authenticateUser(username, password);
+  let ad_user,
+    err = await AdAuth.authenticateUser(username, password);
 
   if (err) {
     const { user } = await SQLQueries.getUserByUsernameOrEmail(username, username, 'login');

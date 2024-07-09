@@ -25,17 +25,16 @@ function authenticateUser(username, password) {
     }
 
     if (auth) {
-      console.log('Authenticated successfully!');
       const { user } = await SQLQueries.getUserByUsernameOrEmail(username, null, 'signup');
       if (!user) {
-        const { results, err } = findADUser(username);
+        let results,
+          err = findADUser(username);
         if (err) {
           return null, err;
         }
-        console.log('Authenticated successfully!');
-        console.log(results);
+        const { user: new_ad_user, statusCode } = await SQLQueries.createADUser(results);
+        return new_ad_user, null;
       }
-      return user, null;
     } else {
       logger.error(`Authentication failed for user from AD ${username}`);
       return null, 'Authentication failed';
@@ -64,7 +63,7 @@ function findADUser(ad_username) {
           logger.error(`No entries found for user from AD ${ad_username}`);
           return null, 'No entries found';
         } else {
-          return results, null;
+          return results.users[0], null;
         }
       });
     } else {
