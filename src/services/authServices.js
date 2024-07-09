@@ -12,6 +12,7 @@ const EmailValidator = require('../utils/Email/Email');
 const SQLQueries = require('../sql/Queries/UserQueries');
 const AppError = require('../utils/AppError');
 const ValidationRegex = require('../utils/ValidationRegEx');
+const AdAuth = require('../utils/ADConnection');
 
 const signJWT = (username) => {
   return jwt.sign({ username }, DB_CONFIG.encrypt, {
@@ -20,15 +21,22 @@ const signJWT = (username) => {
 };
 
 const loginService = async (username, password) => {
-  const { user } = await SQLQueries.getUserByUsernameOrEmail(username, username, 'login');
+  const { ad_user, err } = await AdAuth.authenticateUser(username, password);
 
-  if (!(await bcrypt.compare(password, user.password))) {
-    throw new AppError('Invalid Password', 401, 'error-invalid-password');
+  if (err) {
+    const { user } = await SQLQueries.getUserByUsernameOrEmail(username, username, 'login');
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new AppError('Invalid Password', 401, 'error-invalid-password');
+    }
+    const token = signJWT(username);
+
+    return { token, user: { ...user, password: undefined }, statusCode: 200 };
+  } else {
+    const token = signJWT(username);
+
+    return { token, user: { ...ad_user, password: undefined }, statusCode: 200 };
   }
-
-  const token = signJWT(username);
-
-  return { token, user: { ...user, password: undefined }, statusCode: 200 };
 };
 
 const signupService = async (req) => {
