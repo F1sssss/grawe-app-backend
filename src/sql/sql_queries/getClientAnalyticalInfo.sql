@@ -1,11 +1,9 @@
-
+/*
 declare @policy int=9000664,
 @id varchar(13)='03057917',
 @dateFrom varchar(10)='2024.01.01',
 @dateTo varchar (10)='2024.12.31'
-
-
-
+*/
 
 
 if OBJECT_ID('tempdb..#NaciniPlacanja') is not null
@@ -52,7 +50,8 @@ cast(0 as decimal(18,2))											[premija],
 np.opis																[nacin_placanja],
 np.sifra															[nacin_placanja_sifra],
 bra_vv_ueb															[naziv_branse],
-cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))			[bruto_polisirana_premija],
+dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateFrom)			[bruto_polisirana_premija],
+--cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))			[bruto_polisirana_premija],
 cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[neto_polisirana_premija],
 cast(0 as integer)													[dani_kasnjenja],
 cast(0 as decimal(18,2))											[ukupna_potrazivanja],
@@ -131,10 +130,12 @@ case when isnull([Datum_storna],'')<=isnull([Istek_osiguranja],'') and isnull([D
 end
 from #temp t
 
-
+/*
 update t
 set bruto_polisirana_premija= (select sum(cast(replace(bra_bruttopraemie,',','.')  as decimal(18,2)))from branche b2 where t.polisa=b2.bra_obnr)
 from #temp t
+*/
+
 
 update t
 set [ukupna_potrazivanja]=Bruto_polisirana_premija-(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=t.polisa)
@@ -145,6 +146,7 @@ from #temp t
 delete from #temp
 where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid);
 
+/*
 update t
 set Premija=
 case
@@ -177,7 +179,7 @@ set Premija=Premija * cast(CEILING(cast(DATEDIFF(day,convert(date,[Pocetak_osigu
 from #temp t
 where Bransa in (78,79)
 
-
+*/
 
 update #temp
 set [neto_polisirana_premija]=premija
@@ -192,7 +194,7 @@ where Bransa<>19
 
 
 select
-sum(Bruto_polisirana_premija)	bruto_polisirana_premija,
+sum(premija)	                bruto_polisirana_premija,
 sum(neto_polisirana_premija)	neto_polisirana_premija,
 max(Dani_Kasnjenja)				dani_Kasnjenja,
 sum([dospjelo_potrazivanje]*-1)	dospjelo_potrazivanje,

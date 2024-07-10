@@ -54,7 +54,6 @@ from #branche t
 
 
 
-
 update t
 set zaduzeno=
 case
@@ -88,6 +87,15 @@ where Bransa in (78,79)
 
 
 
+update t
+set zaduzeno=(select sum(zaduzeno) from #branche b where b.broj_dokumenta=t.broj_dokumenta group by b.broj_dokumenta)
+from #branche t
+
+
+delete from #branche
+where not exists (select 1 from vertrag v where v.vtg_pol_bran=#branche.bransa and v.vtg_vertragid=#branche.bra_vertragid);
+
+
 ;WITH CTE AS(
 select
 datum_dokumenta,
@@ -98,10 +106,10 @@ uplaceno
 from #branche
 where convert(date,datum_dokumenta,104)<convert(date,@dateFrom,104)
 UNION
-select pko_wertedatum, pko_obnr,0, 0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
+select pko_wertedatum, pko_obnr,0,  dbo.gr_num_convert(pko_betragsoll) zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
-where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)<>0
+where c.[embg/pib]=@id and (dbo.gr_num_convert(pko_betraghaben)<>0 or dbo.gr_num_convert(pko_betragsoll)<>0)
 and convert(date,pko_wertedatum,104) <= convert(date,@dateTo,104)
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and convert(date,datum_dokumenta,104)<convert(date,@dateFrom,104))
 ),
@@ -128,11 +136,11 @@ uplaceno
 from #branche
 where convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104)
 UNION
-select pko_wertedatum, pko_obnr,b.broj_ponude, 0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
+select pko_wertedatum, pko_obnr,b.broj_ponude,  dbo.gr_num_convert(pko_betragsoll) zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
 left join #branche b on b.polisa=c.polisa
-where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)<>0
+where c.[embg/pib]=@id and (dbo.gr_num_convert(pko_betraghaben)<>0 or dbo.gr_num_convert(pko_betragsoll)<>0)
 and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,104) and convert(date,@dateTo,104)
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and  convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104))
 )
