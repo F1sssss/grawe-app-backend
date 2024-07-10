@@ -50,7 +50,7 @@ cast(0 as decimal(18,2))											[premija],
 np.opis																[nacin_placanja],
 np.sifra															[nacin_placanja_sifra],
 bra_vv_ueb															[naziv_branse],
-dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateFrom)			[bruto_polisirana_premija],
+dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [bruto_polisirana_premija],
 --cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))			[bruto_polisirana_premija],
 cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[neto_polisirana_premija],
 cast(0 as integer)													[dani_kasnjenja],
@@ -181,12 +181,9 @@ where Bransa in (78,79)
 
 */
 
-update #temp
-set [neto_polisirana_premija]=premija
-
 
 update t
-set [neto_polisirana_premija]=[neto_polisirana_premija] / (1+(select porez from brache_porezi a where a.branche_id=t.Bransa))
+set [neto_polisirana_premija]=[premija] / (1+(select porez from brache_porezi a where a.branche_id=t.Bransa))
 from #temp t
 where Bransa<>19
 

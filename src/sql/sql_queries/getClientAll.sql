@@ -38,7 +38,7 @@ b.bra_obnr															[polisa],
 convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja],
 convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
 convert(varchar,convert(date,bra_storno_ab,104),102)   				[datum_storna],
-cast(0 as decimal(18,2))											[premija],
+dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [premija],
 np.opis																[nacin_placanja],
 np.sifra															[nacin_placanja_sifra],
 bra_vv_ueb															[naziv_branse],
@@ -128,7 +128,7 @@ from #temp t
 
 delete from #temp
 where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid);
-
+/*
 update t
 set Premija=
 case
@@ -159,6 +159,7 @@ update t
 set Premija=Premija * cast(CEILING(cast(DATEDIFF(day,convert(date,[Pocetak_osiguranja],102),convert(date,@dateTo,102)) as decimal(18,2))/365) as int)
 from #temp t
 where Bransa in (78,79)
+*/
 
 update #temp
 set [Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),104),

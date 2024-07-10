@@ -18,7 +18,7 @@ SELECT
 (select TOP 1 pko_wertedatum from praemienkonto where praemienkonto.pko_obnr=branche.bra_obnr and dbo.gr_num_convert(pko_betragsoll)>0 order by convert(date,pko_wertedatum,104) asc) datum_dokumenta,
 polisa,
 bra_obnr broj_dokumenta,
-dbo.gr_num_convert(bra_bruttopraemie) zaduzeno,
+dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)           zaduzeno,
 0 uplaceno,
 convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja],
 convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
@@ -43,54 +43,6 @@ set [broj_ponude]=(select case when bransa in (10,19,56) or (bransa=9 and bra_st
 then vtg_antrag_obnr
 else 0 end   from vertrag where vertrag.vtg_vertragid=bra_vertragid)
 
-update t
-set [status_polise]=
-case when isnull([Datum_storna],'')<=isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo then 'Aktivna' -- or isnull([Istek_osiguranja],'')>@datumdo  then 'Aktivna'
-	 when isnull([Datum_storna],'')=isnull([Pocetak_osiguranja],'') then 'Stornirana od pocetka'
-	 when isnull([Datum_storna],'')>isnull([Pocetak_osiguranja],'') and isnull([Datum_storna],'')<isnull([Istek_osiguranja],'') then 'Prekid'
-	 else 'Istekla'
-end
-from #branche t
-
-
-
-update t
-set zaduzeno=
-case
-	 when isnull([Datum_storna],'')=isnull([Istek_osiguranja],'') then zaduzeno
-	 when isnull([Datum_storna],'')=isnull([Pocetak_osiguranja],'') then 0
-	 when isnull([Datum_storna],'')>isnull([Pocetak_osiguranja],'') and isnull([Datum_storna],'')<=isnull([Istek_osiguranja],'') then isnull(ABS((select sum(zaduzeno) from #branche t2 where t2.polisa=t.polisa)-
-	 (select ABS(sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2)))) from praemienkonto pk (nolock) where convert(varchar,convert(date,pko_wertedatum,104),102)>=cast(t.Datum_storna as varchar) and t.polisa=pk.pko_obnr and cast(replace(pko_betragsoll,',','.') as decimal(18,2))<0 )),0)
-	 else 0
-end
-from #branche t
-
-
-update t
-set zaduzeno=(select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr=t.polisa and pko_g_fall<>'SVOR')
-from #branche t
-where status_polise='Prekid' --and Nacin_Placanja not in (0,1)
-
-
-update t
-
-set zaduzeno=Neto_polisirana_premija
-from #branche t
-where storno_tip=2 and Bransa=11 -- and Nacin_Placanja in (0,1)
-
-
-update t
-
-set zaduzeno=zaduzeno * cast(CEILING(cast(DATEDIFF(day,convert(date,[Pocetak_osiguranja],102),convert(date,@dateTo,104)) as decimal(18,2))/365) as int)
-from #branche t
-where Bransa in (78,79)
-
-
-
-update t
-set zaduzeno=(select sum(zaduzeno) from #branche b where b.broj_dokumenta=t.broj_dokumenta group by b.broj_dokumenta)
-from #branche t
-
 
 delete from #branche
 where not exists (select 1 from vertrag v where v.vtg_pol_bran=#branche.bransa and v.vtg_vertragid=#branche.bra_vertragid);
@@ -106,10 +58,10 @@ uplaceno
 from #branche
 where convert(date,datum_dokumenta,104)<convert(date,@dateFrom,104)
 UNION
-select pko_wertedatum, pko_obnr,0,  dbo.gr_num_convert(pko_betragsoll) zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
+select pko_wertedatum, pko_obnr,0,  0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
-where c.[embg/pib]=@id and (dbo.gr_num_convert(pko_betraghaben)<>0 or dbo.gr_num_convert(pko_betragsoll)<>0)
+where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)<>0
 and convert(date,pko_wertedatum,104) <= convert(date,@dateTo,104)
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and convert(date,datum_dokumenta,104)<convert(date,@dateFrom,104))
 ),
@@ -136,11 +88,11 @@ uplaceno
 from #branche
 where convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104)
 UNION
-select pko_wertedatum, pko_obnr,b.broj_ponude,  dbo.gr_num_convert(pko_betragsoll) zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
+select pko_wertedatum, pko_obnr,b.broj_ponude,  0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
 left join #branche b on b.polisa=c.polisa
-where c.[embg/pib]=@id and (dbo.gr_num_convert(pko_betraghaben)<>0 or dbo.gr_num_convert(pko_betragsoll)<>0)
+where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)<>0
 and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,104) and convert(date,@dateTo,104)
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and  convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104))
 )
