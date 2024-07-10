@@ -101,7 +101,7 @@ UNION
 select pko_wertedatum, pko_obnr,0, 0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
-where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)>0
+where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)<>0
 and convert(date,pko_wertedatum,104) <= convert(date,@dateTo,104)
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and convert(date,datum_dokumenta,104)<convert(date,@dateFrom,104))
 ),
@@ -132,7 +132,7 @@ select pko_wertedatum, pko_obnr,b.broj_ponude, 0 zaduzeno, dbo.gr_num_convert(pk
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
 left join #branche b on b.polisa=c.polisa
-where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)>0
+where c.[embg/pib]=@id and dbo.gr_num_convert(pko_betraghaben)<>0
 and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,104) and convert(date,@dateTo,104)
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and  convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104))
 )

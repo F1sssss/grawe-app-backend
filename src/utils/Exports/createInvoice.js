@@ -233,7 +233,7 @@ function generateInvoiceTableRecap(doc, invoice) {
     subtotalPosition,
     'TOTAL:',
     '',
-    formatCurrency(addUpRecap(invoice, 3)),
+    formatCurrency(addUpRecap(invoice, 2)),
     formatCurrency(addUpRecap(invoice, 3)),
     formatCurrency(addUpRecap(invoice, 4)),
     formatCurrency(addUpRecap(invoice, 5)),

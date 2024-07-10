@@ -167,6 +167,7 @@ set [Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),
 
 ;WITH CTE_Praemienkonto AS (
 select t.*,
+pko_buch_nr,
 --convert(varchar,convert(date,pko_wertedatum,104),102)                   datum_dokumenta,
 pko_wertedatum                                                          datum_dokumenta,
 cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    duguje,
@@ -202,4 +203,4 @@ CTE_Final AS (
 )
 SELECT *
 FROM CTE_Final
-order by polisa,convert(date,datum_dokumenta,104) asc
+order by polisa,convert(date,datum_dokumenta,104) asc,pko_buch_nr asc

@@ -58,7 +58,6 @@ async function findADUser(ad_username) {
         return reject(new Error('Service account authentication failed'));
       }
 
-      console.log('Service account authenticated successfully!');
       resolve();
     });
   });
