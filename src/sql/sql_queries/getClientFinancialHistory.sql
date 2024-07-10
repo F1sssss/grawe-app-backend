@@ -18,14 +18,8 @@ SELECT
 (select TOP 1 pko_wertedatum from praemienkonto where praemienkonto.pko_obnr=branche.bra_obnr and dbo.gr_num_convert(pko_betragsoll)>0 order by convert(date,pko_wertedatum,104) asc) datum_dokumenta,
 polisa,
 bra_obnr broj_dokumenta,
-dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)           zaduzeno,
+dbo.Bruto_polisirana_premija_polisa(bra_obnr,@dateTo)             zaduzeno,
 0 uplaceno,
-convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja],
-convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
-convert(varchar,convert(date,bra_storno_ab,104),102)   				[datum_storna],
-cast('' as vaRCHAR(400))											[status_polise],
-cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[neto_polisirana_premija],
-bra_storno_grund													[storno_tip],
 bra_bran															[bransa],
 cast(0 as integer)													[broj_ponude],
 bra_statistik_nr,
@@ -101,7 +95,7 @@ select * from CTE_3
 UNION
 select * from CTE_4
 )
-select ROW_NUMBER() OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta, zaduzeno desc) row_num,*,SUM(zaduzeno-uplaceno) OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta) saldo,
+select ROW_NUMBER() OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta, zaduzeno desc) row_num,*,SUM(zaduzeno-uplaceno) OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta,uplaceno) saldo,
  @dateFrom datum_od,
  @dateTo  datum_do
  from CTE_5

@@ -8,18 +8,9 @@ drop table #temp
 
 
 select
-case when kun_vorname is null then cast(kun_steuer_nr as varchar)
-else
-case when len(kun_yu_persnr)=12
-	then '0' + FORMAT(kun_yu_persnr, '0')
-else FORMAT(kun_yu_persnr, '0') end
-end																	[embg/pib],
 bra_obnr															polisa,
-convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja],
-convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
-convert(varchar,convert(date,bra_storno_ab,104),102)   				[datum_storna],
 isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,104) and p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0)										[dospjela_potrazivanja],
-dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [premija],
+dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [bruto_polisirana_premija],
 cast('' as vaRCHAR(40))												[status_polise],
 bra_storno_grund													[storno_tip],
 bra_bran															[bransa],
@@ -51,9 +42,9 @@ where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and 
 
 
 ;WITH CTE AS(
-select polisa, premija,dospjela_potrazivanja dospjela_potrazivanja from #temp
+select polisa, bruto_polisirana_premija,dospjela_potrazivanja dospjela_potrazivanja from #temp
 )
 select
-case when sum(premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) <0 then 0
-else sum(premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) end ukupno_nedospjelo,
+case when sum(bruto_polisirana_premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) <0 then 0
+else sum(bruto_polisirana_premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) end ukupno_nedospjelo,
 ABS(sum(dospjela_potrazivanja)) ukupno_dospjelo  from CTE
