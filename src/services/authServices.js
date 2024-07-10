@@ -21,10 +21,13 @@ const signJWT = (username) => {
 };
 
 const loginService = async (username, password) => {
-  let ad_user,
-    err = await AdAuth.authenticateUser(username, password);
+  try {
+    const ad_user = await AdAuth.authenticateUser(username, password);
 
-  if (err) {
+    const token = signJWT(username);
+
+    return { token, user: { ...ad_user, password: undefined }, statusCode: 200 };
+  } catch (err) {
     const { user } = await SQLQueries.getUserByUsernameOrEmail(username, username, 'login');
 
     if (!(await bcrypt.compare(password, user.password))) {
@@ -33,10 +36,6 @@ const loginService = async (username, password) => {
     const token = signJWT(username);
 
     return { token, user: { ...user, password: undefined }, statusCode: 200 };
-  } else {
-    const token = signJWT(username);
-
-    return { token, user: { ...ad_user, password: undefined }, statusCode: 200 };
   }
 };
 
