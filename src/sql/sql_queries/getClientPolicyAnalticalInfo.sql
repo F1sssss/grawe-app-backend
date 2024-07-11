@@ -1,4 +1,3 @@
-
 if OBJECT_ID('tempdb..#NaciniPlacanja') is not null
 drop table #NaciniPlacanja
 
@@ -23,24 +22,24 @@ drop table #temp
 
 
 select distinct
-	b.bra_obnr					[Broj_Polise],
-	vtg_antrag_obnr				[Broj_Ponude],
-	vtg_pol_kreis				[Pol_kreis],
-	bra_bran					[Bransa],
-	bra_vv_ueb					[Naziv_Branse],
+	b.bra_obnr					                                        [Broj_Polise],
+	vtg_antrag_obnr				                                        [Broj_Ponude],
+	vtg_pol_kreis				                                        [Pol_kreis],
+	bra_bran					                                        [Bransa],
+	bra_vv_ueb					                                        [Naziv_Branse],
 	convert(varchar,convert(date,bra_vers_beginn,104),102)   			[Pocetak_osiguranja],
 	convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[Istek_osiguranja],
-	convert(varchar,convert(date,bra_storno_ab,104),102)   			[Datum_storna],
-	bra_storno_grund			[Storno_tip],
-	cast('' as vaRCHAR(400))							[StatusPolise],
-	np.opis			[Nacin_Placanja],
-	cast(replace(bra_bruttopraemie,',','.')	as decimal(18,2))		[Bruto_polisirana_premija],
-	cast(replace(bra_nettopraemie1,',','.')as decimal(18,2))			[Neto_polisirana_premija],
-	cast(0 as decimal(18,2))							[Premija],
-	vtg_pol_vkto				[Sifra_zastupnika],
-	isnull(ma_vorname,'')+ ' ' + isnull(ma_zuname,'') [Naziv_zastupnika],
-	ma_unterst_og				[Kanal_prodaje],
-	cast(0 as int)				[Dani_Kasnjenja],
+	convert(varchar,convert(date,bra_storno_ab,104),102)   			    [Datum_storna],
+	bra_storno_grund			                                        [Storno_tip],
+	cast('' as vaRCHAR(400))							                [StatusPolise],
+	np.sifra			                                                [Nacin_Placanja_sifra],
+	np.opis			                                                    [Nacin_Placanja],
+	dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [Bruto_polisirana_premija],
+	dbo.Neto_polisirana_premija_polisa(b.bra_obnr,@dateTo)				[Neto_polisirana_premija],
+	vtg_pol_vkto				                                        [Sifra_zastupnika],
+	isnull(ma_vorname,'')+ ' ' + isnull(ma_zuname,'')                   [Naziv_zastupnika],
+	ma_unterst_og				                                        [Kanal_prodaje],
+	cast(0 as int)				                                        [Dani_Kasnjenja],
 	--vtg_kundenkz_1,
 	case when bra_bran not in (10,11,56,8) then isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,'')) else /*PA*/ isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,''))  end [Ugovarac],
 	case when bra_bran not in (10,11,56,8) then isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,'')) else /*VA*/ isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,''))  end  [Osiguranik]
@@ -69,20 +68,6 @@ INCLUDE ([Datum_storna],[Istek_osiguranja])
 
 
 
-
-update t
-set Premija=
-case  -- 1. Istekla or Aktivna; 2. Stornirana od pocetka; 3. Prekid; 4. OStalo
-	 when isnull([Datum_storna],'')=isnull([Istek_osiguranja],'') or isnull([Datum_storna],'')>@dateTo then [Neto_polisirana_premija]
-	 when isnull([Datum_storna],'')=isnull([Pocetak_osiguranja],'') then 0
-	 when isnull([Datum_storna],'')>isnull([Pocetak_osiguranja],'') and isnull([Datum_storna],'')<isnull([Istek_osiguranja],'') then isnull(ABS((select sum(Bruto_polisirana_premija) from #temp t2 where t2.[Broj_Polise]=t.[Broj_Polise])-
-	 (select ABS(sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2)))) from praemienkonto pk (nolock) where convert(varchar,convert(date,pko_wertedatum,104),102)>=cast(t.Datum_storna as varchar) and t.[Broj_Polise]=pk.pko_obnr and cast(replace(pko_betragsoll,',','.') as decimal(18,2))<0 )),0)
-	 else 0
-end
-from #temp t
-
-
-
 update t
 set StatusPolise=
 case when isnull([Datum_storna],'')=isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo then 'Aktivna' -- or isnull([Istek_osiguranja],'')>@dateTo  then 'Aktivna'
@@ -94,40 +79,6 @@ case when isnull([Datum_storna],'')=isnull([Istek_osiguranja],'') and isnull([Da
 end
 from #temp t
 
-
-
-update t
-set Premija=(select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr=t.[Broj_Polise])
-from #temp t
-where StatusPolise='Prekid' and Nacin_Placanja not in (0,1)
-
-
---------- proporcionalno po bransama
-update t
-
-set Premija=case when (select sum(Bruto_polisirana_premija) from #temp t2 where t2.[Broj_Polise]=t.[Broj_Polise])=0 then 0 else  isnull((Premija*Bruto_polisirana_premija) /(select sum(Bruto_polisirana_premija) from #temp t2 where t2.[Broj_Polise]=t.[Broj_Polise]),0) end
-from #temp t
-where StatusPolise='Prekid' -- isnull([Datum_storna],'')<>isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo -- prekid
-and statuspolise<>'Stornirana od pocetka'
-
-
-
----Porez
-
-update t
-
-set Premija=Premija / (1+(select porez from brache_porezi a where a.branche_id=t.Bransa))
-from #temp t
-where isnull([Datum_storna],'')<>isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')<@dateTo -- da se ne bi ponovo umanjila za porez
-and Bransa<>19
-
-
--- Totalna steta kod kasko osiguranja2
-update t
-
-set Premija=Neto_polisirana_premija
-from #temp t
-where [Storno_tip]=2 and Bransa=11 -- and Nacin_Placanja in (0,1)
 
 
 

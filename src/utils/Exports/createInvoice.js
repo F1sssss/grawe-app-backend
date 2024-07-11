@@ -78,7 +78,7 @@ function createClientInvoice(client) {
       clientData.ukupno_placeno = client[i][0].ukupno_placeno;
       clientData.ukupno_duguje = client[i][0].ukupno_duguje;
       clientData.ukupno_nedospjelo = client[i][0].ukupno_nedospjelo;
-      clientData.premija = client[i][0].premija;
+      clientData.premija = client[i][0].bruto_polisirana_premija;
       clientData.nacin_placanja = client[i][0].nacin_placanja;
       clientData.naziv_branse = client[i][0].naziv_branse;
       clientData.broj_ponude = client[i][0].broj_ponude;
