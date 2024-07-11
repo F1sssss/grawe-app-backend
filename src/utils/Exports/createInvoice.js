@@ -312,13 +312,13 @@ function generateInvoiceTable(doc, invoice) {
     }
   }
 
-  const subtotalPosition = (position2 + 30) % 750 < 10 ? (doc.addPage(), 30) : (position2 + 30) % 750;
+  const subtotalPosition = (position2 + 30) % 750 <= 30 ? (doc.addPage(), 30) : (position2 + 30) % 750;
   generateBoldedTableRow(doc, subtotalPosition, '', '', '', 'Ukupni dug', '', formatCurrency(invoice.ukupno_duguje));
 
-  const paidToDatePosition = (subtotalPosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
+  const paidToDatePosition = (subtotalPosition + 20) % 750 <= 20 ? (doc.addPage(), 30) : (subtotalPosition + 20) % 750;
   generateBoldedTableRow(doc, paidToDatePosition, '', '', '', 'Dospjeli dug', '', formatCurrency(invoice.ukupno_dospjelo));
 
-  const duePosition = (paidToDatePosition + 20) % 750 < 10 ? (doc.addPage(), 30) : (paidToDatePosition + 20) % 750;
+  const duePosition = (paidToDatePosition + 20) % 750 <= 20 ? (doc.addPage(), 30) : (paidToDatePosition + 20) % 750;
   generateBoldedTableRow(doc, duePosition, '', '', '', 'Nedospjeli dug', '', formatCurrency(invoice.ukupno_nedospjelo));
 }
 
