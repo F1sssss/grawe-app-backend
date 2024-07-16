@@ -70,7 +70,16 @@ function createClientInvoice(client) {
         continue;
       }
 
-      clientData.items = getDistinctObjects(client[i], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
+      clientData.items = getDistinctObjects(client[i], [
+        'datum_dokumenta',
+        'broj_dokumenta',
+        'polisa',
+        'duguje',
+        'potrazuje',
+        'saldo',
+        'trangrupa1',
+        'trangrupa2',
+      ]);
       clientData.broj_polise = client[i][0].polisa;
       clientData.pocetak_osiguranja = client[i][0].pocetak_osiguranja;
       clientData.istek_osiguranja = client[i][0].istek_osiguranja;

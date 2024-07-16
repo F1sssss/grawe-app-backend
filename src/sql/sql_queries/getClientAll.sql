@@ -138,7 +138,9 @@ cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1	        saldo,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
 (select SUM(neto_polisirana_premija) from #temp)                        klijent_neto_polisirana_premija,
 (select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))-cast(replace(pko_betraghaben,',','.') as decimal(18,2))) from #praemienkonto p2) klijent_dospjela_potrazivanja,
-(select SUM(ukupna_potrazivanja) from #temp)                            klijent_ukupna_potrazivanja
+(select SUM(ukupna_potrazivanja) from #temp)                            klijent_ukupna_potrazivanja,
+pko_b_art                                                               trangrupa1,
+pko_g_fall                                                              trangrupa2
 from #praemienkonto p(nolock)
 right join #temp t on p.pko_obnr=t.polisa
 ),
