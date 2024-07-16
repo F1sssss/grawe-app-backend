@@ -51,7 +51,7 @@ zaduzeno,
 uplaceno
 from #branche
 where convert(date,datum_dokumenta,104)<convert(date,@dateFrom,104)
-UNION
+UNION ALL
 select pko_wertedatum, pko_obnr,0,  0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
@@ -68,7 +68,7 @@ having sum(zaduzeno-uplaceno)<>0
 ),
 CTE_3 AS (
 select * from CTE_2
-UNION
+UNION ALL
 select * from CTE
 where convert(date,datum_dokumenta,104)>convert(date,'01.01.' + SUBSTRING(@dateFrom,7,4),104)
 )
@@ -81,7 +81,7 @@ zaduzeno,
 uplaceno
 from #branche
 where convert(date,datum_dokumenta,104)>=convert(date,@dateFrom,104)
-UNION
+UNION ALL
 select pko_wertedatum, pko_obnr,b.broj_ponude,  0 zaduzeno, dbo.gr_num_convert(pko_betraghaben) --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
@@ -92,7 +92,7 @@ and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_ob
 )
 ,CTE_5 AS (
 select * from CTE_3
-UNION
+UNION ALL
 select * from CTE_4
 )
 select ROW_NUMBER() OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta, zaduzeno desc) row_num,*,SUM(zaduzeno-uplaceno) OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta,uplaceno) saldo,
