@@ -42,9 +42,15 @@ where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and 
 
 
 ;WITH CTE AS(
-select polisa, bruto_polisirana_premija,dospjela_potrazivanja dospjela_potrazivanja from #temp
+select
+polisa,
+bruto_polisirana_premija,
+dospjela_potrazivanja,
+case when bruto_polisirana_premija-ukupno_placeno-dospjela_potrazivanja <0 or bruto_polisirana_premija- ukupno_placeno<0 then 0 else bruto_polisirana_premija-ukupno_placeno-dospjela_potrazivanja end ukupno_nedospjelo,
+case when [bruto_polisirana_premija] - ukupno_placeno<0 or ukupno_dospjelo<0 then 0
+else ukupno_dospjelo end ukupno_dospjelo
+from #temp
 )
 select
-case when sum(bruto_polisirana_premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) <0 then 0
-else sum(bruto_polisirana_premija) - (select sum(cast(replace(pko_betragsoll,',','.') as decimal(18,2))) from praemienkonto pk(nolock) where pk.pko_obnr in (select polisa from #temp) and convert(date,pk.pko_wertedatum,104)<=convert(date,@dateTo,104)) end ukupno_nedospjelo,
-ABS(sum(dospjela_potrazivanja)) ukupno_dospjelo  from CTE
+sum(ukupno_nedospjelo)ukupno_nedospjelo,
+sum(ukupno_dospjelo) ukupno_dospjelo  from CTE
