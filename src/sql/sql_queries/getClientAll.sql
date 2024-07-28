@@ -149,7 +149,7 @@ CTE_Final AS (
         CTE_Praemienkonto.*,
         case when [bruto_polisirana_premija] - ukupno_placeno<0 or dospjela_potrazivanja<0 then 0
         else dospjela_potrazivanja end ukupno_dospjelo,
-        case when [bruto_polisirana_premija] - ukupno_placeno - klijent_dospjela_potrazivanja <0 or [bruto_polisirana_premija] - ukupno_placeno<0 then 0
+        case when [bruto_polisirana_premija] - ukupno_placeno - dospjela_potrazivanja <0 or [bruto_polisirana_premija] - ukupno_placeno<0 then 0
         else [bruto_polisirana_premija] - ukupno_placeno - case when dospjela_potrazivanja<0 then 0 else dospjela_potrazivanja end
         END AS ukupno_nedospjelo,
         [bruto_polisirana_premija] - ukupno_placeno
