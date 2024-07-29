@@ -126,7 +126,7 @@ cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1	        saldo,
 (select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
 (select SUM(neto_polisirana_premija) from #temp)                        klijent_neto_polisirana_premija,
-(select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=t.polisa order by convert(date,pko_wertedatum,104) desc) dospjela_potrazivanja,
+(select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=t.polisa order by convert(date,pko_wertedatum,104) desc, pko_buch_nr desc) dospjela_potrazivanja,
 pko_b_art                                                               trangrupa1,
 pko_g_fall                                                              trangrupa2
 from #praemienkonto p(nolock)
