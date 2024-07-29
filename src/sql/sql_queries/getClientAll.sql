@@ -103,15 +103,6 @@ CREATE CLUSTERED INDEX #pko_clustered_inx_obnr
 ON #praemienkonto (pko_obnr)
 
 
-
-
-
-update t
-set [ukupna_potrazivanja]=Bruto_polisirana_premija-(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=t.polisa)
-from #temp t
-
-
-
 delete from #temp
 where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid);
 
@@ -132,12 +123,9 @@ cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1	        saldo,
 (select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr) ukupno_zaduzeno,
---(select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr order by convert(date,pko_wertedatum,104) desc) ukupno_dospjelo,
 (select sum(cast(replace(pko_betraghaben,',','.')as decimal(18,2))) from #praemienkonto p2 where p2.pko_obnr=p.pko_obnr)  ukupno_placeno,
 (select SUM(bruto_polisirana_premija)from #temp)                        klijent_bruto_polisirana_premija,
 (select SUM(neto_polisirana_premija) from #temp)                        klijent_neto_polisirana_premija,
-(select sum(cast(replace(pko_betragsoll,',','.')as decimal(18,2))-cast(replace(pko_betraghaben,',','.') as decimal(18,2))) from #praemienkonto p2) klijent_dospjela_potrazivanja,
-(select SUM(ukupna_potrazivanja) from #temp)                            klijent_ukupna_potrazivanja,
 (select top 1 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1 from #praemienkonto p2 where p2.pko_obnr=t.polisa order by convert(date,pko_wertedatum,104) desc) dospjela_potrazivanja,
 pko_b_art                                                               trangrupa1,
 pko_g_fall                                                              trangrupa2
@@ -156,6 +144,8 @@ CTE_Final AS (
         AS ukupno_duguje
     FROM CTE_Praemienkonto
 )
-SELECT *
+SELECT *,
+(select sum(ukupno_duguje) from (select polisa,ukupno_duguje from CTE_Final group by polisa,ukupno_duguje)a)   klijent_ukupna_potrazivanja,
+(select sum(ukupno_dospjelo) from (select polisa,ukupno_dospjelo from CTE_Final group by polisa,ukupno_dospjelo)a) klijent_dospjela_potrazivanja
 FROM CTE_Final
 order by polisa,convert(date,datum_dokumenta,104) asc,pko_buch_nr asc

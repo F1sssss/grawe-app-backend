@@ -46,7 +46,7 @@ select
 polisa,
 bruto_polisirana_premija,
 dospjela_potrazivanja,
-case when bruto_polisirana_premija-ukupno_placeno-dospjela_potrazivanja <0 or bruto_polisirana_premija- ukupno_placeno<0 then 0 else bruto_polisirana_premija-ukupno_placeno-dospjela_potrazivanja end ukupno_nedospjelo,
+case when bruto_polisirana_premija-ukupno_placeno-dospjela_potrazivanja <0 or bruto_polisirana_premija- ukupno_placeno<0 then 0 else [bruto_polisirana_premija] - ukupno_placeno - case when dospjela_potrazivanja<0 then 0 else dospjela_potrazivanja end end ukupno_nedospjelo,
 case when [bruto_polisirana_premija] - ukupno_placeno<0 or ukupno_dospjelo<0 then 0
 else ukupno_dospjelo end ukupno_dospjelo
 from #temp
