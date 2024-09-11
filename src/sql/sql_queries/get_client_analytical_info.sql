@@ -1,4 +1,3 @@
-
 if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
 
@@ -8,12 +7,12 @@ b.bra_obnr															[polisa],
 dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [bruto_polisirana_premija],
 dbo.Neto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [neto_polisirana_premija],
 cast(0 as integer)													[dani_kasnjenja],
-isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))
+isnull(cast(((select top 1  p.pko_wertedatumsaldo
 from praemienkonto p (nolock)
-where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,102) and
-p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104)
-desc,pko_buch_nr desc )) as decimal(18,2)),0)						[dospjelo_potrazivanje],
-bra_bran															[bransa],
+where pko_wertedatum <= @dateTo and
+p.pko_obnr=b.bra_obnr 
+order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)	[dospjelo_potrazivanje],
+bra_bran																[bransa],
 kun_kundenkz,
 bra_vertragid
 into #temp
@@ -27,9 +26,9 @@ where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
       else STR(kun_yu_persnr,13,0) end
       end		=@id
 and
-(exists (select 1 from praemienkonto pk where pk.pko_obnr=b.bra_obnr  and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,102) and convert(date,@dateTo,102)) or
-isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,102) and p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
-OPTION(MAXDOP 1)
+(exists (select 1 from praemienkonto pk where pk.pko_obnr=b.bra_obnr  and pko_wertedatum between @dateFrom and @dateTo) or
+isnull(cast(((select top 1 p.pko_wertedatumsaldo from praemienkonto p (nolock) where pko_wertedatum <= @dateTo and p.pko_obnr=b.bra_obnr order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
+OPTION(MAXDOP 8)
 
 
 
@@ -46,7 +45,7 @@ drop table #praemienkonto
 
 select *,convert(date,p.pko_wertedatum,104) wertedatum into #praemienkonto from praemienkonto p (nolock)
 where p.pko_obnr in (select distinct polisa from #temp)
-and convert(date,p.pko_wertedatum,104)<=convert(date,@dateTo,102)
+and p.pko_wertedatum <= @dateTo
 
 
 
@@ -75,5 +74,3 @@ max(Dani_Kasnjenja)				dani_Kasnjenja,
 sum([dospjelo_potrazivanje]*-1)	dospjelo_potrazivanje,
 '-'								status_polise
 from #temp t
-
-

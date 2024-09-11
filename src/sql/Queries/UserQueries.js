@@ -6,7 +6,7 @@ const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
 const SQLParam = require('../SQLParam');
 const AppError = require('../../utils/AppError');
-const { UserSignup, UserMigration } = require('./params');
+const { UserSignup } = require('./params');
 
 const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);
@@ -81,21 +81,6 @@ const getUserByUsernameOrEmail = async (username, email, requesttype) => {
   return { user, statusCode };
 };
 
-const migrateUserFromAD = async (uid, password) => {
-  try {
-    let { user: existingUser } = await getUserByUsername(uid);
-    if (existingUser) {
-      return { user: existingUser, statusCode: 200 };
-    }
-  } catch (error) {
-    let { user } = await excecuteUserQuery('migrateUserFromAD.sql', UserMigration(uid, await bcrypt.hash(password, 12)), 'signup');
-    if (!user) {
-      throw new AppError('Error creating user!', 401, 'error-creating-user');
-    }
-    return { user: { ...user, password: undefined }, statusCode: 200 };
-  }
-};
-
 const createUser = async (req) => {
   const { username, password, name, last_name, email, date_of_birth } = req;
   const verification_code = Math.floor(Math.random() * 1000000000);
@@ -126,7 +111,7 @@ const createADUser = async (ad_user) => {
   }
 
   const { user } = await excecuteUserQuery(
-    'createUserFromAD.sql',
+    'add_user_from_AD.sql',
     UserSignup(username, null, name, last_name, email, null, verification_code),
     'signup',
   );
@@ -189,7 +174,7 @@ const getUser = async (id) => {
 };
 
 const getMyPermissions = async (id) => {
-  const { user } = await excecuteUserQuery('getMyPermissions.sql', [new SQLParam('id', id, sql.Int)], 'permissions');
+  const { user } = await excecuteUserQuery('get_permission_me.sql', [new SQLParam('id', id, sql.Int)], 'permissions');
   return { user, statusCode: 200 };
 };
 
@@ -205,7 +190,6 @@ module.exports = {
   updateUser,
   deleteUser,
   excecuteUserQuery,
-  migrateUserFromAD,
   getAllUsers,
   getUser,
   getMyPermissions,

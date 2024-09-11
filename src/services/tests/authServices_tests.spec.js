@@ -1,4 +1,4 @@
-const authService = require('../authServices');
+const authService = require('../authService');
 const { getUserByUsernameOrEmail, createUser, getUserById, updateUserVerification, updateUserPassword } = require('../../sql/Queries/UserQueries');
 const Email = require('../../utils/Email/Email');
 let {

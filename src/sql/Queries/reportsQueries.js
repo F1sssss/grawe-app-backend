@@ -24,7 +24,7 @@ const getReports = async () => {
 };
 
 const getReportById = async (id) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getReportById.sql', Report(id), true);
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('get_report_id.sql', Report(id), true);
 
   return {
     report_info: result[0][0],
@@ -34,7 +34,7 @@ const getReportById = async (id) => {
 };
 
 const getReportByName = async (report_name) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getReportByName.sql', ReportName(0, report_name), true);
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('get_report_name.sql', ReportName(0, report_name), true);
 
   return {
     report_info: result[0][0],
@@ -56,7 +56,10 @@ const getProcedureInfo = async (procedure_name) => {
 };
 
 const getParamValues = async (procedure_id, report_id, param_name, order) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getParamValues.sql', Param(procedure_id, report_id, param_name, order));
+  const { result, statusCode } = await excecuteQueryAndHandleErrors(
+    'get_reports_param_values.sql',
+    Param(procedure_id, report_id, param_name, order),
+  );
 
   if (isNullOrEmpty(result.sql)) {
     throw new AppError('Params query is empty!', 404, 'error-param-query-empty');
@@ -73,7 +76,7 @@ const executeReport = async (report, inputParams) => {
 };
 
 const searchProcedure = async (procedure_name) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('searchProcedure.sql', StoredProcedure(procedure_name), true);
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('get_report_search_procedures.sql', StoredProcedure(procedure_name), true);
   return { result, statusCode };
 };
 
@@ -103,7 +106,7 @@ const createReport = async (procedure) => {
 
 //These 2 functions are helper to createReport and are used to insert rows into SQL table
 const insertReport = async (report_name, procedure_id) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('insertReport.sql', NewReport(report_name, procedure_id));
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('add_report.sql', NewReport(report_name, procedure_id));
   return { report_id: result.id, statusCode };
 };
 
@@ -111,7 +114,7 @@ const insertReport = async (report_name, procedure_id) => {
 const insertParamSQL = async (procedure_params, procedure_id, report_id) => {
   procedure_params.map(async (param) => {
     await excecuteQueryAndHandleErrors(
-      'insert_update_reportParams.sql',
+      'update_report_params.sql',
       NewParam(procedure_id, report_id, param['order'], param['param_name'], param['sql_query']),
     );
   });
@@ -145,7 +148,7 @@ const updateReport = async (id, report) => {
 };
 
 const updateReportProcedure = async (id, report) => {
-  await excecuteQueryAndHandleErrors('updateReportProcedure.sql', ReportProcedure(id, report.report_info.procedure_id));
+  await excecuteQueryAndHandleErrors('update_report_procedure.sql', ReportProcedure(id, report.report_info.procedure_id));
   await insertParamSQL(report.report_params, report.report_info.procedure_id, report.report_info.report_id);
 };
 
@@ -153,12 +156,12 @@ const updateReportName = async (id, report) => {
   if ((await getReportByName(report.report_info.report_name))?.report_info?.report_name !== undefined) {
     throw new AppError('Report name already exists!', 404, 'error-report-name-already-exists');
   }
-  await excecuteQueryAndHandleErrors('updateReportName.sql', ReportName(id, report.report_info.report_name));
+  await excecuteQueryAndHandleErrors('update_report_name.sql', ReportName(id, report.report_info.report_name));
 };
 
 const deleteReport = async (id) => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  const report = await connection.executeQuery('deleteReport.sql', ReportId(id));
+  const report = await connection.executeQuery('delete_report.sql', ReportId(id));
 
   if (report) {
     throw new AppError('Error deleting report!', 404, 'error-deleting-report-not-found');

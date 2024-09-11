@@ -3,13 +3,13 @@ const DBConnection = require('../DBConnection');
 const AppError = require('../../utils/AppError');
 const { getPolicyInfo } = require('./PoliciesQueries');
 const { Date, Exception } = require('../Queries/params');
-const { getMeService } = require('../../services/userServices');
+const { getMeService } = require('../../services/userService');
 
 const excecuteQueryAndHandleErrors = async (query, params = []) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const result = await connection.executeQuery(query, params);
 
-  if ((!result || result.length === 0) && query === 'addErrorException.sql') {
+  if ((!result || result.length === 0) && query === 'add_error_exception.sql') {
     throw new AppError('Error during retrieving errors', 404, 'error-getting-errors-query-result-empty');
   }
 
@@ -17,24 +17,24 @@ const excecuteQueryAndHandleErrors = async (query, params = []) => {
 };
 
 const getEmployeeErrors = async (date) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getEmployeeErrors.sql', Date(date));
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('get_employee_errors.sql', Date(date));
   return { employee_errors: result, statusCode };
 };
 
 const getErrorExceptions = async () => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getErrorExceptions.sql');
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('get_employee_errors_exceptions.sql');
   return { exceptions: result, statusCode };
 };
 
 const addErrorException = async (policy, id, exception, req) => {
   await getPolicyInfo(policy); // Check if policy exists
   const { user } = await getMeService(req);
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('addErrorException.sql', Exception(policy, id, exception, user.ID));
+  const { result, statusCode } = await excecuteQueryAndHandleErrors('add_error_exception.sql', Exception(policy, id, exception, user.ID));
   return { result, statusCode };
 };
 
 const deleteErrorException = async (policy, id) => {
-  await excecuteQueryAndHandleErrors('deleteErrorException.sql', Exception(policy, id));
+  await excecuteQueryAndHandleErrors('delete_error_exception.sql', Exception(policy, id));
   return { result: 'Successfully deleted report!', statusCode: 200 };
 };
 

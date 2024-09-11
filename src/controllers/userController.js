@@ -1,4 +1,4 @@
-const userService = require('../services/userServices');
+const userService = require('../services/userService');
 const responseHandler = require('../utils/responseHandler');
 
 const getMe = async (req, res) => {

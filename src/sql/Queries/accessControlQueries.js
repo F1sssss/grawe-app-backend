@@ -19,7 +19,7 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const permissions = await connection.executeQuery(queryFileName, params);
 
-  if (!permissions && queryFileName === 'getclientInfo.sql') {
+  if (!permissions && queryFileName === 'get_client_info.sql') {
     throw new AppError('Error during getting permissions!', 404, 'error-getting-permissions-not-found');
   }
 
@@ -27,32 +27,32 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
 };
 
 const getPermissions = async () => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionsList.sql');
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('get_permission_all.sql');
   return { permissions: data, statusCode };
 };
 
 const getPermission = async (id, group) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermission.sql', PermissionProperties(id, group));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('get_permission.sql', PermissionProperties(id, group));
   return { permissions: data, statusCode };
 };
 
 const createPermission = async (permission) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('createPermission.sql', Permission(permission));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('add_permission.sql', Permission(permission));
   return { permissions: data, statusCode };
 };
 
 const createPermissionProperties = async (id, group) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('createPermissionProperties.sql', PermissionProperties(id, group));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('add_permission_properties.sql', PermissionProperties(id, group));
   return { permissions: data, statusCode };
 };
 
 const getPermissionsByGroup = async (id) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionsByGroup.sql', PermissionGroupID(id));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('get_permission_for_group.sql', PermissionGroupID(id));
   return { permissions: data, statusCode };
 };
 
 const deletePermission = async (id) => {
-  const data = await excecuteQueryAndHandleErrors('deletePermission.sql', PermissionID(id));
+  const data = await excecuteQueryAndHandleErrors('delete_permission.sql', PermissionID(id));
 
   if (data === {}) {
     throw new AppError('Error deleting permission!', 404, 'error-deleting-permission-not-found');
@@ -62,22 +62,22 @@ const deletePermission = async (id) => {
 };
 
 const updatePermission = async (id, permission) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('updatePermission.sql', PermissionUpdate(id, permission));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('update_permission.sql', PermissionUpdate(id, permission));
   return { permissions: data, statusCode };
 };
 
 const updatePermissionRigths = async (id, group, read, write) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('updatePermissionRights.sql', PermissionRights(id, group, read, write));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('update_permission_rights.sql', PermissionRights(id, group, read, write));
   return { permissions: data, statusCode };
 };
 
 const addPermissionToGroup = async (group, permission) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('addPermissionToGroup.sql', PermissionGroupPairing(group, permission));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('add_permission_to_group.sql', PermissionGroupPairing(group, permission));
   return { permissions: data, statusCode };
 };
 
 const removePermissionFromGroup = async (group, permission) => {
-  const data = await excecuteQueryAndHandleErrors('removePermissionFromGroup.sql', PermissionGroupPairing(group, permission));
+  const data = await excecuteQueryAndHandleErrors('delete_permission_from_group.sql', PermissionGroupPairing(group, permission));
 
   if (data === {}) {
     throw new AppError('Error removing permission from group!', 404, 'error-removing-permission-from-group-not-found');
@@ -87,12 +87,12 @@ const removePermissionFromGroup = async (group, permission) => {
 };
 
 const getUsersGroups = async (id) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('getUserGroups.sql', Client(id));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('get_permission_group_for_user.sql', Client(id));
   return { permissions: data, statusCode };
 };
 
 const getGroups = async () => {
-  let { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionGroups.sql');
+  let { data, statusCode } = await excecuteQueryAndHandleErrors('get_permission_groups_all.sql');
   if (!Array.isArray(data)) {
     return { permission_groups: data ? [data] : [], statusCode: 200 };
   }
@@ -108,22 +108,22 @@ const getGroups = async () => {
 };
 
 const getGroup = async (id) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('getPermissionGroup.sql', PermissionGroupID(id));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('get_permission_group.sql', PermissionGroupID(id));
   return { permission_group: data, statusCode };
 };
 
 const createGroup = async (group) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('createPermissionGroup.sql', PermissionGroupName(group));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('add_permission_group.sql', PermissionGroupName(group));
   return { permission_group: data, statusCode };
 };
 
 const updateGroup = async (id, group) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('updatePermissionGroup.sql', PermissionGroup(id, group));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('update_permission_group.sql', PermissionGroup(id, group));
   return { permission_group: data, statusCode };
 };
 
 const deleteGroup = async (id) => {
-  const permission_group = await excecuteQueryAndHandleErrors('deletePermissionGroup.sql', PermissionGroupID(id));
+  const permission_group = await excecuteQueryAndHandleErrors('delete_permission_group.sql', PermissionGroupID(id));
 
   if (permission_group === {}) {
     throw new AppError('Error deleting permission group!', 404, 'error-deleting-permission-group-not-found');
@@ -133,7 +133,7 @@ const deleteGroup = async (id) => {
 };
 
 const addUserToGroup = async (id, user) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('addUserToGroup.sql', ClientGroup(id, user));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('add_user_to_group.sql', ClientGroup(id, user));
 
   if (data === {}) {
     throw new AppError('Error adding user to group!', 404, 'error-adding-user-to-group-not-found');
@@ -143,7 +143,7 @@ const addUserToGroup = async (id, user) => {
 };
 
 const removeUserFromGroup = async (id, user) => {
-  const { data, statusCode } = await excecuteQueryAndHandleErrors('removeUserFromGroup.sql', ClientGroup(id, user));
+  const { data, statusCode } = await excecuteQueryAndHandleErrors('delete_permission_user_from_group.sql', ClientGroup(id, user));
 
   if (data === {}) {
     throw new AppError('Error removing user from group!', 404, 'error-removing-user-from-group-not-found');

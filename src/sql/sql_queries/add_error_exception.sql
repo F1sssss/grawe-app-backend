@@ -3,14 +3,14 @@ begin
     throw 50000, 'Polisa ne postoji u tabelu branche!', 1;
 end
 
-if exists (select 1 from gr_greske_izuzetci where polisa=@policy and id_greske=@id)
+if exists (select 1 from gr_error_exceptions where polisa=@policy and id_greske=@id)
 begin
     throw 50000, 'Polisa ne postoji u tabelu branche!', 1;
 end
 
 
 
-insert into gr_greske_izuzetci values (
+insert into gr_error_exceptions values (
 @policy,
 @id,
 @exception,
@@ -18,6 +18,6 @@ GETDATE(),
 @user
 )
 
-select * from gr_greske_izuzetci (nolock)
+select * from gr_error_exceptions (nolock)
 where polisa=@policy and id_greske=@id
 

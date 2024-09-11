@@ -1,7 +1,7 @@
 const DBConnection = require('../sql/DBConnection');
 const DB_CONFIG = require('../sql/DBconfig');
 const AppError = require('../utils/AppError');
-const userServices = require('../services/userServices');
+const userServices = require('../services/userService');
 const { AccessControl } = require('../sql/Queries/params');
 const CatchAsync = require('./CatchAsync');
 
@@ -21,7 +21,7 @@ const accessControlMiddleware = CatchAsync(async (req, res, next) => {
     throw new AppError('User not logged in!', 404, 'error-access-control-middleware-user-not-logged-in');
   }
 
-  const { permissions } = await excecuteQueryAndHandleErrors('getPermissions.sql', AccessControl(route, user.ID, id));
+  const { permissions } = await excecuteQueryAndHandleErrors('get_permission_for_user.sql', AccessControl(route, user.ID, id));
 
   if (!permissions || permissions.length === 0) {
     throw new AppError('No permissions found', 404, 'error-access-control-middleware-no-permissions-found');

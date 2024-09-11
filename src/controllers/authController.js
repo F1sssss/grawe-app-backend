@@ -7,8 +7,8 @@
 /** @namespace req.user.role * **/
 /** @namespace req.body.newPassword, * **/
 
-const authServices = require('../services/authServices');
-const userServices = require('../services/userServices');
+const authServices = require('../services/authService');
+const userServices = require('../services/userService');
 const AppError = require('../utils/AppError');
 const CatchAsync = require('../middlewares/CatchAsync');
 const responseHandler = require('../utils/responseHandler');

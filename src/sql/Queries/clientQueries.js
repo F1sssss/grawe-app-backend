@@ -7,11 +7,11 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const client = await connection.executeQuery(queryFileName, params);
 
-  if (!client && queryFileName === 'getclientInfo.sql') {
+  if (!client && queryFileName === 'get_client_info.sql') {
     throw new AppError('Error during retrieving client!', 404, 'error-getting-client-not-found');
   }
 
-  if (!client && queryFileName === 'getClientAll.sql') {
+  if (!client && queryFileName === 'get_client_all.sql') {
     throw new AppError('Error during retrieving client!', 404, 'error-getting-client-not-found');
   }
 
@@ -19,8 +19,8 @@ const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
 };
 
 const getClientInfo = async (id) => {
-  const { client, statusCode } = await excecuteQueryAndHandleErrors('getclientInfo.sql', Client(id));
-  const policies = await excecuteQueryAndHandleErrors('getclientPolicies.sql', Client(id));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_info.sql', Client(id));
+  const policies = await excecuteQueryAndHandleErrors('get_client_policies.sql', Client(id));
 
   return {
     client: {
@@ -32,14 +32,14 @@ const getClientInfo = async (id) => {
 };
 
 const getClientHistory = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientHistory.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_history.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   return { client, statusCode };
 };
 
 const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
-  let { client, statusCode } = await excecuteQueryAndHandleErrors('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  let { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_all.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   if (!Array.isArray(client)) client = [client];
-  const policies = await excecuteQueryAndHandleErrors('getClientActivePolicies.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const policies = await excecuteQueryAndHandleErrors('get_client_active_policies.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
 
   const {
     klijent_bruto_polisirana_premija,
@@ -63,22 +63,25 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
 };
 
 const getAllClientInfo = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientAll.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_all.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   return { client, statusCode };
 };
 
 const getClientPolicyAnalticalInfo = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientPolicyAnalticalInfo.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors(
+    'get_client_policy_analytical_info.sql',
+    Client_dateFrom_dateTo(id, dateFrom, dateTo),
+  );
   return { client, statusCode };
 };
 
 const getClientFinancialHistory = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientFinancialHistory.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_financial_history.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   return { clientFinHistory: client, statusCode };
 };
 
 const getClientFinancialInfo = async (id, dateFrom, dateTo) => {
-  const { client, statusCode } = await excecuteQueryAndHandleErrors('getClientFinancialInfo.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_financial_info.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   return { clientFinInfo: client, statusCode };
 };
 

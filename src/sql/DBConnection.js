@@ -2,7 +2,7 @@
 const { ConnectionPool } = require('mssql');
 const AppError = require('../utils/AppError');
 const logger = require('../logging/winstonSetup');
-const loadSqlQueries = require('./sql_queries/loadSQL');
+const loadSqlQueries = require('./sql_queries/loadSQLQueries');
 
 module.exports = class DBConnection {
   constructor(config) {
