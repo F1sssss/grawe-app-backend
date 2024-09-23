@@ -3,9 +3,14 @@ const ClientQueries = require('../sql/Queries/clientQueries');
 const generateExcelFile = require('../utils/Exports/ExcelExport');
 const Invoice = require('../utils/Exports/createInvoice');
 const FinancialInvoice = require('../utils/Exports/createFinancialInvoice');
+const AppError = require('../utils/AppError');
 
 function seperateClientPolicies(client) {
   const arraysByPolisa = {};
+
+  if (!Array.isArray(client)) {
+    return client;
+  }
 
   client.forEach((item) => {
     const policy = item.polisa;
@@ -29,7 +34,7 @@ const getClientInfoService = async (id) => {
 };
 
 const getClientAnalyticalInfoService = async (id, dateFrom, dateTo) => {
-  const cacheKey = `client-analytics-${id}-${dateFrom}-${dateTo}`;
+  const cacheKey = `client-analytical-info-${id}-${dateFrom}-${dateTo}`;
   const { client, statusCode } = await cacheQuery(cacheKey, ClientQueries.getClientAnalyticalInfo(id, dateFrom, dateTo));
   return { client, statusCode };
 };
@@ -70,7 +75,7 @@ const getAllClientAnalyticsService = async (id, dateFrom, dateTo) => {
 };
 
 const getAllClientInfoService = async (id, dateFrom, dateTo) => {
-  const cacheKey = `client-anlaytics-all-${id}-${dateFrom}-${dateTo}`;
+  const cacheKey = `client-analytics-all-${id}-${dateFrom}-${dateTo}`;
   let { client } = await cacheQuery(cacheKey, ClientQueries.getAllClientInfo(id, dateFrom, dateTo));
   client = seperateClientPolicies(client);
   return { client, statusCode: 200 };
@@ -80,17 +85,16 @@ const getClientFinancialHistoryPDFDownloadService = async (res, id, dateFrom, da
   res.setHeader('Content-Type', 'application/pdf');
   let filename = `attachment; filename="KarticaKlijenta-${id}-${dateTo}.pdf"`;
   res.setHeader('Content-Disposition', filename);
-  const cacheKey = `client-anlaytics-all-${id}-${dateFrom}-${dateTo}`;
-  let { client } = await getClientFinancialInfoService(id, dateFrom, dateTo);
+  const cacheKey = `client-analytics-all-${id}-${dateFrom}-${dateTo}`;
+  let { client } = await cacheQuery(cacheKey, getClientFinancialInfoService(id, dateFrom, dateTo));
+  if (!client || !client.finHistory.length) throw new AppError('No financial history found', 404, 'no-financial-history');
   return ({ pdfBuffer, statusCode } = await FinancialInvoice.createClientInvoice(client));
 };
 
 const getClientFinancialInfoService = async (id, dateFrom, dateTo) => {
-  // const cacheKey = `client-financial-info-${id}-${dateFrom}-${dateTo}`;
-  //  let { client } = await cacheQuery(cacheKey, ClientQueries.getClientFinancialHistory(id, dateFrom, dateTo));
   let { clientFinHistory } = await ClientQueries.getClientFinancialHistory(id, dateFrom, dateTo);
-
   let { clientFinInfo } = await ClientQueries.getClientFinancialInfo(id, dateFrom, dateTo);
+
   const { client } = await getClientInfoService(id);
 
   return { client: { finHistory: clientFinHistory, info: { ...client }, finInfo: clientFinInfo } };

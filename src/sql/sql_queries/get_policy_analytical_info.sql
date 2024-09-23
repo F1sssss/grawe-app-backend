@@ -1,3 +1,4 @@
+
 if OBJECT_ID('tempdb..#NaciniPlacanja') is not null
 drop table #NaciniPlacanja
 
@@ -27,9 +28,9 @@ select distinct
 	vtg_pol_kreis										[Pol_kreis],
 	bra_bran											[Bransa],
 	bra_vv_ueb											[Naziv_Branse],
-	bra_vers_beginn   									[Pocetak_osiguranja],
-	bra_vers_ablauf   									[Istek_osiguranja],
-	bra_storno_ab 										[Datum_storna],
+	convert(varchar,bra_vers_beginn,102)    			[Pocetak_osiguranja],
+	convert(varchar,bra_vers_ablauf,102)    	    	[Istek_osiguranja],
+	convert(varchar,bra_storno_ab,102) 					[Datum_storna],
 	bra_storno_grund									[Storno_tip],
 	cast('' as vaRCHAR(400))							[Status_Polise],
 	np.opis			[Nacin_Placanja],
@@ -113,6 +114,12 @@ update f
 set [Dani_Kasnjenja]=isnull((select DaniKasnjenja from #Kasnjenja where #Kasnjenja.polisa=f.[Broj_Polise]),0)
 from #temp f
 
+
+update #temp
+set
+[Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),104),
+[Istek_osiguranja]=convert(varchar,convert(date,[Istek_osiguranja],102),104),
+[Datum_storna]=convert(varchar,convert(date,[Datum_storna],102),104)
 
 
 select distinct * from #temp

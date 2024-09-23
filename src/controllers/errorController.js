@@ -5,7 +5,7 @@ const logger = require('../logging/winstonSetup');
 
 module.exports = errorHandler = (err, req, res, next) => {
   handleOtherErrors(err, res);
-
+  console.log('Test Error', err);
   res.status(err.statusCode || 500).json({
     status: err.status,
     statusMessage:

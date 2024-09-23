@@ -16,23 +16,6 @@ const server = app.listen(DB_CONFIG.port, async () => {
   }
 });
 
-//Error handling - Only in developement
-/*
-process.on('unhandledRejection', async (err) => {
-  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.log(err.name, err.message);
-
-  try {
-    await connection.close();
-    server.close(() => {
-      process.exit(1);
-    });
-  } catch (err) {
-    console.error('Error closing connection pool:', err);
-    process.exit(1);
-  }
-});
- */
 process.on('SIGTERM', async () => {
   console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
 
@@ -46,4 +29,9 @@ process.on('SIGTERM', async () => {
     console.error('Error closing connection pool:', err);
     process.exit(1);
   }
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.log(err.name, err.message);
 });

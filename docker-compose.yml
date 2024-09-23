@@ -1,55 +1,53 @@
 version: '3'
 
-
-
 services:
-#  server:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    ports:
-#      - '3000:3000'                 # Map the server container's port 3000 to the host's port 3000
-#    environment:
-#      - DB_HOST=localhost
-#      - DB_USER=SA
-#      - DB_PASSWORD=Grawe123$
-#      - REDIS_HOST=172.23.0.22
-#      - REDIS_PORT=6379
-#      - REDIS_PASSWORD=Grawe123$
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'                 # Map the server container's port 3000 to the host's port 3000
+    environment:
+      - DB_HOST=localhost
+      - DB_USER=SA
+      - DB_PASSWORD=${SQL_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
 
-#    volumes:
-#      - ./:/usr/src/app
-#      - /usr/src/app/node_modules
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
       #- ./node_modules:/usr/src/app/node_modules
 
-#    restart: on-failure
-#    depends_on:
-     # - mssql-server
-#      - cache
-#    networks:
-#      mynetwork:
-#        ipv4_address: 172.23.0.21
-#    command: ["sh", "-c", "sleep 3 && npm start"]
+    restart: on-failure
+    depends_on:
+      - mssql-server
+      - cache
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.21
+    command: ["sh", "-c", "sleep 30 && npm start"]
 
-#  mssql-server:
+  mssql-server:
     #image: mcr.microsoft.com/mssql/server:latest
-#    image: mcr.microsoft.com/mssql/server:2019-latest
-#    init: true
-#    environment:
-#      - ACCEPT_EULA=Y               # Accept the MSSQL EULA
-#      - SA_PASSWORD=Grawe123$
-#      - MSSQL_PID=Express           # Set the SQL Server Edition
-#    ports:
-#      - '1433:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
-#    volumes:
-#      - ./mssql-data/data:/var/opt/mssql/data
-#      - ./mssql-data/log:/var/opt/mssql/log
-#     - ./mssql-data/secrets:/var/opt/mssql/secrets
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    #init: true
+    environment:
+        - ACCEPT_EULA=Y               # Accept the MSSQL EULA
+        - SA_PASSWORD=${SQL_PASSWORD} # Set the SA user password
+    #      - MSSQL_PID=Express           # Set the SQL Server Edition
+    ports:
+      - '1433:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
+    volumes:
+      - ./mssql-data/data:/var/opt/mssql/data
+      - ./mssql-data/log:/var/opt/mssql/log
+      - ./mssql-data/secrets:/var/opt/mssql/secrets
 
 
-#    networks:
-#      mynetwork:
- #       ipv4_address:
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.20
 
 
   cache:
@@ -72,19 +70,19 @@ services:
       mynetwork:
         ipv4_address: 172.23.0.22
 
-#  nginx:
-#    build:
-#      context: .
-#      dockerfile: ./nginx/Dockerfile
-#    ports:
-#      - '80:80'
-#      - '443:443'
-#    volumes:
-#       - ./nginx:/etc/nginx
-##      - ./nginx/ssl/certificate.crt:/etc/nginx/ssl/certificate.crt
-##      - ./nginx/ssl/private.key:/etc/nginx/ssl/private.key
-##      - ./nginx/ssl/csr.pem:/etc/nginx/ssl/csr.pem
-#    restart: always
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/:/etc/nginx
+      - ./ssl/certificate.crt:/etc/nginx/ssl/certificate.crt
+      - ./ssl/private.key:/etc/nginx/ssl/private.key
+      - ./ssl/csr.pem:/etc/nginx/ssl/csr.pem
+    restart: always
 
 
   superset:
@@ -109,8 +107,12 @@ services:
       - SUPERSET_WEBSERVER_WORKERS=10
       - SUPERSET_WEBSERVER_THREADS=10
       - SUPERSET_WEBSERVER_MAX_REQUESTS=1000
-      - ADMIN_USERNAME=admin
+      - ADMIN_USERNAME= ${SUPERSET_USERNAME}
       - SUPERSET_FEATURE_EMBEDDED_SUPERSET='true'
+    networks:
+      mynetwork:
+        ipv4_address: 172.23.0.13
+
 
   superset-db:
     env_file: ./superset/.env

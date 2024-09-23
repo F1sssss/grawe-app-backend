@@ -11,6 +11,24 @@ begin
     throw 50000, 'Permission already exists', 1;
 end
 
+if not exists
+(
+select * from gr_permission_groups p(nolock)
+where id=@id_permission_group
+)
+begin
+    throw 50001, 'Permission-group-not-found', 1;
+end
+
+if not exists
+(
+select * from gr_permission p(nolock)
+where id=@id_permission
+)
+begin
+    throw 50001, 'Permission-not-found', 1;
+end
+
 
 BEGIN TRANSACTION
 
@@ -37,7 +55,7 @@ COMMIT
   description,
   property_path
 
-    from gr_permission_properties pp
+  from gr_permission_properties pp
   left join gr_pairing_permisson_property_list gpp on pp.permission_property_id=gpp.id
   left join gr_permission p on p.id=gpp.id_permission
   left join gr_property_lists pl on pl.id=gpp.id_permission_property

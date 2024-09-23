@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const getDashboardService = async (id) => {
-  const response = await axios.post('http://127.0.0.1:8088/api/v1/security/login', {
+  const response = await axios.post(`${process.env.SUPERSET_URL}/security/login`, {
     username: process.env.SUPERSET_USERNAME,
     password: process.env.SUPERSET_PASSWORD,
     provider: 'db',
@@ -13,12 +13,12 @@ const getDashboardService = async (id) => {
     data: {
       result: { uuid },
     },
-  } = await axios.get(`http://127.0.0.1:8088/api/v1/dashboard/${id}/embedded`, {
+  } = await axios.get(`${process.env.SUPERSET_URL}/dashboard/${id}/embedded`, {
     headers: { Authorization: `Bearer ${user_jwt_token}` },
   });
 
   const GuestToken = await axios.post(
-    'http://localhost:8088/api/v1/security/guest_token/',
+    `${process.env.SUPERSET_URL}/security/guest_token/`,
     {
       resources: [
         {

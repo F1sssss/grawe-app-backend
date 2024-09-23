@@ -9,25 +9,21 @@ const excecuteQueryAndHandleErrors = async (query, params = []) => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const result = await connection.executeQuery(query, params);
 
-  if ((!result || result.length === 0) && query === 'add_error_exception.sql') {
-    throw new AppError('Error during retrieving errors', 404, 'error-getting-errors-query-result-empty');
-  }
-
-  return { result, statusCode: 200 };
+  return { result: result === undefined ? {} : result, statusCode: 200 };
 };
 
 const getEmployeeErrors = async (date) => {
   const { result, statusCode } = await excecuteQueryAndHandleErrors('get_employee_errors.sql', Date(date));
-  return { employee_errors: result, statusCode };
+  return { employee_errors: returnArray(result), statusCode };
 };
 
 const getErrorExceptions = async () => {
   const { result, statusCode } = await excecuteQueryAndHandleErrors('get_employee_errors_exceptions.sql');
-  return { exceptions: result, statusCode };
+  return { exceptions: returnArray(result), statusCode };
 };
 
 const addErrorException = async (policy, id, exception, req) => {
-  await getPolicyInfo(policy); // Check if policy exists
+  if (Object.keys(await getPolicyInfo(policy)).length === 0) throw new AppError('Policy does not exist!', 404, 'error-policy-not-found');
   const { user } = await getMeService(req);
   const { result, statusCode } = await excecuteQueryAndHandleErrors('add_error_exception.sql', Exception(policy, id, exception, user.ID));
   return { result, statusCode };
@@ -35,18 +31,16 @@ const addErrorException = async (policy, id, exception, req) => {
 
 const deleteErrorException = async (policy, id) => {
   await excecuteQueryAndHandleErrors('delete_error_exception.sql', Exception(policy, id));
-  return { result: 'Successfully deleted report!', statusCode: 200 };
+  return { result: 'Successfully deleted exception!', statusCode: 200 };
 };
 
-const updateErrorException = async (policy, id, exception) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('updateErrorException.sql', Exception(policy, id, exception));
-  return { result, statusCode };
-};
+function returnArray(error) {
+  return Array.isArray(error) ? error : Object.keys(error).length > 0 ? [error] : [];
+}
 
 module.exports = {
   getEmployeeErrors,
   getErrorExceptions,
   addErrorException,
   deleteErrorException,
-  updateErrorException,
 };

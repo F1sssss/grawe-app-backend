@@ -35,9 +35,9 @@ ISNULL(k.kun_telefon_1,'')											[telefon1],
 ISNULL(ISNULL(k.kun_tele_mobil_1,k.kun_tele_mobil_1),'')			[telefon2],
 ISNULL(kun_e_mail,'')												[email],
 b.bra_obnr															[polisa],
-convert(varchar,convert(date,bra_vers_beginn,104),102)   			[pocetak_osiguranja],
-convert(varchar,convert(date,bra_vers_ablauf,104),102)   			[istek_osiguranja],
-convert(varchar,convert(date,bra_storno_ab,104),102)   				[datum_storna],
+convert(varchar,bra_vers_beginn,104) 			                    [pocetak_osiguranja],
+convert(varchar,bra_vers_ablauf,104)  			                    [istek_osiguranja],
+convert(varchar,bra_storno_ab,104) 			                        [datum_storna],
 np.opis																[nacin_placanja],
 np.sifra															[nacin_placanja_sifra],
 bra_vv_ueb															[naziv_branse],
@@ -107,18 +107,11 @@ delete from #temp
 where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid);
 
 
-
-update #temp
-set [Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),104),
-[Istek_osiguranja]=convert(varchar,convert(date,[Istek_osiguranja],102),104),
-[Datum_storna]=convert(varchar,convert(date,[Datum_storna],102),104)
-
-
 ;WITH CTE_Praemienkonto AS (
 select t.*,
 pko_buch_nr,
 --convert(varchar,convert(date,pko_wertedatum,104),102)                   datum_dokumenta,
-pko_wertedatum                                                          datum_dokumenta,
+convert(varchar,pko_wertedatum,104)                                     datum_dokumenta,
 cast(replace(pko_betragsoll,',','.') as decimal(18,2))				    duguje,
 cast(replace(pko_betraghaben,',','.') as decimal(18,2))				    potrazuje,
 cast(replace(pko_wertedatumsaldo,',','.')as decimal(18,2))*-1	        saldo,

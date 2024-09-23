@@ -4,7 +4,7 @@ drop table #temp
 
 select
 bra_obnr															polisa,
-isnull(cast(((select top 1  cast(replace(p.pko_wertedatumsaldo,',','.')	as decimal(18,2))*-1  from praemienkonto p (nolock) where convert(date,pko_wertedatum,104)<=convert(date,@dateTo,104) and p.pko_obnr=b.bra_obnr order by convert(date,pko_wertedatum,104) desc,pko_buch_nr desc )) as decimal(18,2)),0)										[dospjela_potrazivanja],
+isnull(cast(((select top 1 p.pko_wertedatumsaldo*-1  from praemienkonto p (nolock) where pko_wertedatum < @dateTo and p.pko_obnr=b.bra_obnr order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)										[dospjela_potrazivanja],
 dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [bruto_polisirana_premija],
 cast('' as vaRCHAR(40))												[status_polise],
 bra_storno_grund													[storno_tip],

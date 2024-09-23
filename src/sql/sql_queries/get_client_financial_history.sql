@@ -58,9 +58,9 @@ and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_ob
 ),
 
 CTE_2 AS (
-select '01.01.' + SUBSTRING(convert(varchar,@dateFrom,104),7,4) datum_dokumenta, broj_dokumenta,broj_ponude, sum(zaduzeno) zaduzeno, sum (uplaceno) uplaceno
+select '01.01.' + SUBSTRING(convert(varchar,@dateFrom,102),1,4) datum_dokumenta, broj_dokumenta,broj_ponude, sum(zaduzeno) zaduzeno, sum (uplaceno) uplaceno
 FROM CTE
-where datum_dokumenta <= convert(date,'01.01.' + SUBSTRING(convert(varchar,@dateFrom,104),7,4),104)
+where datum_dokumenta <= convert(date,'01.01.' + SUBSTRING(convert(varchar,@dateFrom,102),1,4),104)
 group by broj_dokumenta,broj_ponude
 having sum(zaduzeno-uplaceno)<>0
 ),
@@ -68,7 +68,7 @@ CTE_3 AS (
 select * from CTE_2
 UNION ALL
 select * from CTE
-where convert(date,datum_dokumenta,104)>convert(date,'01.01.' + SUBSTRING(convert(varchar,@dateFrom,104),7,4),104)
+where convert(date,datum_dokumenta,104)>convert(date,'01.01.' + SUBSTRING(convert(varchar,@dateFrom,102),1,4),104)
 )
 ,CTE_4 AS(
 select
@@ -101,7 +101,7 @@ broj_dokumenta,
 broj_ponude,
 zaduzeno,
 uplaceno,
-SUM(zaduzeno-uplaceno) OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta,uplaceno) saldo,
+SUM(cast(zaduzeno-uplaceno as decimal(18,2))) OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta,uplaceno) saldo,
 convert(varchar,@dateFrom,104) datum_od,
 convert(varchar,@dateTo,104)  datum_do
 from CTE_5

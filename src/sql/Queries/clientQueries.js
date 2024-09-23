@@ -1,19 +1,10 @@
 const DBConnection = require('../DBConnection');
 const DB_CONFIG = require('../DBconfig');
-const AppError = require('../../utils/AppError');
 const { Client, Client_dateFrom_dateTo } = require('./params');
 
 const excecuteQueryAndHandleErrors = async (queryFileName, params) => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  const client = await connection.executeQuery(queryFileName, params);
-
-  if (!client && queryFileName === 'get_client_info.sql') {
-    throw new AppError('Error during retrieving client!', 404, 'error-getting-client-not-found');
-  }
-
-  if (!client && queryFileName === 'get_client_all.sql') {
-    throw new AppError('Error during retrieving client!', 404, 'error-getting-client-not-found');
-  }
+  const client = await connection.executeQuery(queryFileName, params, false);
 
   return { client: client === undefined ? {} : client, statusCode: 200 };
 };
@@ -25,7 +16,10 @@ const getClientInfo = async (id) => {
   return {
     client: {
       ...client,
-      policies: Array.isArray(policies['client']) ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? [] : [policies['client']['bra_obnr']],
+      policies:
+        Array.isArray(policies['client']) && policies['client'] !== null && policies['client'] !== undefined
+          ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? []
+          : [],
     },
     statusCode,
   };
@@ -33,7 +27,10 @@ const getClientInfo = async (id) => {
 
 const getClientHistory = async (id, dateFrom, dateTo) => {
   const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_history.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
-  return { client, statusCode };
+  return {
+    client: returnArray(client),
+    statusCode,
+  };
 };
 
 const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
@@ -56,7 +53,10 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
       dani_kasnjenja,
       klijent_ukupna_potrazivanja,
       klijent_dospjela_potrazivanja,
-      policies: Array.isArray(policies['client']) ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? [] : [policies['client']['bra_obnr']],
+      policies:
+        Array.isArray(policies['client']) && policies['client'] !== null && policies['client'] !== undefined
+          ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? []
+          : [],
     },
     statusCode,
   };
@@ -64,7 +64,7 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
 
 const getAllClientInfo = async (id, dateFrom, dateTo) => {
   const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_all.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
-  return { client, statusCode };
+  return { client: returnArray(client), statusCode };
 };
 
 const getClientPolicyAnalticalInfo = async (id, dateFrom, dateTo) => {
@@ -77,13 +77,17 @@ const getClientPolicyAnalticalInfo = async (id, dateFrom, dateTo) => {
 
 const getClientFinancialHistory = async (id, dateFrom, dateTo) => {
   const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_financial_history.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
-  return { clientFinHistory: client, statusCode };
+  return { clientFinHistory: returnArray(client), statusCode };
 };
 
 const getClientFinancialInfo = async (id, dateFrom, dateTo) => {
   const { client, statusCode } = await excecuteQueryAndHandleErrors('get_client_financial_info.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
-  return { clientFinInfo: client, statusCode };
+  return { clientFinInfo: client.ukupno_nedospjelo === null && client.ukupno_dospjelo === null ? {} : client, statusCode };
 };
+
+function returnArray(client) {
+  return Array.isArray(client) ? client : Object.keys(client).length > 0 ? [client] : [];
+}
 
 module.exports = {
   getClientInfo,

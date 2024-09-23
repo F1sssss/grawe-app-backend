@@ -6,30 +6,28 @@ const handleResponse = require('../utils/responseHandler');
 const CatchAsync = require('../middlewares/CatchAsync');
 
 const getClientHistory = CatchAsync(async (req, res) => {
-  await handleResponse(clientService.getClientHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });
+  await handleResponse(clientService.getClientHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo), res);
 });
 
 const getClientInfo = CatchAsync(async (req, res) => {
-  await handleResponse(clientService.getClientInfoService(req.params.id), res, { statusCode: 200 });
+  await handleResponse(clientService.getClientInfoService(req.params.id), res);
 });
 
 const getClientAnalyticalInfo = CatchAsync(async (req, res) => {
-  await handleResponse(clientService.getClientAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });
+  await handleResponse(clientService.getClientAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo), res);
 });
 
 const getClientPolicyAnalyticalInfo = CatchAsync(async (req, res) => {
-  await handleResponse(clientService.getClientPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo), res, {
-    statusCode: 200,
-  });
+  await handleResponse(clientService.getClientPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo), res);
 });
 
 const getAllClientAnalytics = CatchAsync(async (req, res) => {
-  await handleResponse(clientService.getAllClientAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });
+  await handleResponse(clientService.getAllClientAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo), res);
 });
 
 //TOBE DELETED
 const getAllClientInfo = CatchAsync(async (req, res) => {
-  await handleResponse(clientService.getAllClientInfoService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });
+  await handleResponse(clientService.getAllClientInfoService(req.params.id, req.query.dateFrom, req.query.dateTo), res);
 });
 
 const getClientHistoryExcelDownload = CatchAsync(async (req, res) => {

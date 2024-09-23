@@ -44,7 +44,7 @@ const getAllUsersService = async (req) => {
 };
 
 const getUserService = async (req) => {
-  return ({ user } = await SQLQueries.getUser(req.params.id));
+  return ({ user } = await SQLQueries.getUserById(req.params.id));
 };
 
 const getMyPermissionsService = async (req) => {
@@ -53,9 +53,8 @@ const getMyPermissionsService = async (req) => {
   } = await getAccessTokenAndUser(req);
   const { user } = await SQLQueries.getMyPermissions(ID);
 
-  if (!user) {
-    return ['error-no-permissions'];
-    //throw new AppError('The user does not have any permissions.', 401, 'error-no-permissions');
+  if (!user || user.length === 0) {
+    throw new AppError('The user does not have any permissions.', 401, 'error-no-permissions');
   }
 
   const permissions = user.reduce((result, item) => {

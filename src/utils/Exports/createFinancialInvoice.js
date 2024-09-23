@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
 const AppError = require('../AppError');
 const logger = require('../../logging/winstonSetup');
+const { generateHeader } = require('./createInvoice');
 
 function createClientInvoice(client) {
   return new Promise(async (resolve, reject) => {
@@ -37,22 +38,6 @@ function createClientInvoice(client) {
 }
 function generateHr(doc, y) {
   doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
-}
-
-function generateHeader(doc) {
-  doc
-    .image('./src/assets/Grawe.png', 50, 45, { width: 200 })
-    .fillColor('#444444')
-    .fontSize(20)
-    .fontSize(10)
-    .font('./src/assets/Roboto-Regular.ttf')
-    .text('Grawe neživotno osiguranje a.d.', 200, 30, { align: 'right' })
-    .text('Josipa Broza Tita 23a', 200, 45, { align: 'right' })
-    .text('81000 Podgorica', 200, 60, { align: 'right' })
-    .text('T  +382 20 657 300', 200, 75, { align: 'right' })
-    .text('F  +382 20 657 301', 200, 90, { align: 'right' })
-    .text('E  info.nezivot@grawe.me', 200, 105, { align: 'right' })
-    .moveDown();
 }
 
 function generateCustomerInformation(doc, invoice, datum_od, datum_do) {

@@ -12,14 +12,15 @@ const excecuteUserQuery = async (query, param, type = '') => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const user = await connection.executeQuery(query, param);
 
-  if (!user?.username && type !== 'signup' && type !== 'permissions') {
-    throw new AppError(`User not found!`, 404, 'error-user-not-found');
-  }
-
   if (type === 'login' && user.verified !== 1) {
     throw new AppError('Email not verified', 401, 'not-verified');
   }
 
+  if (!user) {
+    return { user: {}, statusCode: 200 };
+  }
+
+  //type !== 'signup' && type !== 'permissions' ? (user.password = type === 'login' ? user?.password : undefined) : type === 'permissions' ? user : {};
   type !== 'signup' && type !== 'permissions'
     ? (user.password = type === 'login' ? user?.password : undefined)
     : type === 'permissions'
@@ -78,6 +79,10 @@ const getUserByUsernameOrEmail = async (username, email, requesttype) => {
     requesttype,
   );
 
+  if (!user && requesttype === 'login') {
+    throw new AppError('User not found!', 401, 'error-user-not-found');
+  }
+
   return { user, statusCode };
 };
 
@@ -116,10 +121,6 @@ const createADUser = async (ad_user) => {
     'signup',
   );
 
-  if (!user) {
-    throw new AppError('Error creating user!', 401, 'error-creating-user');
-  }
-
   return { user: { ...user, password: undefined }, statusCode: 200 };
 };
 
@@ -150,32 +151,19 @@ const deleteUser = async (id) => {
     [new SQLParam('id', id, sql.Int)],
   );
 
-  if (user) {
-    throw new AppError('Error deleting user!', 401, 'error-deleting-user-not-found');
-  }
-
-  return { message: 'User Deleted!', statusCode: 200 };
+  return { message: 'User Deleted successfully!', statusCode: 200 };
 };
 
 const getAllUsers = async () => {
   const connection = new DBConnection(DB_CONFIG.sql);
   const users = await connection.executeQuery('select * from users (nolock)');
 
-  if (!users) {
-    throw new AppError('Error getting users!', 401, 'error-getting-users');
-  }
-
   return { users, statusCode: 200 };
-};
-
-const getUser = async (id) => {
-  const { user, statusCode } = await excecuteUserQuery('select * from users (nolock) where id = @id', [new SQLParam('id', id, sql.Int)]);
-  return { user, statusCode };
 };
 
 const getMyPermissions = async (id) => {
   const { user } = await excecuteUserQuery('get_permission_me.sql', [new SQLParam('id', id, sql.Int)], 'permissions');
-  return { user, statusCode: 200 };
+  return { user: Array.isArray(user) ? user : Object.keys(user).length > 0 ? [user] : [], statusCode: 200 };
 };
 
 module.exports = {
@@ -191,7 +179,6 @@ module.exports = {
   deleteUser,
   excecuteUserQuery,
   getAllUsers,
-  getUser,
   getMyPermissions,
   createADUser,
 };

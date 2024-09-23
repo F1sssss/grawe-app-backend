@@ -20,14 +20,9 @@ const deleteErrorException = catchAsync(async (req, res) => {
   await handleResponse(employeeErrorQueries.deleteErrorException(req.query.policy, req.query.id), res, { statusCode: 200 });
 });
 
-const updateErrorException = catchAsync(async (req, res) => {
-  await handleResponse(employeeErrorQueries.updateErrorException(req.query.policy, req.query.id, req.body.exception), res, { statusCode: 200 });
-});
-
 module.exports = {
   getAllEmployeeErrors,
   getAllExceptions,
   addErrorException,
   deleteErrorException,
-  updateErrorException,
 };

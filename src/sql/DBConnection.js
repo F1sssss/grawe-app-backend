@@ -37,8 +37,6 @@ module.exports = class DBConnection {
     try {
       const request = await this.pool.request();
 
-      logger.info(`💰 SQL query: ${query}`);
-
       if (query.includes('.sql')) {
         query = await loadSqlQueries(query);
       }
@@ -54,11 +52,8 @@ module.exports = class DBConnection {
 
       result = multipleResultSets === false ? result.recordset : result.recordsets;
 
-      logger.info(`💰 Successfully executed query: ${query}`);
-
       return result?.length === 1 ? result[0] : result?.length === 0 ? undefined : result;
     } catch (err) {
-      logger.error(`Error executing query: ${query} - ${err.message}`);
       throw new AppError('Error executing query ' + err.message, 500, 'error-executing-query');
     }
   }
@@ -67,8 +62,6 @@ module.exports = class DBConnection {
     try {
       const request = await this.pool.request();
 
-      logger.info(`Executing stored procedure: ${storedProcedure}`);
-
       // Add parameters to the request
       params.forEach((param) => {
         request.input(param.name, param.type, param.value);
@@ -76,12 +69,9 @@ module.exports = class DBConnection {
 
       const result = await request.execute(storedProcedure);
 
-      logger.info(`Successfully executed stored procedure: ${storedProcedure}`);
-
       return result.recordsets[0];
     } catch (err) {
-      logger.error(`Error executing query: ${query} - ${err.message}`);
-      throw new AppError('Error executing query ' + err.message, 500, 'error-executing-query');
+      throw new AppError(`Error executing stored procedure ${storedProcedure}` + err.message, 500, 'error-executing-query');
     }
   }
 };

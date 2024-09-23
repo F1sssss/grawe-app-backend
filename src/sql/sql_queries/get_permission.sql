@@ -42,7 +42,8 @@ from gr_permission p
 left join gr_pairing_permisson_property_list ppl on ppl.id_permission=p.id
 left join gr_property_lists pl on pl.id=ppl.id_permission_property
 left join gr_permission_properties pp on pp.permission_property_id=ppl.id
-where p.id=@id_permission and group_id=@id_permission_group
+left join gr_pairing_permission_groups_permission ppgp on ppgp.id_permission=p.id
+where p.id=@id_permission and id_permission_group=@id_permission_group
 order by p.id
 
 

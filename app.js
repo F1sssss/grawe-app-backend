@@ -8,8 +8,7 @@ const xss = require('xss-clean');
 const compression = require('compression');
 const morgan = require('morgan');
 
-const errorController = require('./src/controllers/errorController');
-//const MigrateADUsers = require('./src/utils/updateAD');
+const errorHandler = require('./src/controllers/errorController');
 const logger = require('./src/logging/winstonSetup');
 
 const userRouter = require('./src/routes/userRouter');
@@ -20,9 +19,6 @@ const searchRouter = require('./src/routes/searchRouter');
 const employeeErrorRouter = require('./src/routes/employeeErrorRouter');
 const permissionRouter = require('./src/routes/permissionRouter');
 const dashboardRouter = require('./src/routes/dashboardRouter');
-
-//enable jobscheduler
-//MigrateADUsers.start();
 
 //start express app
 const app = express();
@@ -74,16 +70,16 @@ app.use(xss());
 app.use(compression());
 
 //Routes
-app.use('/api/v1/users', userRouter);
-app.use('/api/v1/policies', policyRouter);
-app.use('/api/v1/clients', clientRouter);
-app.use('/api/v1/reports', reportsRouter);
-app.use('/api/v1/search', searchRouter);
-app.use('/api/v1/errors', employeeErrorRouter);
-app.use('/api/v1/permissions', permissionRouter);
-app.use('/api/v1/dashboard', dashboardRouter);
+app.use(`/api/${process.env.API_VERSION}/users`, userRouter);
+app.use(`/api/${process.env.API_VERSION}/policies`, policyRouter);
+app.use(`/api/${process.env.API_VERSION}/clients`, clientRouter);
+app.use(`/api/${process.env.API_VERSION}/reports`, reportsRouter);
+app.use(`/api/${process.env.API_VERSION}/search`, searchRouter);
+app.use(`/api/${process.env.API_VERSION}/errors`, employeeErrorRouter);
+app.use(`/api/${process.env.API_VERSION}/permissions`, permissionRouter);
+app.use(`/api/${process.env.API_VERSION}/dashboard`, dashboardRouter);
 
 //Error handling middleware
-app.use(errorController);
+app.use(errorHandler);
 
 module.exports = app;

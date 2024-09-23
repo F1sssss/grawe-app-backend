@@ -3,117 +3,108 @@ const AppError = require('../AppError');
 const logger = require('../../logging/winstonSetup');
 
 function createInvoice(policy) {
-  return new Promise(async (resolve, reject) => {
-    // Handle errors
-    let buffers = [];
-    let doc = new PDFDocument({ size: 'A4', margin: 50 });
+  return new Promise((resolve, reject) => {
+    try {
+      const buffers = [];
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-    doc.on('error', (err) => {
-      logger.error('Error during creating PDF', err);
-      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-    });
+      doc.on('error', (err) => {
+        logger.error('Error during PDF creation: ' + err);
+        return reject(new AppError('Error during PDF creation', 500, 'error-creating-pdf'));
+      });
 
-    logger.info('Creating PDF...');
+      logger.info('Creating PDF...');
 
-    // Collect the PDF buffers
-    doc.on('data', (buffer) => {
-      buffers.push(buffer);
-    });
+      doc.on('data', (buffer) => buffers.push(buffer));
 
-    // Finalize the PDF document
-    doc.on('end', () => {
-      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-      resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
-    });
+      doc.on('end', () => {
+        if (buffers.length === 0) {
+          return reject(new AppError('Error during PDF creation', 500, 'error-creating-pdf'));
+        }
+        resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
+      });
 
-    let policyData = extractClientPolicyInfo(policy);
-    //console.log(getDistinctObjects(policy[0], ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']));
-    policyData.items = getDistinctObjects(policy, ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
+      const policyData = extractClientPolicyInfo(policy);
+      policyData.items = getDistinctObjects(policy, ['datum_dokumenta', 'broj_dokumenta', 'polisa', 'duguje', 'potrazuje', 'saldo']);
 
-    generateHeader(doc);
-    generateCustomerInformation(doc, policyData);
-    generateInvoiceTable(doc, policyData);
-    //generateFooter(doc);
+      generateHeader(doc);
+      generateCustomerInformation(doc, policyData);
+      generateInvoiceTable(doc, policyData);
 
-    doc.end();
-
-    logger.info('PDF created');
+      doc.end();
+      logger.info('PDF created successfully');
+    } catch (error) {
+      logger.error('Unexpected error:', error);
+      reject(new AppError('Unexpected error during PDF creation', 500, 'unexpected-error'));
+    }
   });
 }
 
 function createClientInvoice(client) {
-  return new Promise(async (resolve, reject) => {
-    let doc = new PDFDocument({ size: 'A4', margin: 50 });
-    let buffers = [];
-    let recapitulation = [];
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      const buffers = [];
+      const recapitulation = [];
 
-    // Handle errors
-    doc.on('error', () => {
-      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-    });
+      doc.on('error', (err) => {
+        logger.error('Error during PDF creation:', err);
+        return reject(new AppError('Error during PDF creation', 500, 'error-creating-pdf'));
+      });
 
-    // Collect the PDF buffers
-    doc.on('data', (buffer) => {
-      buffers.push(buffer);
-    });
+      doc.on('data', (buffer) => buffers.push(buffer));
 
-    // Finalize the PDF document
-    doc.on('end', () => {
-      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-      resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
-    });
+      doc.on('end', () => {
+        if (buffers.length === 0) {
+          return reject(new AppError('Error during PDF creation', 500, 'error-creating-pdf'));
+        }
+        resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
+      });
 
-    let clientData = extractClientInfo(client);
+      let clientData = extractClientInfo(client);
 
-    for (let i = 0; i < client.length; i++) {
-      if (client[i][0].datum_dokumenta === null || !client[i][0].datum_dokumenta) {
-        continue;
+      for (const entry of client) {
+        if (!entry[0].datum_dokumenta) {
+          continue;
+        }
+
+        clientData.items = getDistinctObjects(entry, [
+          'datum_dokumenta',
+          'broj_dokumenta',
+          'polisa',
+          'duguje',
+          'potrazuje',
+          'saldo',
+          'trangrupa1',
+          'trangrupa2',
+        ]);
+        clientData = { ...clientData, ...entry[0] };
+
+        recapitulation.push([
+          clientData.broj_polise,
+          clientData.naziv_branse,
+          clientData.premija,
+          clientData.ukupno_placeno,
+          clientData.ukupno_duguje,
+          clientData.ukupno_dospjelo,
+          clientData.ukupno_nedospjelo,
+        ]);
+
+        generateHeader(doc);
+        generateCustomerInformation(doc, clientData);
+        generateInvoiceTable(doc, clientData);
+        doc.addPage();
       }
 
-      clientData.items = getDistinctObjects(client[i], [
-        'datum_dokumenta',
-        'broj_dokumenta',
-        'polisa',
-        'duguje',
-        'potrazuje',
-        'saldo',
-        'trangrupa1',
-        'trangrupa2',
-      ]);
-      clientData.broj_polise = client[i][0].polisa;
-      clientData.pocetak_osiguranja = client[i][0].pocetak_osiguranja;
-      clientData.istek_osiguranja = client[i][0].istek_osiguranja;
-      clientData.ukupno_dospjelo = client[i][0].ukupno_dospjelo;
-      clientData.ukupno_placeno = client[i][0].ukupno_placeno;
-      clientData.ukupno_duguje = client[i][0].ukupno_duguje;
-      clientData.ukupno_nedospjelo = client[i][0].ukupno_nedospjelo;
-      clientData.premija = client[i][0].bruto_polisirana_premija;
-      clientData.nacin_placanja = client[i][0].nacin_placanja;
-      clientData.naziv_branse = client[i][0].naziv_branse;
-      clientData.broj_ponude = client[i][0].broj_ponude;
-
-      recapitulation.push([
-        clientData.broj_polise,
-        clientData.naziv_branse,
-        clientData.premija,
-        clientData.ukupno_placeno,
-        clientData.ukupno_duguje,
-        clientData.ukupno_dospjelo,
-        clientData.ukupno_nedospjelo,
-      ]);
-
       generateHeader(doc);
-      generateCustomerInformation(doc, clientData);
-      generateInvoiceTable(doc, clientData);
-      doc.addPage();
+      generateCustomerRecapInformation(doc, clientData);
+      generateInvoiceTableRecap(doc, recapitulation);
+
+      doc.end();
+    } catch (error) {
+      logger.error('Unexpected error:', error);
+      reject(new AppError('Unexpected error during PDF creation', 500, 'unexpected-error'));
     }
-
-    generateHeader(doc);
-    generateCustomerRecapInformation(doc, clientData);
-    generateInvoiceTableRecap(doc, recapitulation);
-
-    clientData = [];
-    doc.end();
   });
 }
 
@@ -345,7 +336,7 @@ function generateTableRow(doc, y, datum_dokumenta, broj_polise, broj_ponude, dug
 
 function generateBoldedTableRow(doc, y, datum_dokumenta, broj_polise, broj_ponude, duguje, potrazuje, saldo) {
   doc
-    .fontSize(10)
+    .fontSize(9)
     .font('./src/assets/Roboto-Bold.ttf')
     .text(datum_dokumenta, 50, y, { encoding: 'utf8' })
     .text(broj_polise, 150, y, { encoding: 'utf8' })
@@ -420,14 +411,6 @@ function extractClientPolicyInfo(client) {
   };
 }
 
-function formatDate(date) {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-
-  return day + '/' + month + '/' + year;
-}
-
 function getDistinctObjects(jsonArray, keys) {
   const distinctObjects = jsonArray.reduce((result, obj) => {
     const key = keys.map((key) => obj[key]).join('|');
@@ -439,10 +422,9 @@ function getDistinctObjects(jsonArray, keys) {
 
   return Object.values(distinctObjects).sort((a, b) => {
     const toDate = (dateStr) => {
-      const [day, month, year] = dateStr.split('.').map(Number);
+      const [day, month, year] = dateStr.substring(0, 9).split('.').map(Number);
       return new Date(year, month - 1, day + 1);
     };
-
     toDate(a.datum_dokumenta) >= toDate(b.datum_dokumenta) ? 1 : -1;
   });
 }
@@ -450,5 +432,5 @@ function getDistinctObjects(jsonArray, keys) {
 module.exports = {
   createInvoice,
   createClientInvoice,
-  getDistinctObjects,
+  generateHeader,
 };

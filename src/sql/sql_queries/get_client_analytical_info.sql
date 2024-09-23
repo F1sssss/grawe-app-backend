@@ -68,9 +68,9 @@ where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and 
 
 
 select
-sum(bruto_polisirana_premija)	bruto_polisirana_premija,
-sum(neto_polisirana_premija)	neto_polisirana_premija,
-max(Dani_Kasnjenja)				dani_Kasnjenja,
-sum([dospjelo_potrazivanje]*-1)	dospjelo_potrazivanje,
-'-'								status_polise
+sum(bruto_polisirana_premija)	klijent_bruto_polisirana_premija,
+sum(neto_polisirana_premija)	klijent_neto_polisirana_premija,
+max(Dani_Kasnjenja)				klijent_dani_Kasnjenja,
+sum([dospjelo_potrazivanje]*-1)	klijent_dospjelo_potrazivanje,
+'-'								klijent_status_polise
 from #temp t

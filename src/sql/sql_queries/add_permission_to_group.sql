@@ -1,11 +1,11 @@
-if @id_permission_group is null or @id_permission_group = 0
+if not exists (select 1 from gr_permission where id = @id_permission)
     begin
-        throw 50000, 'id_permission_group is null or 0', 1;
+        throw 50000, 'Permission-not-found', 1;
     end
 
-if @id_permission is null or @id_permission = 0
+if not exists (select 1 from gr_permission_groups where id = @id_permission_group)
     begin
-        throw 50000, 'id_permission is null or 0', 1;
+        throw 50000, 'Permission-group-not-found', 1;
     end
 
 if exists (select 1 from gr_pairing_permission_groups_permission where id_permission_group = @id_permission_group and id_permission = @id_permission)

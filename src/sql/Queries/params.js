@@ -24,8 +24,9 @@ const ClientGroup = (group, user) => {
 };
 
 const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
-  return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.VarChar), new SQLParam('dateTo', dateTo, sql.VarChar)];
+  return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.DateTime), new SQLParam('dateTo', dateTo, sql.DateTime)];
 };
+
 const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];
 };

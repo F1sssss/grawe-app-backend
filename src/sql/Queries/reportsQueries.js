@@ -1,3 +1,5 @@
+const sql = require('mssql');
+
 const DB_CONFIG = require('../DBconfig');
 const DBConnection = require('../DBConnection');
 const AppError = require('../../utils/AppError');
@@ -12,10 +14,7 @@ const excecuteQueryAndHandleErrors = async (query, params = [], multiple = false
 
   const result = type === 'query' ? await connection.executeQuery(query, params, multiple) : await connection.executeStoredProcedure(query, params);
 
-  if (!result || result.length === 0) {
-    throw new AppError('Error during retrieving reports', 404, 'error-getting-reports-query-result-empty');
-  }
-  return { result, statusCode: 200 };
+  return { result: result === undefined ? {} : result, statusCode: 200 };
 };
 
 const getReports = async () => {
@@ -27,8 +26,8 @@ const getReportById = async (id) => {
   const { result, statusCode } = await excecuteQueryAndHandleErrors('get_report_id.sql', Report(id), true);
 
   return {
-    report_info: result[0][0],
-    report_params: result[1],
+    report_info: result[0][0] === undefined ? {} : result[0][0],
+    report_params: result[1] === undefined ? {} : result[1],
     statusCode,
   };
 };
@@ -37,8 +36,8 @@ const getReportByName = async (report_name) => {
   const { result, statusCode } = await excecuteQueryAndHandleErrors('get_report_name.sql', ReportName(0, report_name), true);
 
   return {
-    report_info: result[0][0],
-    report_params: result[1],
+    report_info: result[0][0] === undefined ? {} : result[0][0],
+    report_params: result[1] === undefined ? {} : result[1],
     statusCode,
   };
 };
@@ -46,11 +45,9 @@ const getReportByName = async (report_name) => {
 const getProcedureInfo = async (procedure_name) => {
   const { result, statusCode } = await searchProcedure(procedure_name);
 
-  console.log(result);
-
   return {
-    procedure_info: result[0][0],
-    procedure_params: result[1],
+    procedure_info: result[0][0] === undefined ? {} : result[0][0],
+    procedure_params: result[1] === undefined ? {} : result[1],
     statusCode,
   };
 };
@@ -88,12 +85,7 @@ const createReport = async (procedure) => {
     new_report_name,
   } = procedure;
 
-  if (
-    isNullOrEmpty(new_report_name) ||
-    procedure_id === undefined ||
-    procedure_params.length === 0 ||
-    (await getReportByName(new_report_name))?.report_info?.report_name === new_report_name
-  ) {
+  if (isNullOrEmpty(new_report_name) || procedure_id === undefined || procedure_params.length === 0) {
     throw new AppError('Invalid report data!', 404, 'error-invalid-report-data');
   }
 
@@ -161,11 +153,7 @@ const updateReportName = async (id, report) => {
 
 const deleteReport = async (id) => {
   const connection = new DBConnection(DB_CONFIG.sql);
-  const report = await connection.executeQuery('delete_report.sql', ReportId(id));
-
-  if (report) {
-    throw new AppError('Error deleting report!', 404, 'error-deleting-report-not-found');
-  }
+  await connection.executeQuery('delete_report.sql', ReportId(id));
 
   return { message: 'Report Deleted!', statusCode: 200 };
 };

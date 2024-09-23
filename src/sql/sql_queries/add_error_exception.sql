@@ -1,3 +1,4 @@
+
 if not exists (select 1 from branche where bra_obnr=@policy)
 begin
     throw 50000, 'Polisa ne postoji u tabelu branche!', 1;

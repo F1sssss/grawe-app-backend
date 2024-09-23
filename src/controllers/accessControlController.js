@@ -3,11 +3,11 @@ const CatchAsync = require('../middlewares/CatchAsync');
 const ResponseHandler = require('../utils/responseHandler');
 
 const getGroups = CatchAsync(async (req, res) => {
-  await ResponseHandler(accessControlService.getGroupsService(), res, { statusCode: 200 });
+  await ResponseHandler(accessControlService.getGroupsService(), res);
 });
 
 const getGroup = CatchAsync(async (req, res) => {
-  await ResponseHandler(accessControlService.getGroupService(req.params.id), res, { statusCode: 200 });
+  await ResponseHandler(accessControlService.getGroupService(req.params.id), res);
 });
 
 const createGroup = CatchAsync(async (req, res) => {
@@ -29,7 +29,7 @@ const deleteGroup = CatchAsync(async (req, res) => {
 });
 
 const getPermissions = CatchAsync(async (req, res) => {
-  await ResponseHandler(accessControlService.getPermissionsService(), res, { statusCode: 200 });
+  await ResponseHandler(accessControlService.getPermissionsService(), res);
 });
 
 const getPermission = CatchAsync(async (req, res) => {
@@ -56,8 +56,8 @@ const updatePermission = CatchAsync(async (req, res) => {
   });
 });
 
-const updatePermissionRigths = CatchAsync(async (req, res) => {
-  await ResponseHandler(accessControlService.updatePermissionRigthsService(req.params.id, req.query.group, req.query.read, req.query.write), res, {
+const updatePermissionRights = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.updatePermissionRightsService(req.params.id, req.query.group, req.query.read, req.query.write), res, {
     statusCode: 200,
   });
 });
@@ -108,7 +108,7 @@ module.exports = {
   createPermission,
   updatePermission,
   deleteGroup,
-  updatePermissionRigths,
+  updatePermissionRights,
   addPermissionToGroup,
   removePermissionFromGroup,
   deletePermission,

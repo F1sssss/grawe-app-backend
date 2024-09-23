@@ -70,13 +70,13 @@ const updatePermissionService = async (id, permission) => {
   return { permissions, statusCode };
 };
 
-const updatePermissionRigthsService = async (id, group, read, write) => {
+const updatePermissionRightsService = async (id, group, read, write) => {
   await delKey('permissions');
   await delKey('permission-groups');
   await delKey(`permission-group-${group}`);
   await delKey(`permission-${id}`);
   await delKey(`permission-${group}-${id}`);
-  const { permissions, statusCode } = await accessControlQueries.updatePermissionRigths(id, group, read, write);
+  const { permissions, statusCode } = await accessControlQueries.updatePermissionRights(id, group, read, write);
   return { permissions, statusCode };
 };
 
@@ -141,7 +141,7 @@ module.exports = {
   createPermissionService,
   updatePermissionService,
   deleteGroupService,
-  updatePermissionRigthsService,
+  updatePermissionRightsService,
   addPermissionToGroupService,
   removePermissionFromGroupService,
   deletePermissionService,

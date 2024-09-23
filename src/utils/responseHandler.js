@@ -1,14 +1,8 @@
 const AppError = require('./AppError');
 const logger = require('../logging/winstonSetup');
 
-const handleResponse = async (promise, res, responseFields = {}) => {
-  logger.debug('Got a promise in handleResponse, waiting for it to resolve...');
-
+const handleResponse = async (promise, res, responseFields = {}, next) => {
   let data = await promise;
-
-  logger.debug('Promise resolved!');
-
-  logger.debug('Filtering response...');
 
   /*
   const filteredObject = {};
@@ -34,19 +28,13 @@ const handleResponse = async (promise, res, responseFields = {}) => {
   console.log('filteredObject', filteredObject);
 */
 
-  const { statusCode } = responseFields;
-
-  if (!data || data.length === 0) {
-    throw new AppError('No data found', 404, 'error-controller-handler-no-data-found');
-  }
+  // if (!data || data.length === 0) {
+  //   throw new AppError('No data found', 404, 'error-controller-handler-no-data-found');
+  // }
 
   delete data.statusCode;
 
-  logger.debug('Response filtered!');
-
-  logger.debug('Sending response...');
-
-  res.status(statusCode).json(Object.keys(data).length > 1 ? data : data[Object.keys(data)[0]] || data);
+  res.status(200).json(Object.keys(data).length > 1 ? data : data[Object.keys(data)[0]] || data);
 };
 
 function getValue(obj, keyPath) {

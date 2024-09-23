@@ -1,5 +1,9 @@
 const accessControlController = require('../controllers/accessControlController');
+const authController = require('../controllers/authController');
+
 const router = require('express').Router();
+
+router.use(authController.protect);
 
 router.get('/groups', accessControlController.getGroups);
 router.get('/groups/:id', accessControlController.getGroup);
@@ -16,7 +20,7 @@ router.post('/properties/:id', accessControlController.createPermissionPropertie
 router.post('/properties', accessControlController.createPermission);
 router.patch('/properties/:id', accessControlController.updatePermission);
 
-router.patch('/properties/:id/rights', accessControlController.updatePermissionRigths);
+router.patch('/properties/:id/rights', accessControlController.updatePermissionRights);
 //router.put('/groups/properties/', accessControlController.addPermissionToGroup);
 router.delete('/properties/:id', accessControlController.deletePermission);
 

@@ -5,7 +5,7 @@ const cachingService = require('../services/cachingService');
 
 const router = express.Router();
 
-//router.use(authController.protect);
+router.use(authController.protect);
 
 router.get('/param/', reportsController.getParamValues);
 router.get('/procedure/', reportsController.searchProcedure);

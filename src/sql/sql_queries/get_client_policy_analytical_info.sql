@@ -1,4 +1,3 @@
-
 if OBJECT_ID('tempdb..#NaciniPlacanja') is not null
 drop table #NaciniPlacanja
 
@@ -23,27 +22,27 @@ drop table #temp
 
 
 select distinct
-	b.bra_obnr					                                        [Broj_Polise],
-	vtg_antrag_obnr				                                        [Broj_Ponude],
-	vtg_pol_kreis				                                        [Pol_kreis],
-	bra_bran					                                        [Bransa],
-	bra_vv_ueb					                                        [Naziv_Branse],
-	bra_vers_beginn   													[Pocetak_osiguranja],
-	bra_vers_ablauf   													[Istek_osiguranja],
-	bra_storno_ab 														[Datum_storna],
-	bra_storno_grund			                                        [Storno_tip],
-	cast('' as vaRCHAR(400))							                [StatusPolise],
-	np.sifra			                                                [Nacin_Placanja_sifra],
-	np.opis			                                                    [Nacin_Placanja],
-	dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [Bruto_polisirana_premija],
-	dbo.Neto_polisirana_premija_polisa(b.bra_obnr,@dateTo)				[Neto_polisirana_premija],
-	vtg_pol_vkto				                                        [Sifra_zastupnika],
-	isnull(ma_vorname,'')+ ' ' + isnull(ma_zuname,'')                   [Naziv_zastupnika],
-	ma_unterst_og				                                        [Kanal_prodaje],
-	cast(0 as int)				                                        [Dani_Kasnjenja],
+	b.bra_obnr					                                        [broj_polise],
+	vtg_antrag_obnr				                                        [broj_ponude],
+	vtg_pol_kreis				                                        [pol_kreis],
+	bra_bran					                                        [bransa],
+	bra_vv_ueb					                                        [naziv_branse],
+	convert(varchar,bra_vers_beginn,102)   								[pocetak_osiguranja],
+	convert(varchar,bra_vers_ablauf,102)    							[istek_osiguranja],
+	convert(varchar,bra_storno_ab,102)  								[datum_storna],
+	bra_storno_grund			                                        [storno_tip],
+	cast('' as vaRCHAR(400))							                [status_polise],
+	np.sifra			                                                [nacin_placanja_sifra],
+	np.opis			                                                    [nacin_placanja],
+	dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [bruto_polisirana_premija],
+	dbo.Neto_polisirana_premija_polisa(b.bra_obnr,@dateTo)				[neto_polisirana_premija],
+	vtg_pol_vkto				                                        [sifra_zastupnika],
+	isnull(ma_vorname,'')+ ' ' + isnull(ma_zuname,'')                   [naziv_zastupnika],
+	ma_unterst_og				                                        [kanal_prodaje],
+	cast(0 as int)				                                        [dani_kasnjenja],
 	--vtg_kundenkz_1,
-	case when bra_bran not in (10,11,56,8) then isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,'')) else /*PA*/ isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,''))  end [Ugovarac],
-	case when bra_bran not in (10,11,56,8) then isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,'')) else /*VA*/ isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,''))  end  [Osiguranik]
+	case when bra_bran not in (10,11,56,8) then isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,'')) else /*PA*/ isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,''))  end [ugovarac],
+	case when bra_bran not in (10,11,56,8) then isnull(k.kun_zuname,isnull(k1.kun_zuname,'')) + ' ' + isnull(k.kun_vorname,isnull(k1.kun_vorname,'')) else /*VA*/ isnull(k1.kun_zuname,isnull(k.kun_zuname,'')) + ' ' + isnull(k1.kun_vorname,isnull(k.kun_vorname,''))  end  [osiguranik]
 	into #temp
 from branche b(nolock)
 left join vertrag v (nolock) on b.bra_vertragid=v.vtg_vertragid
@@ -69,7 +68,7 @@ INCLUDE ([Datum_storna],[Istek_osiguranja])
 
 
 update t
-set [StatusPolise]=
+set [status_polise]=
 case when isnull([Datum_storna],'')=isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo then 'Aktivna' -- or isnull([Istek_osiguranja],'')>@dateTo  then 'Aktivna'
 	 when isnull([Datum_storna],'')<isnull([Istek_osiguranja],'') and isnull([Datum_storna],'')>@dateTo then 'Aktivna'
 	 when isnull([Datum_storna],'')=isnull([Pocetak_osiguranja],'') then 'Stornirana od pocetka'
@@ -119,6 +118,12 @@ DEALLOCATE polise
 update f
 set [Dani_Kasnjenja]=isnull((select DaniKasnjenja from #Kasnjenja where #Kasnjenja.polisa=f.[Broj_Polise]),0)
 from #temp f
+
+update #temp
+set
+[Pocetak_osiguranja]=convert(varchar,convert(date,[Pocetak_osiguranja],102),104),
+[Istek_osiguranja]=convert(varchar,convert(date,[Istek_osiguranja],102),104),
+[Datum_storna]=convert(varchar,convert(date,[Datum_storna],102),104)
 
 
 select * from #temp
