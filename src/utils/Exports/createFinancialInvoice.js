@@ -5,35 +5,40 @@ const { generateHeader } = require('./createInvoice');
 
 function createClientInvoice(client) {
   return new Promise(async (resolve, reject) => {
-    let clientData = client.finHistory;
+    try {
+      let clientData = client.finHistory;
 
-    clientData['ukupno_dospjelo'] = client.finInfo.ukupno_dospjelo;
-    clientData['ukupno_nedospjelo'] = client.finInfo.ukupno_nedospjelo;
+      clientData['ukupno_dospjelo'] = client.finInfo.ukupno_dospjelo;
+      clientData['ukupno_nedospjelo'] = client.finInfo.ukupno_nedospjelo;
 
-    let doc = new PDFDocument({ size: 'A4', margin: 50 });
-    let buffers = [];
+      let doc = new PDFDocument({ size: 'A4', margin: 50 });
+      let buffers = [];
 
-    // Handle errors
-    doc.on('error', () => {
-      throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-    });
+      // Handle errors
+      doc.on('error', () => {
+        throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+      });
 
-    // Collect the PDF buffers
-    doc.on('data', (buffer) => {
-      buffers.push(buffer);
-    });
+      // Collect the PDF buffers
+      doc.on('data', (buffer) => {
+        buffers.push(buffer);
+      });
 
-    // Finalize the PDF document
-    doc.on('end', () => {
-      if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
-      resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
-    });
+      // Finalize the PDF document
+      doc.on('end', () => {
+        if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
+        resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
+      });
 
-    generateHeader(doc);
-    generateCustomerInformation(doc, client.info, clientData[0].datum_od, clientData[0].datum_do);
-    generateInvoiceTable(doc, clientData);
+      generateHeader(doc);
+      generateCustomerInformation(doc, client.info, clientData[0].datum_od, clientData[0].datum_do);
+      generateInvoiceTable(doc, clientData);
 
-    doc.end();
+      doc.end();
+    } catch (error) {
+      logger.error(`Error creating PDF: ${error.message}`);
+      reject(new AppError('Error creating PDF', 500, 'error-creating-pdf'));
+    }
   });
 }
 function generateHr(doc, y) {

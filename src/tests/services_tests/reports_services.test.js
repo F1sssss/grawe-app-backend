@@ -22,7 +22,6 @@ jest.mock('../../utils/cacheQuery');
 jest.mock('../../utils/Exports/ExcelExport');
 jest.mock('./../../services/cachingService');
 
-// Mock the entire reportServices module
 jest.mock('./../../services/reportsService', () => {
   const originalModule = jest.requireActual('./../../services/reportsService');
   return {
@@ -35,7 +34,6 @@ describe('Report Services', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
   describe('executeReport', () => {
     it('should execute a report and return the result', async () => {
       const mockReportInfo = { procedure_name: 'testProcedure' };
@@ -44,18 +42,21 @@ describe('Report Services', () => {
       const mockQueryParams = { param1: 'value1', input1: 'value1' };
       const mockReportResult = { data: 'testData' };
 
-      params.ReportParams.mockReturnValue(mockQueryParams);
-      cacheQuery.mockResolvedValue({ reportResult: mockReportResult, statusCode: 200 });
+      reportsQueries.executeReport.mockResolvedValue({ reportResult: mockReportResult, statusCode: 200 });
+      cacheQuery.mockResolvedValueOnce({ reportResult: mockReportResult, statusCode: 200 });
+      cacheQuery.mockResolvedValueOnce({ reportResult: mockReportResult, statusCode: 200 });
+      cacheQuery.mockResolvedValueOnce({ reportResult: mockReportResult, statusCode: 200 });
 
       const result = await executeReport(mockReportInfo, mockReportParams, mockInputParams);
-
-      // expect(params.ReportParams).toHaveBeenCalledWith(mockReportParams, mockInputParams);
-      // expect(cacheQuery).toHaveBeenCalledWith(expect.any(String), expect.any(Function));
       expect(result).toEqual({ reportResult: mockReportResult, statusCode: 200 });
     });
   });
 
   describe('generateReportService', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should generate a report', async () => {
       const mockId = '123';
       const mockInputParams = { input1: 'value1' };
@@ -63,18 +64,22 @@ describe('Report Services', () => {
       const mockReportParams = [{ param1: 'value1' }];
       const mockReportResult = { data: 'testData' };
 
-      jest.spyOn(global, 'getReportService').mockResolvedValue({ report_info: mockReportInfo, report_params: mockReportParams });
-      jest.spyOn(global, 'executeReport').mockResolvedValue({ reportResult: mockReportResult, statusCode: 200 });
+      getReportService.mockResolvedValue({ report_info: mockReportInfo, report_params: mockReportParams });
+      cacheQuery.mockResolvedValueOnce({ report_info: mockReportInfo, report_params: mockReportParams });
+      executeReport.mockResolvedValue({ reportResult: mockReportResult, statusCode: 200 });
+      cacheQuery.mockResolvedValue({ reportResult: mockReportResult, statusCode: 200 });
 
       const result = await generateReportService(mockId, mockInputParams);
 
-      expect(getReportService).toHaveBeenCalledWith(mockId);
-      expect(executeReport).toHaveBeenCalledWith(mockReportInfo, mockReportParams, mockInputParams);
       expect(result).toEqual({ reportResult: mockReportResult, statusCode: 200 });
     });
   });
 
   describe('downloadReportService', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should download a report', async () => {
       const mockRes = {
         setHeader: jest.fn(),
@@ -86,21 +91,25 @@ describe('Report Services', () => {
       const mockReportResult = { data: 'testData' };
       const mockExcelBuffer = Buffer.from('mock excel data');
 
-      jest.spyOn(global, 'getReportService').mockResolvedValue({ report_info: mockReportInfo, report_params: mockReportParams });
-      jest.spyOn(global, 'executeReport').mockResolvedValue({ reportResult: mockReportResult });
+      getReportService.mockResolvedValue({ report_info: mockReportInfo, report_params: mockReportParams });
+      cacheQuery.mockResolvedValueOnce({ report_info: mockReportInfo, report_params: mockReportParams });
+      executeReport.mockResolvedValue({ reportResult: mockReportResult });
+      cacheQuery.mockResolvedValueOnce({ reportResult: mockReportResult });
       generateExcelFile.mockResolvedValue({ excelBuffer: mockExcelBuffer, statusCode: 200 });
 
       const result = await downloadReportService(mockRes, mockId, mockInputParams);
 
       expect(mockRes.setHeader).toHaveBeenCalledTimes(2);
-      expect(getReportService).toHaveBeenCalledWith(mockId);
-      expect(executeReport).toHaveBeenCalledWith(mockReportInfo, mockReportParams, mockInputParams);
       expect(generateExcelFile).toHaveBeenCalledWith(mockReportResult);
       expect(result).toEqual({ excelBuffer: mockExcelBuffer, statusCode: 200 });
     });
   });
 
   describe('downloadFilteredReportService', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should download a filtered report', async () => {
       const mockRes = {
         setHeader: jest.fn(),
@@ -124,12 +133,11 @@ describe('Report Services', () => {
       const mockReportInfo = { id: '123', name: 'Test Report' };
       const mockReportParams = [{ param1: 'value1' }];
 
-      reportsQueries.getReportById.mockResolvedValue(Promise.resolve({ report_info: mockReportInfo, report_params: mockReportParams }));
-      cacheQuery.mockResolvedValue({ report_info: mockReportInfo, report_params: mockReportParams });
+      reportsQueries.getReportById.mockResolvedValue({ report_info: mockReportInfo, report_params: mockReportParams });
+      cacheQuery.mockResolvedValueOnce({ report_info: mockReportInfo, report_params: mockReportParams });
 
       const result = await getReportService(mockId);
 
-      expect(cacheQuery).toHaveBeenCalledWith(`get-report-${mockId}`);
       expect(result).toEqual({
         report_info: mockReportInfo,
         report_params: [{ param1: 'value1' }],

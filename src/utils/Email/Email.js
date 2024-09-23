@@ -6,7 +6,6 @@ const { SENDGRID_API_KEY, EMAIL_FROM, FRONTEND_URL, HOST_URL } = process.env;
 
 module.exports = class Email {
   constructor(user) {
-    console.log(user);
     this.emailTo = user.email;
     this.username = user.username;
     this.id = user.ID;

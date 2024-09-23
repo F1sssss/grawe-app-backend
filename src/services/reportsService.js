@@ -35,7 +35,7 @@ const getReportService = async (id) => {
   const { report_info, report_params } = await cacheQuery(cacheKey, reportsQueries.getReportById(id));
   return {
     report_info,
-    report_params: report_params.map((param) => ({ ...param })),
+    report_params: Array.isArray(report_params) ? report_params.map((param) => ({ ...param })) : report_params,
   };
 };
 

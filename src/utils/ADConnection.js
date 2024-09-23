@@ -5,11 +5,11 @@ const SQLQueries = require('../sql/Queries/UserQueries');
 const config = {
   url: process.env.LDAP_URL,
   baseDN: process.env.LDAP_BASE_DN,
-  username: process.env.LDAP_USERNAME, // Your service account UPN
+  username: process.env.LDAP_USERNAME, // Service account UPN
   password: process.env.LDAP_PASSWORD, // Service account password
   tlsOptions: {
     rejectUnauthorized: false, // Set to true in production with valid CA
-    // ca: [fs.readFileSync('path/to/ca.crt')]
+    // ca: [fs.readFileSync('../ca.crt')],
   },
 };
 

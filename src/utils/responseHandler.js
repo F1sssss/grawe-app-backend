@@ -37,10 +37,10 @@ const handleResponse = async (promise, res, responseFields = {}, next) => {
   res.status(200).json(Object.keys(data).length > 1 ? data : data[Object.keys(data)[0]] || data);
 };
 
-function getValue(obj, keyPath) {
-  return keyPath.reduce((acc, curr) => {
-    return acc && acc[curr];
-  }, obj);
-}
+// function getValue(obj, keyPath) {
+//   return keyPath.reduce((acc, curr) => {
+//     return acc && acc[curr];
+//   }, obj);
+// }
 
 module.exports = handleResponse;

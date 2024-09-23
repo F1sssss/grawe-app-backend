@@ -19,6 +19,43 @@ describe('Client Services', () => {
     jest.clearAllMocks();
   });
 
+  describe('getClientPolicyAnalyticalInfoService', () => {
+    it('should call cacheQuery with correct parameters and return result', async () => {
+      const id = '123';
+      const dateFrom = '2023-01-01';
+      const dateTo = '2023-12-31';
+      const mockResult = { client: { id: '123', name: 'Test Client' }, statusCode: 200 };
+
+      cacheQuery.mockResolvedValue(mockResult);
+
+      const result = await clientServices.getClientPolicyAnalyticalInfoService(id, dateFrom, dateTo);
+
+      expect(cacheQuery).toHaveBeenCalledWith(
+        `client-policy-analytics-${id}-${dateFrom}-${dateTo}`,
+        ClientQueries.getClientPolicyAnalticalInfo(id, dateFrom, dateTo),
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+  describe('getAllClientInfoService', () => {
+    it('should call cacheQuery and return result with status code 200', async () => {
+      const id = '456';
+      const dateFrom = '2023-01-01';
+      const dateTo = '2023-12-31';
+      const mockClient = { id: '456', name: 'Test Client', policies: ['policy1', 'policy2'] };
+
+      cacheQuery.mockResolvedValue({ client: mockClient });
+
+      const result = await clientServices.getAllClientInfoService(id, dateFrom, dateTo);
+
+      expect(cacheQuery).toHaveBeenCalledWith(
+        `client-analytics-all-${id}-${dateFrom}-${dateTo}`,
+        ClientQueries.getAllClientInfo(id, dateFrom, dateTo),
+      );
+      expect(result).toEqual({ client: mockClient, statusCode: 200 });
+    });
+  });
+
   describe('getClientHistoryService', () => {
     it('should retrieve client history and return client and status code', async () => {
       const mockResponse = { client: [{ id: 1, name: 'Client 1' }], statusCode: 200 };
@@ -142,29 +179,4 @@ describe('Client Services', () => {
       expect(result).toEqual({ pdfBuffer: mockPdfBuffer, statusCode: 200 });
     });
   });
-  //
-  // describe('getClientFinancialInfoService', () => {
-  //   it('should retrieve client financial history and info', async () => {
-  //     const mockFinHistory = [{ id: 1, name: 'Financial History' }];
-  //     const mockFinInfo = { id: 1, name: 'Financial Info' };
-  //     const mockClientInfo = { id: 1, name: 'Client Info' };
-  //
-  //     ClientQueries.getClientFinancialHistory.mockResolvedValue({ clientFinHistory: mockFinHistory });
-  //     cacheQuery.mockResolvedValueOnce({ clientFinHistory: mockFinHistory });
-  //     ClientQueries.getClientFinancialInfo.mockResolvedValue({ clientFinInfo: mockFinInfo });
-  //     cacheQuery.mockResolvedValueOnce({ clientFinInfo: mockFinInfo });
-  //     clientServices.getClientInfoService = jest.fn().mockResolvedValue({ client: mockClientInfo });
-  //     cacheQuery.mockResolvedValueOnce({ client: mockClientInfo });
-  //
-  //     const result = await clientServices.getClientFinancialInfoService(1, '2023-01-01', '2023-12-31');
-  //
-  //     expect(result).toEqual({
-  //       client: {
-  //         finHistory: mockFinHistory,
-  //         info: {},
-  //         finInfo: mockFinInfo,
-  //       },
-  //     });
-  //   });
-  // });
 });

@@ -112,6 +112,66 @@ describe('Access control Services', () => {
     });
   });
 
+  describe('updatePermissionRightsService', () => {
+    it('should delete all related keys and call updatePermissionRights', async () => {
+      const id = '123';
+      const group = 'admin';
+      const read = true;
+      const write = false;
+
+      const mockPermissions = { id: '123', group: 'admin', read: true, write: false };
+      const mockStatusCode = 200;
+
+      accessControlQueries.updatePermissionRights.mockResolvedValue({ permissions: mockPermissions, statusCode: mockStatusCode });
+
+      const result = await accessControlServices.updatePermissionRightsService(id, group, read, write);
+
+      // Check if all delKey calls were made with correct arguments
+      expect(delKey).toHaveBeenCalledTimes(5);
+      expect(delKey).toHaveBeenCalledWith('permissions');
+      expect(delKey).toHaveBeenCalledWith('permission-groups');
+      expect(delKey).toHaveBeenCalledWith(`permission-group-${group}`);
+      expect(delKey).toHaveBeenCalledWith(`permission-${id}`);
+      expect(delKey).toHaveBeenCalledWith(`permission-${group}-${id}`);
+
+      // Check if updatePermissionRights was called with correct arguments
+      expect(accessControlQueries.updatePermissionRights).toHaveBeenCalledWith(id, group, read, write);
+
+      // Check if the function returns the expected result
+      expect(result).toEqual({ permissions: mockPermissions, statusCode: mockStatusCode });
+    });
+
+    it('should handle errors from updatePermissionRights', async () => {
+      const id = '456';
+      const group = 'user';
+      const read = false;
+      const write = true;
+
+      const mockError = new Error('Update failed');
+      accessControlQueries.updatePermissionRights.mockRejectedValue(mockError);
+
+      await expect(accessControlServices.updatePermissionRightsService(id, group, read, write)).rejects.toThrow('Update failed');
+
+      // Check if all delKey calls were still made
+      expect(delKey).toHaveBeenCalledTimes(5);
+    });
+
+    it('should handle errors from delKey', async () => {
+      const id = '789';
+      const group = 'guest';
+      const read = true;
+      const write = true;
+
+      const mockError = new Error('Redis error');
+      delKey.mockRejectedValue(mockError);
+
+      await expect(accessControlServices.updatePermissionRightsService(id, group, read, write)).rejects.toThrow('Redis error');
+
+      // Check if updatePermissionRights was not called
+      expect(accessControlQueries.updatePermissionRights).not.toHaveBeenCalled();
+    });
+  });
+
   describe('deleteGroupService', () => {
     it('should delete "permission-groups" cache and delete the group', async () => {
       const mockResponse = { message: 'Group deleted', statusCode: 200 };

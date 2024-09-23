@@ -3,14 +3,15 @@ const app = require('./app');
 const DB_CONFIG = require('./src/sql/DBconfig');
 const DBConnection = require('./src/sql/DBConnection');
 const connection = new DBConnection(DB_CONFIG.sql);
+const cachingService = require('./src/services/cachingService');
 
 const server = app.listen(DB_CONFIG.port, async () => {
   console.log(`🌐 App running on port  ${DB_CONFIG.port}...`);
 
   try {
     await connection.connect();
+    await cachingService.connectToRedis();
   } catch (err) {
-    console.log('Error connecting to MSSQL database server.js');
     console.log(err);
     process.exit(1);
   }
