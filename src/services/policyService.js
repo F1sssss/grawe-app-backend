@@ -1,4 +1,4 @@
-const PolicyQueries = require('../sql/Queries/PoliciesQueries');
+const PolicyQueries = require('../sql/Queries/policiesQueries');
 const generateExcelFile = require('../utils/Exports/ExcelExport');
 const Invoice = require('../utils/Exports/createInvoice');
 const cacheQuery = require('../utils/cacheQuery');
@@ -42,9 +42,6 @@ const getPolicyHistoryPDFDownloadService = async (res, id, dateFrom, dateTo) => 
   res.setHeader('Content-Disposition', 'attachment; filename="Invoice.pdf"');
   const { policy } = await PolicyQueries.getPolicyExcelInfo(id, dateFrom, dateTo);
   return ({ pdfBuffer, statusCode } = await Invoice.createInvoice(policy));
-
-  //const { policy } = await getPolicyHistoryService(id, dateFrom, dateTo);
-  //return ({ pdfBuffer, statusCode } = await Invoice.createInvoice(policy));
 };
 
 module.exports = {

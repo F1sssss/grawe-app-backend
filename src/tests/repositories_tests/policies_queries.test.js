@@ -1,19 +1,8 @@
 const DBConnection = require('../../sql/DBConnection');
 const PolicyQueries = require('../../sql/Queries/policiesQueries');
 const { correct_policies_values } = require('../testing_values/correct_values');
+const sql = require('../../tests/sql_test');
 
-sql = {
-  server: '192.168.1.217',
-  database: 'GRAWE_WEBAPP_TEST',
-  user: 'sa',
-  encrypt: false,
-  password: 'Grawe123$',
-  pool: {
-    max: 20,
-    min: 0,
-    idleTimeoutMillis: 300000,
-  },
-};
 describe('Policies queries tests', () => {
   beforeAll(() => {
     connection = new DBConnection(sql);

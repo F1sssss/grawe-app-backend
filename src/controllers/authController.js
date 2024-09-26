@@ -1,15 +1,5 @@
-// Description: Controller for user authentication
-//It also contains the protect and restrictTo middleware functions
-
-/** @namespace req.body.last_name * **/
-/** @namespace req.body.Date_of_birth * **/
-/** @namespace req.body.email * **/
-/** @namespace req.user.role * **/
-/** @namespace req.body.newPassword, * **/
-
 const authServices = require('../services/authService');
 const userServices = require('../services/userService');
-const AppError = require('../utils/AppError');
 const CatchAsync = require('../middlewares/CatchAsync');
 const responseHandler = require('../utils/responseHandler');
 

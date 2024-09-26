@@ -1,19 +1,7 @@
 const DBConnection = require('../../sql/DBConnection');
-const UserQueries = require('../../sql/Queries/UserQueries');
+const UserQueries = require('../../sql/Queries/userQueries');
 const { beforeEach } = require('node:test');
-
-sql = {
-  server: '192.168.1.217',
-  database: 'GRAWE_WEBAPP_TEST',
-  user: 'sa',
-  encrypt: false,
-  password: 'Grawe123$',
-  pool: {
-    max: 20,
-    min: 0,
-    idleTimeoutMillis: 300000,
-  },
-};
+sql = require('../../tests/sql_test');
 
 describe('User queries tests', () => {
   let user_id;

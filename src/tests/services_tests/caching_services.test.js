@@ -59,12 +59,11 @@ describe('Caching Service', () => {
       mockRedisClient.set.mockResolvedValue('OK');
       mockRedisClient.expire.mockResolvedValue();
 
-      const result = await cachingService.setWithTTL('testKey', 'testValue', 6000);
+      await cachingService.setWithTTL('testKey', 'testValue', 6000);
 
       expect(mockRedisClient.set).toHaveBeenCalledWith('testKey', 'testValue');
       expect(mockRedisClient.expire).toHaveBeenCalledWith('testKey', 6000);
       expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Set value in Redis for key: testKey'));
-      expect(result).toBe('OK');
     });
 
     it('should throw AppError if setting the key fails', async () => {

@@ -1,4 +1,3 @@
-// cachingService.js
 const redis = require('redis');
 const AppError = require('../utils/AppError');
 const logger = require('../logging/winstonSetup');
@@ -12,23 +11,19 @@ function createClient() {
     socket: {
       port: 6379,
       host: process.env.REDIS_HOST,
-      reconnectStrategy: function (times, cause) {
-        logger.error(`Could not connect to Redis server: ${cause}`);
-        console.log(cause);
-        if (times >= 3) {
-          throw new AppError('Could not connect to Redis', 500, 'error-connecting-to-redis-server');
+      reconnectStrategy: (retries) => {
+        if (retries > 10) {
+          logger.error('Max Redis reconnection attempts reached');
+          return new AppError('Max Redis reconnection attempts reached', 500);
         }
+        return Math.min(retries * 100, 3000);
       },
     },
     password: process.env.REDIS_PASSWORD,
-    AutoReconnect: true,
-    KeepAlive: 1000,
   });
 
   client.on('error', (error) => {
-    logger.error(`Could not connect to Redis server: ${error}`);
-    console.log(error);
-    throw new AppError(error, 500, 'unhandled-redis-error');
+    logger.error(`Redis error: ${error}`);
   });
 
   client.on('connect', () => {
@@ -45,20 +40,17 @@ async function connectToRedis() {
     await redisClient.connect();
   } catch (err) {
     logger.error(`Could not connect to Redis server: ${err}`);
-    throw new AppError('Could not connect to Redis', 500, 'error-connecting-to-redis-server');
   }
 }
 
 async function setWithTTL(key, value, ttl = 6000) {
   const redisClient = createClient();
   try {
-    const result = await redisClient.set(key, value);
+    await redisClient.set(key, value);
     await redisClient.expire(key, ttl);
     logger.info(`Set value in Redis for key: ${key}`);
-    return result;
   } catch (err) {
     logger.error(`Could not set value in Redis: ${err}`);
-    throw new AppError('Could not set value in Redis', 500, 'error-setting-value-in-redis');
   }
 }
 
@@ -66,10 +58,11 @@ async function get(key) {
   const redisClient = createClient();
   try {
     logger.info(`Getting value from Redis for key: ${key}`);
-    return JSON.parse(await redisClient.get(key));
+    const value = await redisClient.get(key);
+    return value ? JSON.parse(value) : null;
   } catch (err) {
     logger.error(`Could not get value from Redis: ${err}`);
-    throw new AppError('Could not get value from Redis', 500, 'error-getting-value-from-redis');
+    return null;
   }
 }
 
@@ -81,7 +74,6 @@ async function del(req, res, next) {
     next();
   } catch (err) {
     logger.error(`Could not delete value from Redis: ${err}`);
-    throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
   }
 }
 
@@ -89,13 +81,11 @@ async function delKey(key) {
   const redisClient = createClient();
   try {
     await redisClient.del(key);
-    logger.info('💰 Redis key deleted: ', key);
+    logger.info('Redis key deleted: ', key);
   } catch (err) {
     logger.error(`Could not delete value from Redis: ${err}`);
-    throw new AppError('Could not delete value from Redis', 500, 'error-deleting-value-from-redis');
   }
 }
-
 module.exports = {
   createClient,
   connectToRedis,

@@ -2,7 +2,7 @@ const { promisify } = require('util');
 const AppError = require('../utils/AppError');
 const jwt = require('jsonwebtoken');
 const DB_CONFIG = require('../sql/DBconfig');
-const SQLQueries = require('../sql/Queries/UserQueries');
+const SQLQueries = require('../sql/Queries/userQueries');
 const { loggers } = require('winston');
 
 const getAccessTokenAndUser = async (req) => {

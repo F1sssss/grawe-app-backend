@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const AppError = require('../../utils/AppError');
-const SQLQueries = require('../../sql/Queries/UserQueries');
+const SQLQueries = require('../../sql/Queries/userQueries');
 const {
   getMeService,
   updateMeService,
@@ -13,7 +13,7 @@ const {
 jest.mock('jsonwebtoken');
 jest.mock('../../utils/AppError');
 jest.mock('../../sql/DBconfig');
-jest.mock('../../sql/Queries/UserQueries');
+jest.mock('../../sql/Queries/userQueries');
 
 describe('User Service', () => {
   afterEach(() => {

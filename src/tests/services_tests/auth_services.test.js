@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const AdAuth = require('../../utils/ADConnection');
-const SQLQueries = require('../../sql/Queries/UserQueries');
+const SQLQueries = require('../../sql/Queries/userQueries');
 const EmailValidator = require('../../utils/Email/Email');
 const authService = require('../../services/authService');
 const AppError = require('../../utils/AppError');
@@ -10,7 +10,7 @@ const AppError = require('../../utils/AppError');
 jest.mock('jsonwebtoken');
 jest.mock('bcryptjs');
 jest.mock('../../utils/ADConnection');
-jest.mock('../../sql/Queries/UserQueries');
+jest.mock('../../sql/Queries/userQueries');
 jest.mock('../../utils/Email/Email');
 
 describe('User Services', () => {

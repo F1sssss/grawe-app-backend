@@ -1,19 +1,6 @@
 const DBConnection = require('../../sql/DBConnection');
 const AccessControlQueries = require('../../sql/Queries/accessControlQueries');
-const { loggers } = require('winston');
-
-sql = {
-  server: '192.168.1.217',
-  database: 'GRAWE_WEBAPP_TEST',
-  user: 'sa',
-  encrypt: false,
-  password: 'Grawe123$',
-  pool: {
-    max: 20,
-    min: 0,
-    idleTimeoutMillis: 300000,
-  },
-};
+const sql = require('../../tests/sql_test');
 
 describe('Access control queries', () => {
   let permissionId;
@@ -338,13 +325,11 @@ describe('Access control queries', () => {
   });
 
   it('should delete user that was made for testing', async () => {
-    const result = await connection.executeQuery('DELETE FROM users WHERE id = @id', [{ name: 'id', type: 'INT', value: user_id }]);
+    await connection.executeQuery('DELETE FROM users WHERE id = @id', [{ name: 'id', type: 'INT', value: user_id }]);
   });
 
   it('should delete property that was made for testing', async () => {
-    const result = await connection.executeQuery('DELETE FROM gr_permission_properties WHERE id = @id', [
-      { name: 'id', type: 'INT', value: property_id },
-    ]);
+    await connection.executeQuery('DELETE FROM gr_permission_properties WHERE id = @id', [{ name: 'id', type: 'INT', value: property_id }]);
   });
 
   it('should close the connection', async () => {

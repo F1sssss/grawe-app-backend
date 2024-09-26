@@ -1,5 +1,3 @@
-// Desc: Error handler for the application
-
 const AppError = require('../utils/AppError');
 const logger = require('../logging/winstonSetup');
 

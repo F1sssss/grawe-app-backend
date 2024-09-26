@@ -3,6 +3,9 @@ const params = require('../sql/Queries/params');
 const cacheQuery = require('../utils/cacheQuery');
 const generateExcelFile = require('../utils/Exports/ExcelExport');
 const { delKey } = require('./cachingService');
+const ReportQueue = require('../utils/ReportQueue');
+
+const reportQueue = new ReportQueue();
 
 const executeReport = async (report_info, report_params, input_params) => {
   const cacheKey = `execute-report-${report_info['procedure_name']}-${JSON.stringify(input_params)}-${JSON.stringify(report_params)}`;
@@ -12,16 +15,17 @@ const executeReport = async (report_info, report_params, input_params) => {
 
 const generateReportService = async (id, input_params) => {
   const { report_info, report_params } = await getReportService(id);
-  const { reportResult, statusCode } = await executeReport(report_info, report_params, input_params);
-  return { reportResult, statusCode };
+
+  return await reportQueue.getOrQueueReport(id, input_params, async () => {
+    return executeReport(report_info, report_params, input_params);
+  });
 };
 
 const downloadReportService = async (res, id, input_params) => {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename="generated_report.xlsx"');
-  const { report_info, report_params } = await getReportService(id);
-  const { reportResult } = await executeReport(report_info, report_params, input_params);
-  return ({ excelBuffer, statusCode = 200 } = await generateExcelFile(reportResult));
+  const { data } = await generateReportService(id, input_params);
+  return ({ excelBuffer, statusCode = 200 } = await generateExcelFile(data.reportResult));
 };
 
 const downloadFilteredReportService = async (res, report) => {

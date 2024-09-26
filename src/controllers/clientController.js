@@ -1,6 +1,3 @@
-//Controller for client information and analytics
-
-//TODO: Better naming for this controller
 const clientService = require('../services/clientService');
 const handleResponse = require('../utils/responseHandler');
 const CatchAsync = require('../middlewares/CatchAsync');
@@ -37,7 +34,6 @@ const getClientHistoryExcelDownload = CatchAsync(async (req, res) => {
 
 const getClientHistoryPDFDownload = CatchAsync(async (req, res) => {
   const { pdfBuffer } = await clientService.getPolicyHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
-  //const { pdfBuffer } = await clientService.getClientFinancialHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
   res.status(200).send(pdfBuffer);
 });
 

@@ -1,6 +1,6 @@
 const ActiveDirectory = require('activedirectory2');
 const logger = require('../logging/winstonSetup');
-const SQLQueries = require('../sql/Queries/UserQueries');
+const SQLQueries = require('../sql/Queries/userQueries');
 
 const config = {
   url: process.env.LDAP_URL,

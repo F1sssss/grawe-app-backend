@@ -4,6 +4,7 @@ const DB_CONFIG = require('./src/sql/DBconfig');
 const DBConnection = require('./src/sql/DBConnection');
 const connection = new DBConnection(DB_CONFIG.sql);
 const cachingService = require('./src/services/cachingService');
+const { logger } = require('./src/logging/winstonSetup');
 
 const server = app.listen(DB_CONFIG.port, async () => {
   console.log(`🌐 App running on port  ${DB_CONFIG.port}...`);
@@ -33,6 +34,5 @@ process.on('SIGTERM', async () => {
 });
 
 process.on('unhandledRejection', (err) => {
-  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.log(err.name, err.message);
+  logger.error(err);
 });

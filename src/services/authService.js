@@ -1,15 +1,9 @@
-// Purpose: Service for user login.
-// Description: This is a service for user login. It is called by the authController.js file.
-
-/** @namespace user.verified**/
-/** @namespace user.time_to_varify**/
-
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const DB_CONFIG = require('../sql/DBconfig');
 const EmailValidator = require('../utils/Email/Email');
-const SQLQueries = require('../sql/Queries/UserQueries');
+const SQLQueries = require('../sql/Queries/userQueries');
 const AppError = require('../utils/AppError');
 const ValidationRegex = require('../utils/ValidationRegEx');
 const AdAuth = require('../utils/ADConnection');

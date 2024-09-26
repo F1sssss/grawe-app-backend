@@ -1,24 +1,12 @@
 const DBConnection = require('../../sql/DBConnection');
 const ClientQueries = require('../../sql/Queries/employeeErrorQueries');
 const DB_CONFIG = require('../../sql/DBconfig');
-const { getPolicyInfo } = require('../../sql/Queries/PoliciesQueries');
+const sql = require('../../tests/sql_test');
+const { getPolicyInfo } = require('../../sql/Queries/policiesQueries');
 const { getMeService } = require('../../services/userService');
 
-jest.mock('../../sql/Queries/PoliciesQueries');
+jest.mock('../../sql/Queries/policiesQueries');
 jest.mock('../../services/userService');
-
-sql = {
-  server: '192.168.1.217',
-  database: 'GRAWE_WEBAPP_TEST',
-  user: 'sa',
-  encrypt: false,
-  password: 'Grawe123$',
-  pool: {
-    max: 20,
-    min: 0,
-    idleTimeoutMillis: 300000,
-  },
-};
 
 describe('Employee errors queries', () => {
   beforeAll(() => {

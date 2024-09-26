@@ -1,5 +1,3 @@
-//Controller for route creation, excecution and deletion
-
 const catchAsync = require('../middlewares/CatchAsync');
 const reportsQueries = require('../sql/Queries/reportsQueries');
 const reportService = require('../services/reportsService');
@@ -13,9 +11,25 @@ const getReportById = catchAsync(async (req, res) => {
   await responseHandler(reportService.getReportService(req.params.id), res, { statusCode: 200 });
 });
 
-const generateReport = catchAsync(async (req, res) => {
-  await responseHandler(reportService.generateReportService(req.params.id, req.query), res, { statusCode: 200 });
-});
+const generateReport = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const input_params = req.query;
+
+    const result = await reportService.generateReportService(id, input_params);
+
+    if (result.status === 'completed') {
+      res.status(200).json(result.data.reportResult);
+    } else {
+      res.status(500).json({
+        status: 'error',
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
 const downloadReport = catchAsync(async (req, res) => {
   const { excelBuffer, statusCode } = await reportService.downloadReportService(res, req.params.id, req.query);

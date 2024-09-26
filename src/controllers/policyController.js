@@ -1,7 +1,3 @@
-//Controller for policies routes
-//TODO add policy route for analytical info
-/** @namespace req.query.dateFrom * **/
-/** @namespace req.query.dateTo * **/
 const policyService = require('../services/policyService');
 const CatchAsync = require('../middlewares/CatchAsync');
 const handleResponse = require('../utils/responseHandler');

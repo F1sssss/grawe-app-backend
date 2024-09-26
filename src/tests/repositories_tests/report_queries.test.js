@@ -1,26 +1,13 @@
 const DBConnection = require('../../sql/DBConnection');
 const ReportQueries = require('../../sql/Queries/reportsQueries');
-
-sql_config = {
-  server: '192.168.1.217',
-  database: 'GRAWE_WEBAPP_TEST',
-  user: 'sa',
-  encrypt: false,
-  password: 'Grawe123$',
-  pool: {
-    max: 20,
-    min: 0,
-    idleTimeoutMillis: 300000,
-  },
-};
-
+const sql = require('../../tests/sql_test');
 describe('Report queries tests', () => {
   let procedura_id;
   let params;
   let report_id;
 
   beforeAll(() => {
-    connection = new DBConnection(sql_config);
+    connection = new DBConnection(sql);
     jest.setTimeout(50000000);
   });
 
@@ -253,7 +240,6 @@ describe('Report queries tests', () => {
 
   it('should execute param sql query', async () => {
     const { report_info, report_params } = await ReportQueries.getReportById(report_id);
-
     const { param_values, statusCode } = await ReportQueries.getParamValues(report_info.procedure_id, report_id, report_params[0].param_name, 1);
 
     expect(statusCode).toBe(200);

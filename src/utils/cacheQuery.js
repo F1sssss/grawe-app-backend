@@ -3,8 +3,6 @@ const logger = require('../logging/winstonSetup');
 
 module.exports = cacheQuery = async (cacheKey, promiseQuery) => {
   try {
-    logger.debug('cacheQuery: cacheQuery called with cacheKey: ', cacheKey);
-
     const cacheData = await get(cacheKey);
 
     if (cacheData) {
@@ -12,9 +10,6 @@ module.exports = cacheQuery = async (cacheKey, promiseQuery) => {
       return { ...cacheData, statusCode: 200 };
     }
     const data = await promiseQuery;
-
-    logger.debug('cacheQuery: cacheData not found for cacheKey: ', cacheKey);
-    logger.debug('cacheQuery: Setting cache for cacheKey: ', cacheKey);
 
     await setWithTTL(cacheKey, JSON.stringify({ ...data }));
 

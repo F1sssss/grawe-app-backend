@@ -1,5 +1,5 @@
 const cacheQuery = require('../../utils/cacheQuery');
-const PolicyQueries = require('../../sql/Queries/PoliciesQueries');
+const PolicyQueries = require('../../sql/Queries/policiesQueries');
 const generateExcelFile = require('../../utils/Exports/ExcelExport');
 const Invoice = require('../../utils/Exports/createInvoice');
 const policyServices = require('../../services/policyService');
@@ -7,7 +7,7 @@ const policyService = require('../../services/policyService');
 
 // Mocking external dependencies
 jest.mock('../../utils/cacheQuery');
-jest.mock('../../sql/Queries/PoliciesQueries');
+jest.mock('../../sql/Queries/policiesQueries');
 jest.mock('../../utils/Exports/ExcelExport');
 jest.mock('../../utils/Exports/createInvoice');
 

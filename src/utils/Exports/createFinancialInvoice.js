@@ -4,7 +4,7 @@ const logger = require('../../logging/winstonSetup');
 const { generateHeader } = require('./createInvoice');
 
 function createClientInvoice(client) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       let clientData = client.finHistory;
 
@@ -29,6 +29,10 @@ function createClientInvoice(client) {
         if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
         resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
       });
+
+      if (!client.info || !clientData || clientData.length === 0) {
+        reject(new AppError('Error creating PDF', 500, 'error-creating-pdf'));
+      }
 
       generateHeader(doc);
       generateCustomerInformation(doc, client.info, clientData[0].datum_od, clientData[0].datum_do);
