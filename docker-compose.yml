@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'                 # Map the server container's port 3000 to the host's port 3000
+      - '3001:3001'                 # Map the server container's port 3000 to the host's port 3000
     environment:
       - DB_HOST=localhost
       - DB_USER=SA
@@ -29,6 +29,7 @@ services:
         ipv4_address: 172.23.0.21
     command: ["sh", "-c", "sleep 30 && npm start"]
 
+
   mssql-server:
     #image: mcr.microsoft.com/mssql/server:latest
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -38,7 +39,7 @@ services:
         - SA_PASSWORD=${SQL_PASSWORD} # Set the SA user password
     #      - MSSQL_PID=Express           # Set the SQL Server Edition
     ports:
-      - '1433:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
+      - '1435:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
     volumes:
       - ./mssql-data/data:/var/opt/mssql/data
       - ./mssql-data/log:/var/opt/mssql/log
@@ -48,6 +49,7 @@ services:
     networks:
       mynetwork:
         ipv4_address: 172.23.0.20
+
 
 
   cache:
@@ -68,7 +70,7 @@ services:
 
     networks:
       mynetwork:
-        ipv4_address: 172.23.0.22
+        ipv4_address: 172.25.0.22
 
   nginx:
     build:
@@ -135,3 +137,4 @@ networks:
       driver: default
       config:
         - subnet: "172.23.0.0/24"
+
