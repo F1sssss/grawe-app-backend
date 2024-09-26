@@ -1,29 +1,34 @@
-// Desc: Error handler for the application
-
 const AppError = require('../utils/AppError');
+const logger = require('../logging/winstonSetup');
 
 module.exports = errorHandler = (err, req, res, next) => {
-  handleOtherErrors(err, res);
+  const handled_err = handleOtherErrors(err);
+  const error = handled_err || err;
 
-  res.status(err.statusCode || 500).json({
-    status: err.status,
+  console.log('Test Error log', error);
+  res.status(error.statusCode || 500).json({
+    status: error.status,
     statusMessage:
-      err.statusMessage === 'error-executing-query'
-        ? err.message.includes('-')
-          ? err.message.split(' ').pop()
-          : err.statusMessage
-        : err.statusMessage,
-    message: err.message,
-    statusCode: err.statusCode,
-    error: err.name,
+      error.statusMessage === 'error-executing-query'
+        ? error.message.includes('-')
+          ? error.message.split(' ').pop()
+          : error.statusMessage
+        : error.statusMessage,
+    message: error.message,
+    statusCode: error.statusCode,
+    error: error.name,
   });
+
+  logger.error(`${error.status} - ${error.message} - ${error.statusMessage}- ${req.originalUrl} - ${req.method} - ${req.ip}`);
+
   next();
 };
 
 const handleOtherErrors = (err) => {
-  if (err.name === 'TokenExpiredError') handleTokenExpiredError(err);
-  if (err.name === 'TypeCastError') handleTypeCastError(err);
-  if (err.name === 'JsonWebTokenError') handleJWTError(err);
+  if (err.name === 'TokenExpiredError') return handleTokenExpiredError();
+  if (err.name === 'TypeCastError') return handleTypeCastError();
+  if (err.name === 'JsonWebTokenError') return handleJWTError();
+  return null;
 };
 
 const handleJWTError = () => new AppError('Invalid token. Please log in again!', 401, 'error-invalid-token');

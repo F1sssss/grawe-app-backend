@@ -4,6 +4,8 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
+router.get('/', userController.getAllUsers);
+
 router.post('/signup', authController.signUp);
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);
@@ -16,5 +18,7 @@ router.use(authController.protect);
 router.get('/me', userController.getMe);
 router.patch('/me', userController.updateMe);
 router.delete('/me', userController.deleteMe);
+router.get('/:id', userController.getUser);
+router.get('/me/permissions', userController.getMyPermissions);
 
 module.exports = router;

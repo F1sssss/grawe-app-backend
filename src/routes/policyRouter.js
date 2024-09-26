@@ -1,12 +1,14 @@
 const express = require('express');
 const policyController = require('../controllers/policyController');
 const authController = require('../controllers/authController');
+const accessControlMiddleware = require('../middlewares/accessControl');
 
 const router = express.Router();
 
-//router.use(authController.protect);
+router.use(authController.protect);
 
 router.get('/:id/history', policyController.getPolicyHistory);
+//router.get('/:id/info', accessControlMiddleware, policyController.getPolicyInfo);
 router.get('/:id/info', policyController.getPolicyInfo);
 
 router.get('/:id/history/xls/download', policyController.getPolicyHistoryExcelDownload);

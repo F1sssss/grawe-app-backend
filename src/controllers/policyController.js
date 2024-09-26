@@ -1,40 +1,21 @@
-//Controller for policies routes
-//TODO add policy route for analytical info
-/** @namespace req.query.dateFrom * **/
-/** @namespace req.query.dateTo * **/
-const policyService = require('../services/policiesServices');
-const CatchAsync = require('../utils/CatchAsync');
+const policyService = require('../services/policyService');
+const CatchAsync = require('../middlewares/CatchAsync');
 const handleResponse = require('../utils/responseHandler');
 
 const getPolicyInfo = CatchAsync(async (req, res) => {
-  await handleResponse(policyService.getPolicyInfoService(req.params.id), res, { statusCode: 200 }, 'success');
+  await handleResponse(policyService.getPolicyInfoService(req.params.id), res, { statusCode: 200 });
 });
 
 const getPolicyAnalyticalInfo = CatchAsync(async (req, res) => {
-  await handleResponse(
-    policyService.getPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo),
-    res,
-    { statusCode: 200 },
-    'success',
-  );
+  await handleResponse(policyService.getPolicyAnalyticalInfoService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });
 });
 
 const getPolicyHistory = CatchAsync(async (req, res) => {
-  await handleResponse(
-    policyService.getPolicyHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo),
-    res,
-    { statusCode: 200 },
-    'success',
-  );
+  await handleResponse(policyService.getPolicyHistoryService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });
 });
 
 const getAllPolicyAnalytics = CatchAsync(async (req, res) => {
-  await handleResponse(
-    policyService.getAllPolicyAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo),
-    res,
-    { statusCode: 200 },
-    'success',
-  );
+  await handleResponse(policyService.getAllPolicyAnalyticsService(req.params.id, req.query.dateFrom, req.query.dateTo), res, { statusCode: 200 });
 });
 
 const getPolicyHistoryExcelDownload = CatchAsync(async (req, res) => {

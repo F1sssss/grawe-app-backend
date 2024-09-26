@@ -1,16 +1,6 @@
-// Description: Controller for user authentication
-//It also contains the protect and restrictTo middleware functions
-
-/** @namespace req.body.last_name * **/
-/** @namespace req.body.Date_of_birth * **/
-/** @namespace req.body.email * **/
-/** @namespace req.user.role * **/
-/** @namespace req.body.newPassword, * **/
-
-const authServices = require('../services/authServices');
-const userServices = require('../services/userServices');
-const AppError = require('../utils/AppError');
-const CatchAsync = require('../utils/CatchAsync');
+const authServices = require('../services/authService');
+const userServices = require('../services/userService');
+const CatchAsync = require('../middlewares/CatchAsync');
 const responseHandler = require('../utils/responseHandler');
 
 const login = CatchAsync(async (req, res) => {
@@ -36,34 +26,26 @@ const logout = CatchAsync(async (req, res) => {
 });
 
 const signUp = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.signupService(req.body), res, { statusCode: 201 }, 'Signup successful!');
+  await responseHandler(authServices.signupService(req.body), res, { statusCode: 201 });
 });
 
 const forgotPassword = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.forgotPasswordService(req.body.username), res, { statusCode: 200 }, 'Password reset email sent!');
+  await responseHandler(authServices.forgotPasswordService(req.body.username), res, { statusCode: 200 });
 });
 
 const setNewPassword = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.setNewPasswordService(req.body.newPassword, req.query.id), res, { statusCode: 200 }, 'Successful!');
+  await responseHandler(authServices.setNewPasswordService(req.body.newPassword, req.query.id), res, { statusCode: 200 });
 });
 
 const emailVerification = CatchAsync(async (req, res) => {
-  await responseHandler(authServices.verifyUserService(req.query.id, req.query.token), res, { statusCode: 200 }, 'Email verification successful!');
+  await responseHandler(authServices.verifyUserService(req.query.id, req.query.token), res, { statusCode: 200 });
 });
 
 const protect = CatchAsync(async (req, res, next) => {
-  const { user } = await userServices.getMeService(req);
+  const { user } = await userServices.getMeService(req, res, next);
   req.user = user;
   next();
 });
-
-const restictTo = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      throw next(new AppError('You do not have permission to perform this action', 403, 'error-permission-denied'));
-    }
-  };
-};
 
 module.exports = {
   login,
@@ -72,6 +54,5 @@ module.exports = {
   forgotPassword,
   emailVerification,
   protect,
-  restictTo,
   setNewPassword,
 };

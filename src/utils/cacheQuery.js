@@ -1,14 +1,20 @@
 const { get, setWithTTL } = require('../services/cachingService');
+const logger = require('../logging/winstonSetup');
 
 module.exports = cacheQuery = async (cacheKey, promiseQuery) => {
-  const cacheData = await get(cacheKey);
+  try {
+    const cacheData = await get(cacheKey);
 
-  if (cacheData) {
-	return { ...cacheData, statusCode: 200 };
+    if (cacheData) {
+      logger.debug('cacheQuery: cacheData found for cacheKey: ', cacheKey);
+      return { ...cacheData, statusCode: 200 };
+    }
+    const data = await promiseQuery;
+
+    await setWithTTL(cacheKey, JSON.stringify({ ...data }));
+
+    return { ...data, statusCode: 200 };
+  } catch (error) {
+    throw error;
   }
-  const data = await promiseQuery;
-
-  await setWithTTL(cacheKey, JSON.stringify({ ...data }));
-
-  return { ...data, statusCode: 200 };
 };

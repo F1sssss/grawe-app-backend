@@ -1,5 +1,4 @@
-const DB_CONFIG = require('../DBconfig');
-const DBConnection = require('../DBConnection');
+const { executeQueryAndHandleErrors } = require('../executeQuery');
 const AppError = require('../../utils/AppError');
 const { Report, NewReport, NewParam, StoredProcedure, Param, ReportProcedure, ReportName, ReportId } = require('../Queries/params');
 
@@ -7,71 +6,61 @@ function isNullOrEmpty(str) {
   return !str || !str.trim();
 }
 
-const excecuteQueryAndHandleErrors = async (query, params = [], multiple = false, type = 'query') => {
-  const connection = new DBConnection(DB_CONFIG.sql);
-
-  const result = type === 'query' ? await connection.executeQuery(query, params, multiple) : await connection.executeStoredProcedure(query, params);
-
-  if (!result || result.length === 0) {
-    throw new AppError('Error during retrieving reports', 404, 'error-getting-reports-query-result-empty');
-  }
-  return { result, statusCode: 200 };
-};
-
 const getReports = async () => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('SELECT * FROM reports (NOLOCK)');
-  return { reports: result, statusCode };
+  const { data, statusCode } = await executeQueryAndHandleErrors('SELECT * FROM reports (NOLOCK)');
+  return { reports: data, statusCode };
 };
 
 const getReportById = async (id) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getReportById.sql', Report(id), true);
+  const { data, statusCode } = await executeQueryAndHandleErrors('get_report_id.sql', Report(id), true);
 
   return {
-    report_info: result[0][0],
-    report_params: result[1],
+    report_info: data[0][0] === undefined ? {} : data[0][0],
+    report_params: data[1] === undefined ? {} : data[1],
     statusCode,
   };
 };
 
 const getReportByName = async (report_name) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getReportByName.sql', ReportName(0, report_name), true);
+  const { data, statusCode } = await executeQueryAndHandleErrors('get_report_name.sql', ReportName(0, report_name), true);
 
   return {
-    report_info: result[0][0],
-    report_params: result[1],
+    report_info: data[0][0] === undefined ? {} : data[0][0],
+    report_params: data[1] === undefined ? {} : data[1],
     statusCode,
   };
 };
 
 const getProcedureInfo = async (procedure_name) => {
-  const { result, statusCode } = await searchProcedure(procedure_name);
+  const { data, statusCode } = await searchProcedure(procedure_name);
 
   return {
-    procedure_info: result[0][0],
-    procedure_params: result[1],
+    procedure_info: data[0][0] === undefined ? {} : data[0][0],
+    procedure_params: data[1] === undefined ? {} : data[1],
     statusCode,
   };
 };
 
 const getParamValues = async (procedure_id, report_id, param_name, order) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getParamValues.sql', Param(procedure_id, report_id, param_name, order));
+  const { data, statusCode } = await executeQueryAndHandleErrors('get_reports_param_values.sql', Param(procedure_id, report_id, param_name, order));
 
-  if (isNullOrEmpty(result.sql)) {
+  if (isNullOrEmpty(data.sql)) {
     throw new AppError('Params query is empty!', 404, 'error-param-query-empty');
   }
 
-  const values = await excecuteQueryAndHandleErrors(result['sql']);
-  return { param_values: values, statusCode };
+  const { data: param_values } = await executeQueryAndHandleErrors(data['sql']);
+
+  return { param_values, statusCode };
 };
 
 const executeReport = async (report, inputParams) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors(report, inputParams, false, 'storedProcedure');
-  return { reportResult: result, statusCode };
+  const { data, statusCode } = await executeQueryAndHandleErrors(report, inputParams, false, 'storedProcedure');
+  return { reportResult: data, statusCode };
 };
 
 const searchProcedure = async (procedure_name) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('searchProcedure.sql', StoredProcedure(procedure_name), true);
-  return { result, statusCode };
+  const { data, statusCode } = await executeQueryAndHandleErrors('get_report_search_procedures.sql', StoredProcedure(procedure_name), true);
+  return { data, statusCode };
 };
 
 //This function is used to insert a new report and its params, and returns the new report (with its params)
@@ -82,12 +71,7 @@ const createReport = async (procedure) => {
     new_report_name,
   } = procedure;
 
-  if (
-    isNullOrEmpty(new_report_name) ||
-    procedure_id === undefined ||
-    procedure_params.length === 0 ||
-    (await getReportByName(new_report_name))?.report_info?.report_name === new_report_name
-  ) {
+  if (isNullOrEmpty(new_report_name) || procedure_id === undefined || procedure_params.length === 0) {
     throw new AppError('Invalid report data!', 404, 'error-invalid-report-data');
   }
 
@@ -100,15 +84,15 @@ const createReport = async (procedure) => {
 
 //These 2 functions are helper to createReport and are used to insert rows into SQL table
 const insertReport = async (report_name, procedure_id) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('insertReport.sql', NewReport(report_name, procedure_id));
-  return { report_id: result.id, statusCode };
+  const { data, statusCode } = await executeQueryAndHandleErrors('add_report.sql', NewReport(report_name, procedure_id));
+  return { report_id: data.id, statusCode };
 };
 
 //Insert Prams inserts the params of the report or updates them if they already exist
 const insertParamSQL = async (procedure_params, procedure_id, report_id) => {
   procedure_params.map(async (param) => {
-    await excecuteQueryAndHandleErrors(
-      'insert_update_reportParams.sql',
+    await executeQueryAndHandleErrors(
+      'update_report_params.sql',
       NewParam(procedure_id, report_id, param['order'], param['param_name'], param['sql_query']),
     );
   });
@@ -142,7 +126,7 @@ const updateReport = async (id, report) => {
 };
 
 const updateReportProcedure = async (id, report) => {
-  await excecuteQueryAndHandleErrors('updateReportProcedure.sql', ReportProcedure(id, report.report_info.procedure_id));
+  await executeQueryAndHandleErrors('update_report_procedure.sql', ReportProcedure(id, report.report_info.procedure_id));
   await insertParamSQL(report.report_params, report.report_info.procedure_id, report.report_info.report_id);
 };
 
@@ -150,17 +134,11 @@ const updateReportName = async (id, report) => {
   if ((await getReportByName(report.report_info.report_name))?.report_info?.report_name !== undefined) {
     throw new AppError('Report name already exists!', 404, 'error-report-name-already-exists');
   }
-  await excecuteQueryAndHandleErrors('updateReportName.sql', ReportName(id, report.report_info.report_name));
+  await executeQueryAndHandleErrors('update_report_name.sql', ReportName(id, report.report_info.report_name));
 };
 
 const deleteReport = async (id) => {
-  const connection = new DBConnection(DB_CONFIG.sql);
-  const user = await connection.executeQuery('deleteReport.sql', ReportId(id));
-
-  if (user) {
-    throw new AppError('Error deleting report!', 404, 'error-deleting-report-not-found');
-  }
-
+  await executeQueryAndHandleErrors('delete_report.sql', ReportId(id));
   return { message: 'Report Deleted!', statusCode: 200 };
 };
 

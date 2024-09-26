@@ -6,8 +6,10 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const xss = require('xss-clean');
 const compression = require('compression');
+const morgan = require('morgan');
 
-const errorController = require('./src/controllers/errorController');
+const errorHandler = require('./src/controllers/errorController');
+const logger = require('./src/logging/winstonSetup');
 
 const userRouter = require('./src/routes/userRouter');
 const policyRouter = require('./src/routes/policyRouter');
@@ -15,9 +17,33 @@ const reportsRouter = require('./src/routes/reportsRouter');
 const clientRouter = require('./src/routes/clientRouter');
 const searchRouter = require('./src/routes/searchRouter');
 const employeeErrorRouter = require('./src/routes/employeeErrorRouter');
+const permissionRouter = require('./src/routes/permissionRouter');
+const dashboardRouter = require('./src/routes/dashboardRouter');
 
 //start express app
 const app = express();
+
+app.use(
+  morgan(
+    function (tokens, req, res) {
+      return JSON.stringify({
+        method: tokens.method(req, res),
+        url: tokens.url(req, res),
+        status: Number.parseFloat(tokens.status(req, res)),
+        content_length: tokens.res(req, res, 'content-length'),
+        response_time: Number.parseFloat(tokens['response-time'](req, res)),
+      });
+    },
+    {
+      stream: {
+        write: (message) => {
+          const data = JSON.parse(message);
+          logger.http('Express request', data);
+        },
+      },
+    },
+  ),
+);
 
 app.enable('trust proxy');
 
@@ -43,22 +69,17 @@ app.use(xss());
 //Optimizing the sent data
 app.use(compression());
 
-//test middleware
-app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
-});
-
 //Routes
-
-app.use('/api/v1/users', userRouter);
-app.use('/api/v1/policies', policyRouter);
-app.use('/api/v1/clients', clientRouter);
-app.use('/api/v1/reports', reportsRouter);
-app.use('/api/v1/search', searchRouter);
-app.use('/api/v1/errors', employeeErrorRouter);
+app.use(`/api/${process.env.API_VERSION}/users`, userRouter);
+app.use(`/api/${process.env.API_VERSION}/policies`, policyRouter);
+app.use(`/api/${process.env.API_VERSION}/clients`, clientRouter);
+app.use(`/api/${process.env.API_VERSION}/reports`, reportsRouter);
+app.use(`/api/${process.env.API_VERSION}/search`, searchRouter);
+app.use(`/api/${process.env.API_VERSION}/errors`, employeeErrorRouter);
+app.use(`/api/${process.env.API_VERSION}/permissions`, permissionRouter);
+app.use(`/api/${process.env.API_VERSION}/dashboard`, dashboardRouter);
 
 //Error handling middleware
-app.use(errorController);
+app.use(errorHandler);
 
 module.exports = app;

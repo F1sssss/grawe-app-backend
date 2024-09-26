@@ -135,5 +135,14 @@ config.env
 
 /mssql-data/
 /.idea/
+ldap/
 
 cache/
+
+ssl/
+
+src/tests/testing_values/*
+
+src/tests/testing_values
+
+superset/data/

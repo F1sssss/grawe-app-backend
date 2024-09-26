@@ -1,44 +1,29 @@
-const DB_CONFIG = require('../DBconfig');
-const DBConnection = require('../DBConnection');
+const { executeQueryAndHandleErrors, returnArray } = require('../executeQuery');
 const AppError = require('../../utils/AppError');
-const { getPolicyInfo } = require('./PoliciesQueries');
+const { getPolicyInfo } = require('./policiesQueries');
 const { Date, Exception } = require('../Queries/params');
-
-const excecuteQueryAndHandleErrors = async (query, params = []) => {
-  const connection = new DBConnection(DB_CONFIG.sql);
-  const result = await connection.executeQuery(query, params);
-
-  if ((!result || result.length === 0) && query === 'addErrorException.sql') {
-    throw new AppError('Error during retrieving errors', 404, 'error-getting-errors-query-result-empty');
-  }
-
-  return { result, statusCode: 200 };
-};
+const { getMeService } = require('../../services/userService');
 
 const getEmployeeErrors = async (date) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('getEmployeeErrors.sql', Date(date));
-  return { employee_errors: result, statusCode };
+  const { data, statusCode } = await executeQueryAndHandleErrors('get_employee_errors.sql', Date(date));
+  return { employee_errors: returnArray(data), statusCode };
 };
 
 const getErrorExceptions = async () => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('select * from gr_greske_izuzetci (nolock)');
-  return { exceptions: result, statusCode };
+  const { data, statusCode } = await executeQueryAndHandleErrors('get_employee_errors_exceptions.sql');
+  return { exceptions: returnArray(data), statusCode };
 };
 
-const addErrorException = async (policy, id, exception) => {
-  await getPolicyInfo(policy); // Check if policy exists
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('addErrorException.sql', Exception(policy, id, exception));
-  return { result, statusCode };
+const addErrorException = async (policy, id, exception, req) => {
+  if (Object.keys(await getPolicyInfo(policy)).length === 0) throw new AppError('Policy does not exist!', 404, 'error-policy-not-found');
+  const { user } = await getMeService(req);
+  const { data, statusCode } = await executeQueryAndHandleErrors('add_error_exception.sql', Exception(policy, id, exception, user.ID));
+  return { result: data, statusCode };
 };
 
 const deleteErrorException = async (policy, id) => {
-  await excecuteQueryAndHandleErrors('deleteErrorException.sql', Exception(policy, id));
-  return { result: 'Successfully deleted report!', statusCode: 200 };
-};
-
-const updateErrorException = async (policy, id, exception) => {
-  const { result, statusCode } = await excecuteQueryAndHandleErrors('updateErrorException.sql', Exception(policy, id, exception));
-  return { result, statusCode };
+  await executeQueryAndHandleErrors('delete_error_exception.sql', Exception(policy, id));
+  return { result: 'Successfully deleted exception!', statusCode: 200 };
 };
 
 module.exports = {
@@ -46,5 +31,4 @@ module.exports = {
   getErrorExceptions,
   addErrorException,
   deleteErrorException,
-  updateErrorException,
 };

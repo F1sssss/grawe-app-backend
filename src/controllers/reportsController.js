@@ -1,21 +1,35 @@
-//Controller for route creation, excecution and deletion
-
-const catchAsync = require('../utils/CatchAsync');
+const catchAsync = require('../middlewares/CatchAsync');
 const reportsQueries = require('../sql/Queries/reportsQueries');
 const reportService = require('../services/reportsService');
 const responseHandler = require('../utils/responseHandler');
 
 const getReports = catchAsync(async (req, res) => {
-  await responseHandler(reportsQueries.getReports(), res, { statusCode: 200 }, 'Successfully got reports');
+  await responseHandler(reportsQueries.getReports(), res, { statusCode: 200 });
 });
 
 const getReportById = catchAsync(async (req, res) => {
-  await responseHandler(reportService.getReportService(req.params.id), res, { statusCode: 200 }, 'Succesfully got report');
+  await responseHandler(reportService.getReportService(req.params.id), res, { statusCode: 200 });
 });
 
-const generateReport = catchAsync(async (req, res) => {
-  await responseHandler(reportService.generateReportService(req.params.id, req.query), res, { statusCode: 200 }, 'Success');
-});
+const generateReport = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const input_params = req.query;
+
+    const result = await reportService.generateReportService(id, input_params);
+
+    if (result.status === 'completed') {
+      res.status(200).json(result.data.reportResult);
+    } else {
+      res.status(500).json({
+        status: 'error',
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
 const downloadReport = catchAsync(async (req, res) => {
   const { excelBuffer, statusCode } = await reportService.downloadReportService(res, req.params.id, req.query);
@@ -23,7 +37,7 @@ const downloadReport = catchAsync(async (req, res) => {
 });
 
 const createReport = catchAsync(async (req, res) => {
-  await responseHandler(reportService.createReportService(req.body['procedure']), res, { statusCode: 201 }, 'Successfully created report');
+  await responseHandler(reportService.createReportService(req.body['procedure']), res, { statusCode: 201 });
 });
 
 const getParamValues = catchAsync(async (req, res) => {
@@ -31,20 +45,19 @@ const getParamValues = catchAsync(async (req, res) => {
     reportsQueries.getParamValues(req.query['procedure_id'], req.query['report_id'], req.query['param_name'], req.query['order']),
     res,
     { statusCode: 200 },
-    'Succesfully got param values',
   );
 });
 
 const searchProcedure = catchAsync(async (req, res) => {
-  await responseHandler(reportService.searchProcedureService(req.query['procedure_name']), res, { statusCode: 200 }, 'Search results:');
+  await responseHandler(reportService.searchProcedureService(req.query['procedure_name']), res, { statusCode: 200 });
 });
 
 const updateReport = catchAsync(async (req, res) => {
-  await responseHandler(reportService.updateReportService(req.params.id, req.body), res, { statusCode: 200 }, 'Successfully updated report');
+  await responseHandler(reportService.updateReportService(req.params.id, req.body), res, { statusCode: 200 });
 });
 
 const deleteReport = catchAsync(async (req, res) => {
-  await responseHandler(reportService.deleteReportService(req.params.id), res, { statusCode: 200 }, 'Successfully deleted report');
+  await responseHandler(reportService.deleteReportService(req.params.id), res, { statusCode: 200 });
 });
 
 const downloadFilteredReport = catchAsync(async (req, res) => {

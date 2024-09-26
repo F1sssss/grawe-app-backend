@@ -1,12 +1,13 @@
-/** @namespace result.recordset**/
-/** @namespace result.recordsets**/
-const { ConnectionPool, Request } = require('mssql');
+/** @namespace result.recordset**/ /** @namespace result.recordsets**/
+const { ConnectionPool } = require('mssql');
 const AppError = require('../utils/AppError');
-const loadSqlQueries = require('./sql_queries/loadSQL');
+const logger = require('../logging/winstonSetup');
+const loadSqlQueries = require('./sql_queries/loadSQLQueries');
 
 module.exports = class DBConnection {
   constructor(config) {
     if (DBConnection._instance) {
+      this.pool = new ConnectionPool(config);
       return DBConnection._instance;
     }
     this.pool = new ConnectionPool(config);
@@ -16,6 +17,7 @@ module.exports = class DBConnection {
   async connect() {
     try {
       await this.pool.connect();
+      logger.info('🔒 Connected to MSSQL database');
       console.log('🔒 Connected to MSSQL database');
     } catch (err) {
       throw new AppError('Error connecting to MSSQL database' + err.message, 500, 'error-connecting-to-db');
@@ -25,12 +27,14 @@ module.exports = class DBConnection {
     try {
       await this.pool.close();
       console.log('🔒 Connection to MSSQL database closed');
+      logger.info('🔒 Connection to MSSQL database closed');
     } catch (err) {
       throw new AppError('Error closing database connection' + err.message, 500, 'error-closing-db-connection');
     }
   }
 
   async executeQuery(query, params = [], multipleResultSets = false) {
+    const query_name = query;
     try {
       const request = await this.pool.request();
 
@@ -51,7 +55,8 @@ module.exports = class DBConnection {
 
       return result?.length === 1 ? result[0] : result?.length === 0 ? undefined : result;
     } catch (err) {
-      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
+      logger.error(`Error executing query ${query_name} : ` + err.message);
+      throw new AppError('Error executing query ' + err.message, 500, 'error-executing-query');
     }
   }
 
@@ -68,7 +73,8 @@ module.exports = class DBConnection {
 
       return result.recordsets[0];
     } catch (err) {
-      throw new AppError('Error executing query' + err.message, 500, 'error-executing-query');
+      logger.error(`Error executing stored procedure ${storedProcedure} : ` + err.message);
+      throw new AppError(`Error executing stored procedure ${storedProcedure} : ` + err.message, 500, 'error-executing-query');
     }
   }
 };

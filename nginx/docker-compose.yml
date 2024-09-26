@@ -1,0 +1,18 @@
+version: '3'
+
+
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./:/etc/nginx
+      - ../ssl/certificate.crt:/etc/nginx/ssl/certificate.crt
+      - ../ssl/private.key:/etc/nginx/ssl/private.key
+      - ../ssl/csr.pem:/etc/nginx/ssl/csr.pem
+    restart: always

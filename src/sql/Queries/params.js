@@ -19,9 +19,14 @@ const Client = (id) => {
   return [new SQLParam('id', id, sql.VarChar)];
 };
 
-const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
-  return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.VarChar), new SQLParam('dateTo', dateTo, sql.VarChar)];
+const ClientGroup = (group, user) => {
+  return [new SQLParam('user', user, sql.Int), new SQLParam('group', group, sql.Int)];
 };
+
+const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
+  return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.DateTime), new SQLParam('dateTo', dateTo, sql.DateTime)];
+};
+
 const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];
 };
@@ -101,8 +106,68 @@ const Date = (date) => {
   return [new SQLParam('date', date, sql.VarChar)];
 };
 
-const Exception = (policy, id, exception) => {
-  return [new SQLParam('policy', policy, sql.Int), new SQLParam('id', id, sql.Int), new SQLParam('exception', exception, sql.VarChar)];
+const Exception = (policy, id, exception, user) => {
+  return [
+    new SQLParam('policy', policy, sql.Int),
+    new SQLParam('id', id, sql.Int),
+    new SQLParam('exception', exception, sql.VarChar),
+    new SQLParam('user', user, sql.Int),
+  ];
+};
+
+const Permission = (permission) => {
+  return [
+    new SQLParam('route', permission.route, sql.VarChar),
+    new SQLParam('visibility', permission.visibility, sql.VarChar),
+    new SQLParam('method', permission.method, sql.VarChar),
+    new SQLParam('name', permission.name, sql.VarChar),
+    new SQLParam('description', permission.description, sql.VarChar),
+  ];
+};
+
+const PermissionUpdate = (id, permission) => {
+  return [
+    new SQLParam('id', id, sql.Int),
+    new SQLParam('name', permission.name, sql.VarChar),
+    new SQLParam('description', permission.description, sql.VarChar),
+  ];
+};
+
+const PermissionGroupID = (id) => {
+  return [new SQLParam('id', id, sql.Int)];
+};
+
+const AccessControl = (route, user, id) => {
+  return [new SQLParam('route', route, sql.VarChar), new SQLParam('user', user, sql.Int), new SQLParam('id', id, sql.VarChar)];
+};
+
+const PermissionGroupName = (name) => {
+  return [new SQLParam('name', name, sql.VarChar)];
+};
+
+const PermissionRights = (id, group, read, write) => {
+  return [
+    new SQLParam('id', id, sql.Int),
+    new SQLParam('group', group, sql.Int),
+    new SQLParam('read', read, sql.Int),
+    new SQLParam('write', write, sql.Int),
+  ];
+};
+
+const PermissionGroup = (id, name) => {
+  return [new SQLParam('id', id, sql.Int), new SQLParam('name', name, sql.VarChar)];
+};
+
+const PermissionID = (id) => {
+  return [new SQLParam('id', id, sql.Int)];
+};
+
+const PermissionGroupPairing = (id_permission_group, id_permission) => {
+  return [new SQLParam('id_permission_group', id_permission_group, sql.Int), new SQLParam('id_permission', id_permission, sql.Int)];
+};
+
+const PermissionProperties = (id_permission, id_permission_group) => {
+  return [new SQLParam('id_permission', id_permission, sql.Int), new SQLParam('id_permission_group', id_permission_group, sql.Int)];
 };
 
 module.exports = {
@@ -124,4 +189,15 @@ module.exports = {
   Date,
   Exception,
   ReportId,
+  Permission,
+  AccessControl,
+  PermissionGroupID,
+  PermissionGroupName,
+  PermissionGroup,
+  PermissionID,
+  PermissionUpdate,
+  PermissionRights,
+  PermissionGroupPairing,
+  PermissionProperties,
+  ClientGroup,
 };
