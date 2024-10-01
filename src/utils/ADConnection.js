@@ -28,7 +28,7 @@ async function authenticateUser(username, password) {
       if (auth) {
         try {
           const { user } = await SQLQueries.getUserByUsernameOrEmail(username, null, 'signup');
-          if (!user) {
+          if (Object.keys(user).length === 0) {
             const ad_user = await findADUser(username);
             const { user: new_ad_user, statusCode } = await SQLQueries.createADUser(ad_user);
             return resolve(new_ad_user);

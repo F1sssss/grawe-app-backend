@@ -43,32 +43,34 @@ function createInvoice(policy) {
 function createClientInvoice(client) {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ size: 'A4', margin: 50 });
-      const buffers = [];
-      const recapitulation = [];
+      let doc = new PDFDocument({ size: 'A4', margin: 50 });
+      let buffers = [];
+      let recapitulation = [];
 
-      doc.on('error', (err) => {
-        logger.error('Error during PDF creation:', err);
-        return reject(new AppError('Error during PDF creation', 500, 'error-creating-pdf'));
+      // Handle errors
+      doc.on('error', () => {
+        throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
       });
 
-      doc.on('data', (buffer) => buffers.push(buffer));
+      // Collect the PDF buffers
+      doc.on('data', (buffer) => {
+        buffers.push(buffer);
+      });
 
+      // Finalize the PDF document
       doc.on('end', () => {
-        if (buffers.length === 0) {
-          return reject(new AppError('Error during PDF creation', 500, 'error-creating-pdf'));
-        }
+        if (buffers.length === 0) throw new AppError('Error during creating PDF', 500, 'error-creating-pdf');
         resolve({ pdfBuffer: Buffer.concat(buffers), statusCode: 200 });
       });
 
       let clientData = extractClientInfo(client);
 
-      for (const entry of client) {
-        if (!entry[0].datum_dokumenta) {
+      for (let i = 0; i < client.length; i++) {
+        if (client[i][0].datum_dokumenta === null || !client[i][0].datum_dokumenta) {
           continue;
         }
 
-        clientData.items = getDistinctObjects(entry, [
+        clientData.items = getDistinctObjects(client[i], [
           'datum_dokumenta',
           'broj_dokumenta',
           'polisa',
@@ -78,7 +80,17 @@ function createClientInvoice(client) {
           'trangrupa1',
           'trangrupa2',
         ]);
-        clientData = { ...clientData, ...entry[0] };
+        clientData.broj_polise = client[i][0].polisa;
+        clientData.pocetak_osiguranja = client[i][0].pocetak_osiguranja;
+        clientData.istek_osiguranja = client[i][0].istek_osiguranja;
+        clientData.ukupno_dospjelo = client[i][0].ukupno_dospjelo;
+        clientData.ukupno_placeno = client[i][0].ukupno_placeno;
+        clientData.ukupno_duguje = client[i][0].ukupno_duguje;
+        clientData.ukupno_nedospjelo = client[i][0].ukupno_nedospjelo;
+        clientData.premija = client[i][0].bruto_polisirana_premija;
+        clientData.nacin_placanja = client[i][0].nacin_placanja;
+        clientData.naziv_branse = client[i][0].naziv_branse;
+        clientData.broj_ponude = client[i][0].broj_ponude;
 
         recapitulation.push([
           clientData.broj_polise,
