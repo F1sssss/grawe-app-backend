@@ -307,7 +307,7 @@ function generateInvoiceTable(doc, invoice) {
     generateHr(doc, position + 20);
 
     if (i === invoice.items.length - 1) {
-      position2 = (position + 30) % 750 < 20 ? (doc.addPage(), 30) : (position + 30) % 750;
+      position2 = (position + 30) % 750 <= 30 ? (doc.addPage(), 30) : (position + 30) % 750;
 
       generateBoldedTableRow(
         doc,

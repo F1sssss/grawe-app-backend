@@ -27,7 +27,7 @@ else
 
 begin
 
-select
+select distinct
 p.id permission_id,
 p.route,
 p.method,
