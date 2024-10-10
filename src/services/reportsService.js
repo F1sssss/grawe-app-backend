@@ -8,7 +8,9 @@ const ReportQueue = require('../utils/ReportQueue');
 const reportQueue = new ReportQueue();
 
 const executeReport = async (report_info, report_params, input_params) => {
-  const cacheKey = `execute-report-${report_info['procedure_name']}-${JSON.stringify(input_params)}-${JSON.stringify(report_params)}`;
+  const cacheKey = `execute-report-${report_info['procedure_name']}-${JSON.stringify(input_params).replace(':', '')}-${JSON.stringify(
+    report_params,
+  ).replace(':', '')}`;
   const queryParams = params.ReportParams(report_params, input_params);
   return ({ reportResult, statusCode } = await cacheQuery(cacheKey, reportsQueries.executeReport(report_info['procedure_name'], queryParams)));
 };

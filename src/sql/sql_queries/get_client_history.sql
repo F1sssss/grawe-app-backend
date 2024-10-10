@@ -18,8 +18,8 @@ pko_praemienkontoid								broj_dokumenta,
 pko_obnr										broj_ponude,
 pko_b_art										vid,
 pko_g_fall										opis_knjizenja,
-pko_betraghaben									duguje,
-pko_betragsoll									potrazuje,
+pko_betragsoll									duguje,
+pko_betraghaben									potrazuje,
 pko_wertedatumsaldo								saldo
 from
 praemienkonto (nolock)

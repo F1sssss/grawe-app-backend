@@ -16,7 +16,7 @@ const getReportById = async (id) => {
 
   return {
     report_info: data[0][0] === undefined ? {} : data[0][0],
-    report_params: data[1] === undefined ? {} : data[1],
+    report_params: data[1] === undefined || data[1][0]['param_name'] === null ? [] : data[1],
     statusCode,
   };
 };
@@ -26,7 +26,7 @@ const getReportByName = async (report_name) => {
 
   return {
     report_info: data[0][0] === undefined ? {} : data[0][0],
-    report_params: data[1] === undefined ? {} : data[1],
+    report_params: data[1] === undefined || data[1][0]['param_name'] === null ? [] : data[1],
     statusCode,
   };
 };
@@ -36,7 +36,7 @@ const getProcedureInfo = async (procedure_name) => {
 
   return {
     procedure_info: data[0][0] === undefined ? {} : data[0][0],
-    procedure_params: data[1] === undefined ? {} : data[1],
+    procedure_params: data[1] === undefined || data[1][0]['param_name'] === null ? [] : data[1],
     statusCode,
   };
 };

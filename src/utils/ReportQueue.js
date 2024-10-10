@@ -9,7 +9,7 @@ module.exports = class ReportQueue extends EventEmitter {
   }
 
   async getOrQueueReport(reportId, inputParams, generateReportFn) {
-    const key = `report-${reportId}-${JSON.stringify(inputParams)}`;
+    const key = `report-${reportId}-${JSON.stringify(inputParams).replace(':', '')}`;
 
     // Check cache first
     try {
