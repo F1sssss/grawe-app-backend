@@ -1,6 +1,6 @@
 if not exists (select *  from gr_permission_properties pp
                              left join gr_pairing_permisson_property_list pl on pp.permission_property_id=pl.id
-                             where permission_property_id = @id and group_id = @group)
+                             where id_permission_property = @id and group_id = @group)
 begin
 
     throw 50000, 'Permission-not-found', 1;
