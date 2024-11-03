@@ -1,10 +1,3 @@
-/*
-declare @policy int=9000664,
-@embg varchar(13)='02015366',
-@dateFrom varchar(10)='01.01.2022',
-@dateTo varchar (10)='31.12.2023'
-*/
-
 if OBJECT_ID('tempdb..#branche') is not null
 drop table #branche
 
@@ -21,9 +14,12 @@ bra_statistik_nr,
 bra_vertragid
 into #branche  from branche (nolock)
 JOIN gr_clients_all c on c.polisa=branche.bra_obnr
+join vertrag v on bra_vertragid=v.vtg_vertragid
 where c.[embg/pib]=@id and
 (exists (select 1 from praemienkonto pk where pk.pko_obnr=branche.bra_obnr  and pko_wertedatum between @dateFrom and @dateTo) or
 isnull(cast(((select top 1 p.pko_wertedatumsaldo  from praemienkonto p (nolock) where pko_wertedatum <= @dateTo and p.pko_obnr=branche.bra_obnr order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
+and 1= case when @ZK = 1 then 1 else case when bra_bran=19 then 0 else 1 end end
+and 1= case when @AO = 1 then 1 else case when bra_bran=10 and vtg_pol_kreis<>97 then 0 else 1 end end
 
 
 

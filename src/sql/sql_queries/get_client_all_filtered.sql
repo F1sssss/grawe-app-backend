@@ -66,8 +66,10 @@ where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
       else STR(kun_yu_persnr,13,0) end
       end		=@id
 and
-(exists (select 1 from praemienkonto pk where pk.pko_obnr=b.bra_obnr  and convert(date,pko_wertedatum,104) between convert(date,@dateFrom,102) and convert(date,@dateTo,102)) or
+(exists (select 1 from praemienkonto pk where pk.pko_obnr=b.bra_obnr  and pko_wertedatum between @dateFrom and @dateTo) or
 isnull(cast(((select top 1 p.pko_wertedatumsaldo from praemienkonto p (nolock) where pko_wertedatum <= @dateTo and p.pko_obnr=b.bra_obnr order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
+and 1= case when @ZK = 1 then 1 else case when bra_bran=19 then 0 else 1 end end
+and 1= case when @AO = 1 then 1 else case when bra_bran=10 and vtg_pol_kreis<>97 then 0 else 1 end end
 OPTION(MAXDOP 1)
 
 

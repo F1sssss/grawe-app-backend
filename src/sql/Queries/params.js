@@ -27,6 +27,16 @@ const Client_dateFrom_dateTo = (id, dateFrom, dateTo) => {
   return [new SQLParam('id', id, sql.VarChar), new SQLParam('dateFrom', dateFrom, sql.DateTime), new SQLParam('dateTo', dateTo, sql.DateTime)];
 };
 
+const Client_dateFrom_dateTo_ZK_AO = (id, dateFrom, dateTo, ZK, AO) => {
+  return [
+    new SQLParam('id', id, sql.VarChar),
+    new SQLParam('dateFrom', dateFrom, sql.DateTime),
+    new SQLParam('dateTo', dateTo, sql.DateTime),
+    new SQLParam('ZK', ZK, sql.Int),
+    new SQLParam('AO', AO, sql.Int),
+  ];
+};
+
 const Report = (id) => {
   return [new SQLParam('report', id, sql.Int)];
 };
@@ -200,4 +210,5 @@ module.exports = {
   PermissionGroupPairing,
   PermissionProperties,
   ClientGroup,
+  Client_dateFrom_dateTo_ZK_AO,
 };

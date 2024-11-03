@@ -52,12 +52,14 @@ const getClientHistoryExcelDownloadService = async (res, id, dateFrom, dateTo) =
   return ({ excelBuffer, statusCode } = await generateExcelFile(client));
 };
 
-const getPolicyHistoryPDFDownloadService = async (res, id, dateFrom, dateTo) => {
+const getPolicyHistoryPDFDownloadService = async (res, id, dateFrom, dateTo, ZK, AO) => {
   res.setHeader('Content-Type', 'application/pdf');
   let filename = `attachment; filename="KarticaKlijenta-${id}-${dateTo}.pdf"`;
   res.setHeader('Content-Disposition', filename);
-  const cacheKey = `client-anlaytics-all-${id}-${dateFrom}-${dateTo}`;
-  let { client } = await cacheQuery(cacheKey, ClientQueries.getAllClientInfo(id, dateFrom, dateTo));
+  ZK = ZK === undefined ? 1 : ZK;
+  AO = AO === undefined ? 1 : AO;
+  const cacheKey = `client-analytics-all-${id}-${dateFrom}-${dateTo}-${ZK}-${AO}`;
+  let { client } = await cacheQuery(cacheKey, ClientQueries.getAllClientInfoFiltered(id, dateFrom, dateTo, ZK, AO));
   client = seperateClientPolicies(client);
   return ({ pdfBuffer, statusCode } = await Invoice.createClientInvoice(client));
 };
@@ -81,19 +83,21 @@ const getAllClientInfoService = async (id, dateFrom, dateTo) => {
   return { client, statusCode: 200 };
 };
 
-const getClientFinancialHistoryPDFDownloadService = async (res, id, dateFrom, dateTo) => {
+const getClientFinancialHistoryPDFDownloadService = async (res, id, dateFrom, dateTo, ZK, AO) => {
   res.setHeader('Content-Type', 'application/pdf');
   let filename = `attachment; filename="KarticaKlijenta-${id}-${dateTo}.pdf"`;
   res.setHeader('Content-Disposition', filename);
-  const cacheKey = `client-analytics-all-${id}-${dateFrom}-${dateTo}`;
-  let { client } = await cacheQuery(cacheKey, getClientFinancialInfoService(id, dateFrom, dateTo));
+  ZK = ZK === undefined ? 1 : ZK;
+  AO = AO === undefined ? 1 : AO;
+  const cacheKey = `client-fin-analytics-all-${id}-${dateFrom}-${dateTo}-${ZK}-${AO}`;
+  let { client } = await cacheQuery(cacheKey, getClientFinancialInfoService(id, dateFrom, dateTo, ZK, AO));
   if (!client || !client.finHistory.length) throw new AppError('No financial history found', 404, 'no-financial-history');
   return ({ pdfBuffer, statusCode } = await FinancialInvoice.createClientInvoice(client));
 };
 
-const getClientFinancialInfoService = async (id, dateFrom, dateTo) => {
-  let { clientFinHistory } = await ClientQueries.getClientFinancialHistory(id, dateFrom, dateTo);
-  let { clientFinInfo } = await ClientQueries.getClientFinancialInfo(id, dateFrom, dateTo);
+const getClientFinancialInfoService = async (id, dateFrom, dateTo, ZK, AO) => {
+  let { clientFinHistory } = await ClientQueries.getClientFinancialHistory(id, dateFrom, dateTo, ZK, AO);
+  let { clientFinInfo } = await ClientQueries.getClientFinancialInfo(id, dateFrom, dateTo, ZK, AO);
 
   const { client } = await getClientInfoService(id);
 

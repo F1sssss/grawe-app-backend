@@ -1,4 +1,4 @@
-const { Client, Client_dateFrom_dateTo } = require('./params');
+const { Client, Client_dateFrom_dateTo, Client_dateFrom_dateTo_ZK_AO } = require('./params');
 const { executeQueryAndHandleErrors, returnArray } = require('../executeQuery');
 
 const getClientInfo = async (id) => {
@@ -59,6 +59,14 @@ const getAllClientInfo = async (id, dateFrom, dateTo) => {
   return { client: returnArray(data), statusCode };
 };
 
+const getAllClientInfoFiltered = async (id, dateFrom, dateTo, ZK, AO) => {
+  const { data, statusCode } = await executeQueryAndHandleErrors(
+    'get_client_all_filtered.sql',
+    Client_dateFrom_dateTo_ZK_AO(id, dateFrom, dateTo, ZK, AO),
+  );
+  return { client: returnArray(data), statusCode };
+};
+
 const getClientPolicyAnalticalInfo = async (id, dateFrom, dateTo) => {
   const { data, statusCode } = await executeQueryAndHandleErrors(
     'get_client_policy_analytical_info.sql',
@@ -67,13 +75,19 @@ const getClientPolicyAnalticalInfo = async (id, dateFrom, dateTo) => {
   return { client: data, statusCode };
 };
 
-const getClientFinancialHistory = async (id, dateFrom, dateTo) => {
-  const { data, statusCode } = await executeQueryAndHandleErrors('get_client_financial_history.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+const getClientFinancialHistory = async (id, dateFrom, dateTo, ZK, AO) => {
+  const { data, statusCode } = await executeQueryAndHandleErrors(
+    'get_client_financial_history.sql',
+    Client_dateFrom_dateTo_ZK_AO(id, dateFrom, dateTo, ZK, AO),
+  );
   return { clientFinHistory: returnArray(data), statusCode };
 };
 
-const getClientFinancialInfo = async (id, dateFrom, dateTo) => {
-  const { data, statusCode } = await executeQueryAndHandleErrors('get_client_financial_info.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+const getClientFinancialInfo = async (id, dateFrom, dateTo, ZK, AO) => {
+  const { data, statusCode } = await executeQueryAndHandleErrors(
+    'get_client_financial_info.sql',
+    Client_dateFrom_dateTo_ZK_AO(id, dateFrom, dateTo, ZK, AO),
+  );
   return { clientFinInfo: data.ukupno_nedospjelo === null && data.ukupno_dospjelo === null ? {} : data, statusCode };
 };
 
@@ -85,4 +99,5 @@ module.exports = {
   getClientPolicyAnalticalInfo,
   getClientFinancialHistory,
   getClientFinancialInfo,
+  getAllClientInfoFiltered,
 };

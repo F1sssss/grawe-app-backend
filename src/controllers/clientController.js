@@ -33,12 +33,26 @@ const getClientHistoryExcelDownload = CatchAsync(async (req, res) => {
 });
 
 const getClientHistoryPDFDownload = CatchAsync(async (req, res) => {
-  const { pdfBuffer } = await clientService.getPolicyHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
+  const { pdfBuffer } = await clientService.getPolicyHistoryPDFDownloadService(
+    res,
+    req.params.id,
+    req.query.dateFrom,
+    req.query.dateTo,
+    req.query.ZK,
+    req.query.AO,
+  );
   res.status(200).send(pdfBuffer);
 });
 
 const getClientFinancialHistoryPDFDownload = CatchAsync(async (req, res) => {
-  const { pdfBuffer } = await clientService.getClientFinancialHistoryPDFDownloadService(res, req.params.id, req.query.dateFrom, req.query.dateTo);
+  const { pdfBuffer } = await clientService.getClientFinancialHistoryPDFDownloadService(
+    res,
+    req.params.id,
+    req.query.dateFrom,
+    req.query.dateTo,
+    req.query.ZK,
+    req.query.AO,
+  );
   res.status(200).send(pdfBuffer);
 });
 
