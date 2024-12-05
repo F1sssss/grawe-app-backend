@@ -26,7 +26,7 @@ drop table #temp
 select distinct
 kun_zuname + ' ' + isnull(kun_vorname,'')							[klijent],
 kun_geburtsdatum													[datum_rodjenja],
-case when kun_vorname is null then cast(kun_steuer_nr as varchar)
+case when kun_steuer_nr is not null and  kun_steuer_nr<>'' then cast(kun_steuer_nr as varchar)
 else
 case when len(kun_yu_persnr)=12
 	then '0' + FORMAT(kun_yu_persnr, '0')

@@ -3,7 +3,7 @@ select  bra_obnr
 from branche b (nolock)
 join vertrag v (nolock) on b.bra_vertragid=v.vtg_vertragid
 join kunde k (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
-where case when kun_vorname is null then cast(kun_steuer_nr as varchar)
+where case when kun_steuer_nr is not null and  kun_steuer_nr<>'' then cast(kun_steuer_nr as varchar)
 else
 case when STR(kun_yu_persnr,12,0)<>'************'
 	then '0' + STR(kun_yu_persnr,12,0)

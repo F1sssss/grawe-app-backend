@@ -1,6 +1,6 @@
 select distinct
 kun_zuname + ' ' + isnull(kun_vorname,'') [klijent],
-case when kun_vorname is null then cast(kun_steuer_nr as varchar) else case when len(FORMAT(kun_yu_persnr, '0'))=12 then '0' + FORMAT(kun_yu_persnr, '0') else FORMAT(kun_yu_persnr, '0') end end [embg/pib],
+case when kun_steuer_nr is not null and  kun_steuer_nr<>'' then cast(kun_steuer_nr as varchar) else case when len(FORMAT(kun_yu_persnr, '0'))=12 then '0' + FORMAT(kun_yu_persnr, '0') else FORMAT(kun_yu_persnr, '0') end end [embg/pib],
 isnull(bra_obnr,'') [polisa]
 
 from branche b (nolock)
