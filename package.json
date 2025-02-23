@@ -13,8 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "@elastic/ecs-winston-format": "^1.5.2",
-    "@sendgrid/client": "^7.7.0",
-    "@sendgrid/mail": "^7.7.0",
+    "@sendgrid/client": "^8.1.4",
+    "@sendgrid/mail": "^8.1.4",
     "@types/node": "^20.2.5",
     "activedirectory2": "^2.2.0",
     "axios": "^1.6.7",
@@ -30,9 +30,8 @@
     "jsonwebtoken": "^9.0.0",
     "ldapjs": "^3.0.7",
     "morgan": "^1.10.0",
-    "mssql": "^9.1.1",
+    "mssql": "^11.0.1",
     "node-cron": "^3.0.3",
-    "nodemon": "^2.0.22",
     "parse-function": "^5.6.10",
     "path": "^0.12.7",
     "pdfkit": "^0.13.0",
@@ -46,7 +45,7 @@
   },
   "devDependencies": {
     "jest": "^29.5.0",
-    "nodemon": "^2.0.22",
+    "nodemon": "^3.1.9",
     "prettier": "2.8.8"
   },
   "nodemonConfig": {

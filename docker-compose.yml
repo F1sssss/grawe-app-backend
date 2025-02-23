@@ -6,14 +6,14 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3001:3001'                 # Map the server container's port 3000 to the host's port 3000
+      - '3000:3000'                 # Map the server container's port 3000 to the host's port 3000
     environment:
       - DB_HOST=localhost
       - DB_USER=SA
       - DB_PASSWORD=${SQL_PASSWORD}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=172.23.0.22
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=Grawe123$
 
     volumes:
       - ./:/usr/src/app
@@ -39,7 +39,7 @@ services:
         - SA_PASSWORD=${SQL_PASSWORD} # Set the SA user password
     #      - MSSQL_PID=Express           # Set the SQL Server Edition
     ports:
-      - '1435:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
+      - '1433:1433'                 # Map the MSSQL container's port 1433 to the host's port 1433
     volumes:
       - ./mssql-data/data:/var/opt/mssql/data
       - ./mssql-data/log:/var/opt/mssql/log
@@ -70,7 +70,7 @@ services:
 
     networks:
       mynetwork:
-        ipv4_address: 172.25.0.22
+        ipv4_address: 172.23.0.22
 
   nginx:
     build:

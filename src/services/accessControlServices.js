@@ -131,6 +131,64 @@ const removeUserFromGroupService = async (id, user) => {
   return { message, statusCode };
 };
 
+const getHierarchyGroupsService = async () => {
+  const cacheKey = 'hierarchy-groups';
+  const { permission_groups, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getHierarchyGroups());
+  return { permission_groups, statusCode };
+};
+
+const getHierarchyGroupService = async (id) => {
+  const cacheKey = `hierarchy-group-${id}`;
+  const { permission_group, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getHierarchyGroup(id));
+  return { permission_group, statusCode };
+};
+
+const getUserHierarchyGroupsService = async (userId) => {
+  const cacheKey = `user-hierarchy-groups-${userId}`;
+  const { permission_groups, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getUserHierarchyGroups(userId));
+  return { permission_groups, statusCode };
+};
+
+const getGroupVKTOsService = async (groupId) => {
+  const cacheKey = `group-vktos-${groupId}`;
+  const { vktos, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getGroupVKTOs(groupId));
+  return { vktos, statusCode };
+};
+
+const createHierarchyGroupService = async (group) => {
+  await delKey('hierarchy-groups');
+  const { permission_group, statusCode } = await accessControlQueries.createHierarchyGroup(group);
+  return { permission_group, statusCode };
+};
+
+const updateHierarchyGroupService = async (id, group) => {
+  await delKey('hierarchy-groups');
+  await delKey(`hierarchy-group-${id}`);
+  const { permission_group, statusCode } = await accessControlQueries.updateHierarchyGroup(id, group);
+  return { permission_group, statusCode };
+};
+
+const deleteHierarchyGroupService = async (id) => {
+  await delKey('hierarchy-groups');
+  await delKey(`hierarchy-group-${id}`);
+  const { message, statusCode } = await accessControlQueries.deleteHierarchyGroup(id);
+  return { message, statusCode };
+};
+
+const addUserToHierarchyGroupService = async (groupId, userId) => {
+  await delKey('hierarchy-groups');
+  await delKey(`user-hierarchy-groups-${userId}`);
+  const { message, statusCode } = await accessControlQueries.addUserToHierarchyGroup(groupId, userId);
+  return { message, statusCode };
+};
+
+const removeUserFromHierarchyGroupService = async (groupId, userId) => {
+  await delKey('hierarchy-groups');
+  await delKey(`user-hierarchy-groups-${userId}`);
+  const { message, statusCode } = await accessControlQueries.removeUserFromHierarchyGroup(groupId, userId);
+  return { message, statusCode };
+};
+
 module.exports = {
   getGroupsService,
   getGroupService,
@@ -149,4 +207,13 @@ module.exports = {
   createPermissionPropertiesService,
   removeUserFromGroupService,
   addUserToGroupService,
+  getHierarchyGroupsService,
+  getHierarchyGroupService,
+  getUserHierarchyGroupsService,
+  getGroupVKTOsService,
+  createHierarchyGroupService,
+  updateHierarchyGroupService,
+  deleteHierarchyGroupService,
+  addUserToHierarchyGroupService,
+  removeUserFromHierarchyGroupService,
 };

@@ -4,11 +4,10 @@ const DB_CONFIG = require('./src/sql/DBconfig');
 const DBConnection = require('./src/sql/DBConnection');
 const connection = new DBConnection(DB_CONFIG.sql);
 const cachingService = require('./src/services/cachingService');
-const { logger } = require('./src/logging/winstonSetup');
+const logger = require('./src/logging/winstonSetup');
 
 const server = app.listen(DB_CONFIG.port, async () => {
   console.log(`🌐 App running on port  ${DB_CONFIG.port}...`);
-
   try {
     await connection.connect();
     await cachingService.connectToRedis();

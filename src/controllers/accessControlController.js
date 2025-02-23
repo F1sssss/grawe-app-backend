@@ -98,6 +98,42 @@ const removeUserFromGroup = CatchAsync(async (req, res) => {
   });
 });
 
+const getHierarchyGroups = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getHierarchyGroupsService(), res);
+});
+
+const getHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getHierarchyGroupService(req.params.id), res);
+});
+
+const getUserHierarchyGroups = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getUserHierarchyGroupsService(req.user.ID), res);
+});
+
+const getGroupVKTOs = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getGroupVKTOsService(req.params.id), res);
+});
+
+const createHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.createHierarchyGroupService(req.body), res, { statusCode: 201 });
+});
+
+const updateHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.updateHierarchyGroupService(req.params.id, req.body), res);
+});
+
+const deleteHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.deleteHierarchyGroupService(req.params.id), res, { statusCode: 204 });
+});
+
+const addUserToHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.addUserToHierarchyGroupService(req.params.id, req.query.user), res, { statusCode: 201 });
+});
+
+const removeUserFromHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.removeUserFromHierarchyGroupService(req.params.id, req.query.user), res, { statusCode: 204 });
+});
+
 module.exports = {
   getGroups,
   getGroup,
@@ -116,4 +152,13 @@ module.exports = {
   createPermissionProperties,
   addUserToGroup,
   removeUserFromGroup,
+  getHierarchyGroups,
+  getHierarchyGroup,
+  getUserHierarchyGroups,
+  getGroupVKTOs,
+  createHierarchyGroup,
+  updateHierarchyGroup,
+  deleteHierarchyGroup,
+  addUserToHierarchyGroup,
+  removeUserFromHierarchyGroup,
 };

@@ -35,6 +35,7 @@ where not exists (select 1 from vertrag v where v.vtg_pol_bran=#branche.bransa a
 
 ;WITH CTE AS(
 select
+0 id,
 datum_dokumenta,
 broj_dokumenta,
 broj_ponude,
@@ -45,7 +46,7 @@ where datum_dokumenta < @dateFrom
 
 UNION ALL
 
-select pko_wertedatum, pko_obnr,0,  0 zaduzeno, pko_betraghaben --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
+select pko_praemienkontoid, pko_wertedatum, pko_obnr,0,  0 zaduzeno, pko_betraghaben --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
 where c.[embg/pib]=@id and pko_betraghaben <> 0
@@ -54,10 +55,10 @@ and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_ob
 ),
 
 CTE_2 AS (
-select '01.01.' + SUBSTRING(convert(varchar,@dateFrom,102),1,4) datum_dokumenta, broj_dokumenta,broj_ponude, sum(zaduzeno) zaduzeno, sum (uplaceno) uplaceno
+select id, '01.01.' + SUBSTRING(convert(varchar,@dateFrom,102),1,4) datum_dokumenta, broj_dokumenta,broj_ponude, sum(zaduzeno) zaduzeno, sum (uplaceno) uplaceno
 FROM CTE
 where datum_dokumenta <= convert(date,'01.01.' + SUBSTRING(convert(varchar,@dateFrom,102),1,4),104)
-group by broj_dokumenta,broj_ponude
+group by broj_dokumenta,broj_ponude,id
 having sum(zaduzeno-uplaceno)<>0
 ),
 CTE_3 AS (
@@ -68,6 +69,7 @@ where convert(date,datum_dokumenta,104)>convert(date,'01.01.' + SUBSTRING(conver
 )
 ,CTE_4 AS(
 select
+0 id,
 datum_dokumenta,
 broj_dokumenta,
 broj_ponude,
@@ -78,7 +80,7 @@ where convert(date,datum_dokumenta,104)>= @dateFrom
 
 UNION ALL
 
-select pko_wertedatum, pko_obnr,b.broj_ponude,  0 zaduzeno, pko_betraghaben --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
+select pko_praemienkontoid, pko_wertedatum, pko_obnr,b.broj_ponude,  0 zaduzeno, pko_betraghaben --bra_bruttopraemie - SUM(pko_betraghaben) OVER (PARTITION BY pko_obnr)
 from praemienkonto (nolock)
 JOIN gr_clients_all c on c.polisa=praemienkonto.pko_obnr
 left join #branche b on b.polisa=c.polisa
@@ -87,9 +89,9 @@ and pko_wertedatum between @dateFrom and @dateTo
 and exists (select 1 from #branche b where b.broj_dokumenta=praemienkonto.pko_obnr and  convert(date,datum_dokumenta,104)>=@dateFrom)
 )
 ,CTE_5 AS (
-select * from CTE_3
+select DISTINCT * from CTE_3
 UNION ALL
-select * from CTE_4
+select DISTINCT * from CTE_4
 )
 select ROW_NUMBER() OVER ( ORDER BY convert(date,datum_dokumenta,104) asc,broj_dokumenta, zaduzeno desc) row_num,
 convert(varchar,datum_dokumenta,104)datum_dokumenta,

@@ -12,6 +12,10 @@ const {
   Client,
   PermissionProperties,
   ClientGroup,
+  HierarchyGroup,
+  HierarchyGroupWithID,
+  HierarchyGroupID,
+  HierarchyGroupUser,
 } = require('./params');
 
 const getPermissions = async () => {
@@ -130,6 +134,79 @@ const removeUserFromGroup = async (id, user) => {
   return { message: 'User removed from group!', statusCode: 200 };
 };
 
+const createHierarchyGroup = async (group) => {
+  const { data } = await executeQueryAndHandleErrors('add_hierarchy_group.sql', HierarchyGroup(group.name, group.levelType, group.parentId));
+
+  if (data === {}) {
+    throw new AppError('Error creating hierarchy group!', 400, 'error-creating-hierarchy-group');
+  }
+
+  return { permission_group: data, statusCode: 201 };
+};
+
+const updateHierarchyGroup = async (id, group) => {
+  const { data } = await executeQueryAndHandleErrors(
+    'update_hierarchy_group.sql',
+    HierarchyGroupWithID(id, group.name, group.levelType, group.parentId),
+  );
+
+  if (data === {}) {
+    throw new AppError('Error updating hierarchy group!', 404, 'error-updating-hierarchy-group-not-found');
+  }
+
+  return { permission_group: data, statusCode: 200 };
+};
+
+const deleteHierarchyGroup = async (id) => {
+  const permission_group = await executeQueryAndHandleErrors('delete_hierarchy_group.sql', HierarchyGroupID(id));
+
+  if (permission_group === {}) {
+    throw new AppError('Error deleting hierarchy group!', 404, 'error-deleting-hierarchy-group-not-found');
+  }
+
+  return { message: 'Hierarchy group deleted!', statusCode: 200 };
+};
+
+const addUserToHierarchyGroup = async (groupId, userId) => {
+  const { data } = await executeQueryAndHandleErrors('add_user_to_hierarchy_group.sql', HierarchyGroupUser(groupId, userId));
+
+  if (data === {}) {
+    throw new AppError('Error adding user to hierarchy group!', 404, 'error-adding-user-to-hierarchy-group-not-found');
+  }
+
+  return { message: 'User added to hierarchy group!', statusCode: 200 };
+};
+
+const removeUserFromHierarchyGroup = async (groupId, userId) => {
+  const { data } = await executeQueryAndHandleErrors('remove_user_from_hierarchy_group.sql', HierarchyGroupUser(groupId, userId));
+
+  if (data === {}) {
+    throw new AppError('Error removing user from hierarchy group!', 404, 'error-removing-user-from-hierarchy-group-not-found');
+  }
+
+  return { message: 'User removed from hierarchy group!', statusCode: 200 };
+};
+
+const getHierarchyGroup = async (id) => {
+  const { data } = await executeQueryAndHandleErrors('get_hierarchy_group.sql', HierarchyGroupID(id));
+  return { permission_group: data, statusCode: 200 };
+};
+
+const getUserHierarchyGroups = async (id) => {
+  const { data } = await executeQueryAndHandleErrors('get_user_hierarchy_groups.sql', Client(id));
+  return { permission_groups: data, statusCode: 200 };
+};
+
+const getUserVKTOGroups = async (id) => {
+  const { data } = await executeQueryAndHandleErrors('get_user_vkto_groups.sql', Client(id));
+  return { vktos: data, statusCode: 200 };
+};
+
+const getGroupVKTOs = async (id) => {
+  const { data } = await executeQueryAndHandleErrors('get_group_vkto_groups.sql', HierarchyGroupID(id));
+  return { vktos: data, statusCode: 200 };
+};
+
 module.exports = {
   getGroups,
   getGroup,
@@ -148,4 +225,13 @@ module.exports = {
   createPermissionProperties,
   addUserToGroup,
   removeUserFromGroup,
+  createHierarchyGroup,
+  updateHierarchyGroup,
+  deleteHierarchyGroup,
+  addUserToHierarchyGroup,
+  removeUserFromHierarchyGroup,
+  getHierarchyGroup,
+  getUserHierarchyGroups,
+  getUserVKTOGroups,
+  getGroupVKTOs,
 };

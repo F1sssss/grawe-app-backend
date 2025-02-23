@@ -5,6 +5,16 @@ const router = require('express').Router();
 
 router.use(authController.protect);
 
+router.get('/hierarchy/groups', accessControlController.getHierarchyGroups);
+router.get('/hierarchy/groups/:id', accessControlController.getHierarchyGroup);
+router.get('/hierarchy/my-groups', accessControlController.getUserHierarchyGroups);
+router.get('/hierarchy/groups/:id/vktos', accessControlController.getGroupVKTOs);
+router.post('/hierarchy/groups', accessControlController.createHierarchyGroup);
+router.patch('/hierarchy/groups/:id', accessControlController.updateHierarchyGroup);
+router.delete('/hierarchy/groups/:id', accessControlController.deleteHierarchyGroup);
+router.post('/hierarchy/groups/:id/users', accessControlController.addUserToHierarchyGroup);
+router.delete('/hierarchy/groups/:id/users', accessControlController.removeUserFromHierarchyGroup);
+
 router.get('/groups', accessControlController.getGroups);
 router.get('/groups/:id', accessControlController.getGroup);
 router.post('/groups', accessControlController.createGroup);

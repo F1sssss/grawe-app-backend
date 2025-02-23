@@ -180,6 +180,27 @@ const PermissionProperties = (id_permission, id_permission_group) => {
   return [new SQLParam('id_permission', id_permission, sql.Int), new SQLParam('id_permission_group', id_permission_group, sql.Int)];
 };
 
+const HierarchyGroup = (name, levelType, parentId) => {
+  return [new SQLParam('name', name, sql.VarChar), new SQLParam('levelType', levelType, sql.Int), new SQLParam('parentId', parentId, sql.Int)];
+};
+
+const HierarchyGroupWithID = (id, name, levelType, parentId) => {
+  return [
+    new SQLParam('id', id, sql.Int),
+    new SQLParam('name', name, sql.VarChar),
+    new SQLParam('levelType', levelType, sql.Int),
+    new SQLParam('parentId', parentId, sql.Int),
+  ];
+};
+
+const HierarchyGroupID = (id) => {
+  return [new SQLParam('id', id, sql.Int)];
+};
+
+const HierarchyGroupUser = (groupId, userId) => {
+  return [new SQLParam('groupId', groupId, sql.Int), new SQLParam('userId', userId, sql.Int)];
+};
+
 module.exports = {
   Policy,
   Policy_dateFrom_dateTo,
@@ -211,4 +232,8 @@ module.exports = {
   PermissionProperties,
   ClientGroup,
   Client_dateFrom_dateTo_ZK_AO,
+  HierarchyGroup,
+  HierarchyGroupWithID,
+  HierarchyGroupID,
+  HierarchyGroupUser,
 };

@@ -2,7 +2,7 @@ if OBJECT_ID('tempdb..#temp') is not null
 drop table #temp
 
 
-select
+select distinct
 bra_obnr															polisa,
 isnull(cast(((select top 1 p.pko_wertedatumsaldo*-1  from praemienkonto p (nolock) where pko_wertedatum <= @dateTo and p.pko_obnr=b.bra_obnr order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)										[dospjela_potrazivanja],
 dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [bruto_polisirana_premija],
