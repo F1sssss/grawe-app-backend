@@ -134,6 +134,22 @@ const removeUserFromHierarchyGroup = CatchAsync(async (req, res) => {
   await ResponseHandler(accessControlService.removeUserFromHierarchyGroupService(req.params.id, req.query.user), res, { statusCode: 204 });
 });
 
+const getUsersInHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getUsersInHierarchyGroupService(req.params.id), res);
+});
+
+const addVKTOToHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.addVKTOToHierarchyGroupService(req.params.id, req.query.vkto), res, {
+    statusCode: 200,
+  });
+});
+
+const removeVKTOFromHierarchyGroup = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.removeVKTOFromHierarchyGroupService(req.params.id, req.query.vkto), res, {
+    statusCode: 200,
+  });
+});
+
 module.exports = {
   getGroups,
   getGroup,
@@ -161,4 +177,7 @@ module.exports = {
   deleteHierarchyGroup,
   addUserToHierarchyGroup,
   removeUserFromHierarchyGroup,
+  getUsersInHierarchyGroup,
+  addVKTOToHierarchyGroup,
+  removeVKTOFromHierarchyGroup,
 };

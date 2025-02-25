@@ -16,6 +16,7 @@ const {
   HierarchyGroupWithID,
   HierarchyGroupID,
   HierarchyGroupUser,
+  HierarchyGroupVKTO,
 } = require('./params');
 
 const getPermissions = async () => {
@@ -141,7 +142,7 @@ const createHierarchyGroup = async (group) => {
     throw new AppError('Error creating hierarchy group!', 400, 'error-creating-hierarchy-group');
   }
 
-  return { permission_group: data, statusCode: 201 };
+  return { permission_group: data || {}, statusCode: 201 };
 };
 
 const updateHierarchyGroup = async (id, group) => {
@@ -154,7 +155,7 @@ const updateHierarchyGroup = async (id, group) => {
     throw new AppError('Error updating hierarchy group!', 404, 'error-updating-hierarchy-group-not-found');
   }
 
-  return { permission_group: data, statusCode: 200 };
+  return { permission_group: data || {}, statusCode: 200 };
 };
 
 const deleteHierarchyGroup = async (id) => {
@@ -189,22 +190,42 @@ const removeUserFromHierarchyGroup = async (groupId, userId) => {
 
 const getHierarchyGroup = async (id) => {
   const { data } = await executeQueryAndHandleErrors('get_hierarchy_group.sql', HierarchyGroupID(id));
-  return { permission_group: data, statusCode: 200 };
+  return { permission_group: data || {}, statusCode: 200 };
 };
 
 const getUserHierarchyGroups = async (id) => {
   const { data } = await executeQueryAndHandleErrors('get_user_hierarchy_groups.sql', Client(id));
-  return { permission_groups: data, statusCode: 200 };
+  return { permission_groups: returnArray(data), statusCode: 200 };
 };
 
 const getUserVKTOGroups = async (id) => {
   const { data } = await executeQueryAndHandleErrors('get_user_vkto_groups.sql', Client(id));
-  return { vktos: data, statusCode: 200 };
+  return { vktos: returnArray(data), statusCode: 200 };
 };
 
 const getGroupVKTOs = async (id) => {
   const { data } = await executeQueryAndHandleErrors('get_group_vkto_groups.sql', HierarchyGroupID(id));
-  return { vktos: data, statusCode: 200 };
+  return { vktos: returnArray(data), statusCode: 200 };
+};
+
+const getHierarchyGroups = async () => {
+  const { data } = await executeQueryAndHandleErrors('get_hierarchy_groups.sql');
+  return { permission_groups: returnArray(data), statusCode: 200 };
+};
+
+const getUsersInHierarchyGroup = async (groupId) => {
+  const { data } = await executeQueryAndHandleErrors('get_users_in_hierarchy_group.sql', HierarchyGroupID(groupId));
+  return { users: returnArray(data), statusCode: 200 };
+};
+
+const addVKTOToHierarchyGroup = async (groupId, vkto) => {
+  await executeQueryAndHandleErrors('add_vkto_to_hierarchy_group.sql', HierarchyGroupVKTO(groupId, vkto));
+  return { message: 'VKTO added to hierarchy group!', statusCode: 200 };
+};
+
+const removeVKTOFromHierarchyGroup = async (groupId, vkto) => {
+  await executeQueryAndHandleErrors('remove_vkto_from_hierarchy_group.sql', HierarchyGroupVKTO(groupId, vkto));
+  return { message: 'VKTO removed from hierarchy group!', statusCode: 200 };
 };
 
 module.exports = {
@@ -234,4 +255,8 @@ module.exports = {
   getUserHierarchyGroups,
   getUserVKTOGroups,
   getGroupVKTOs,
+  getUsersInHierarchyGroup,
+  addVKTOToHierarchyGroup,
+  removeVKTOFromHierarchyGroup,
+  getHierarchyGroups,
 };

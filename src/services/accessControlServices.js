@@ -112,7 +112,7 @@ const deletePermissionService = async (id) => {
 const getUsersGroupsService = async (id) => {
   const cacheKey = `permission-groups-user-${id}`;
   const { permissions, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getUsersGroups(id));
-  return { permissions: permissions.id === null ? {} : permissions, statusCode };
+  return { permissions: permissions && permissions.id === null ? {} : permissions, statusCode };
 };
 
 const addUserToGroupService = async (id, user) => {
@@ -189,6 +189,26 @@ const removeUserFromHierarchyGroupService = async (groupId, userId) => {
   return { message, statusCode };
 };
 
+const getUsersInHierarchyGroupService = async (groupId) => {
+  const cacheKey = `hierarchy-group-users-${groupId}`;
+  const { users, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getUsersInHierarchyGroup(groupId));
+  return { users, statusCode };
+};
+
+const addVKTOToHierarchyGroupService = async (groupId, vkto) => {
+  await delKey('hierarchy-groups');
+  await delKey(`group-vktos-${groupId}`);
+  const { message, statusCode } = await accessControlQueries.addVKTOToHierarchyGroup(groupId, vkto);
+  return { message, statusCode };
+};
+
+const removeVKTOFromHierarchyGroupService = async (groupId, vkto) => {
+  await delKey('hierarchy-groups');
+  await delKey(`group-vktos-${groupId}`);
+  const { message, statusCode } = await accessControlQueries.removeVKTOFromHierarchyGroup(groupId, vkto);
+  return { message, statusCode };
+};
+
 module.exports = {
   getGroupsService,
   getGroupService,
@@ -216,4 +236,7 @@ module.exports = {
   deleteHierarchyGroupService,
   addUserToHierarchyGroupService,
   removeUserFromHierarchyGroupService,
+  getUsersInHierarchyGroupService,
+  addVKTOToHierarchyGroupService,
+  removeVKTOFromHierarchyGroupService,
 };

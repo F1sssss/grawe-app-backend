@@ -197,6 +197,10 @@ const HierarchyGroupID = (id) => {
   return [new SQLParam('id', id, sql.Int)];
 };
 
+const HierarchyGroupVKTO = (groupId, vkto) => {
+  return [new SQLParam('groupId', groupId, sql.Int), new SQLParam('vkto', vkto, sql.VarChar)];
+};
+
 const HierarchyGroupUser = (groupId, userId) => {
   return [new SQLParam('groupId', groupId, sql.Int), new SQLParam('userId', userId, sql.Int)];
 };
@@ -236,4 +240,5 @@ module.exports = {
   HierarchyGroupWithID,
   HierarchyGroupID,
   HierarchyGroupUser,
+  HierarchyGroupVKTO,
 };

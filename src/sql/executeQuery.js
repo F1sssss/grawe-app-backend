@@ -12,9 +12,12 @@ const executeQueryAndHandleErrors = async (queryFileName, params = [], multiple 
   return { data: data === undefined ? {} : data, statusCode: 200 };
 };
 
-function returnArray(data) {
-  return Array.isArray(data) ? data : Object.keys(data).length === 0 ? [] : [data];
-}
+const returnArray = (data) => {
+  if (!data) {
+    return [];
+  }
+  return Array.isArray(data) ? data : [data];
+};
 
 module.exports = {
   executeQueryAndHandleErrors,
