@@ -2,10 +2,12 @@ const express = require('express');
 const clientController = require('../controllers/clientController');
 const accessControlMiddleware = require('../middlewares/accessControl');
 const authController = require('../controllers/authController');
+const setupUserContext = require('../middlewares/userContext');
 
 const router = express.Router();
 
 router.use(authController.protect);
+router.use(setupUserContext.setupUserContext);
 
 router.get('/:id/history', clientController.getClientHistory);
 router.get('/:id/info', clientController.getClientInfo);

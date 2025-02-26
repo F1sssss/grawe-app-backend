@@ -150,6 +150,12 @@ const removeVKTOFromHierarchyGroup = CatchAsync(async (req, res) => {
   });
 });
 
+const getAllVKTOs = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getAllVKTOsService(), res, {
+    statusCode: 200,
+  });
+});
+
 module.exports = {
   getGroups,
   getGroup,
@@ -180,4 +186,5 @@ module.exports = {
   getUsersInHierarchyGroup,
   addVKTOToHierarchyGroup,
   removeVKTOFromHierarchyGroup,
+  getAllVKTOs,
 };

@@ -10,6 +10,7 @@ router.get('/hierarchy/groups/:id', accessControlController.getHierarchyGroup);
 router.get('/hierarchy/my-groups', accessControlController.getUserHierarchyGroups);
 router.get('/hierarchy/groups/:id/vktos', accessControlController.getGroupVKTOs);
 router.get('/hierarchy/groups/:id/users', accessControlController.getUsersInHierarchyGroup);
+router.get('/hierarchy/vktos', accessControlController.getAllVKTOs);
 router.post('/hierarchy/groups', accessControlController.createHierarchyGroup);
 router.post('/hierarchy/groups/:id/vktos', accessControlController.addVKTOToHierarchyGroup);
 router.patch('/hierarchy/groups/:id', accessControlController.updateHierarchyGroup);

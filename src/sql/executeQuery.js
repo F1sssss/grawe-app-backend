@@ -13,7 +13,7 @@ const executeQueryAndHandleErrors = async (queryFileName, params = [], multiple 
 };
 
 const returnArray = (data) => {
-  if (!data) {
+  if (!data || (typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0)) {
     return [];
   }
   return Array.isArray(data) ? data : [data];

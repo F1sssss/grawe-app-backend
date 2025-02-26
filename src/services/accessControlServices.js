@@ -209,6 +209,12 @@ const removeVKTOFromHierarchyGroupService = async (groupId, vkto) => {
   return { message, statusCode };
 };
 
+const getAllVKTOsService = async () => {
+  const cacheKey = 'vkto';
+  const { vktos, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getAllVKTOs());
+  return { vktos, statusCode };
+};
+
 module.exports = {
   getGroupsService,
   getGroupService,
@@ -239,4 +245,5 @@ module.exports = {
   getUsersInHierarchyGroupService,
   addVKTOToHierarchyGroupService,
   removeVKTOFromHierarchyGroupService,
+  getAllVKTOsService,
 };

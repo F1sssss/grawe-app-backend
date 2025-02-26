@@ -205,6 +205,10 @@ const HierarchyGroupUser = (groupId, userId) => {
   return [new SQLParam('groupId', groupId, sql.Int), new SQLParam('userId', userId, sql.Int)];
 };
 
+const UserID = (id) => {
+  return [new SQLParam('id', id, sql.Int)];
+};
+
 module.exports = {
   Policy,
   Policy_dateFrom_dateTo,
@@ -241,4 +245,5 @@ module.exports = {
   HierarchyGroupID,
   HierarchyGroupUser,
   HierarchyGroupVKTO,
+  UserID,
 };

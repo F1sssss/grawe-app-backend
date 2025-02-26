@@ -17,6 +17,7 @@ const {
   HierarchyGroupID,
   HierarchyGroupUser,
   HierarchyGroupVKTO,
+  UserID,
 } = require('./params');
 
 const getPermissions = async () => {
@@ -194,7 +195,7 @@ const getHierarchyGroup = async (id) => {
 };
 
 const getUserHierarchyGroups = async (id) => {
-  const { data } = await executeQueryAndHandleErrors('get_user_hierarchy_groups.sql', Client(id));
+  const { data } = await executeQueryAndHandleErrors('get_user_hierarchy_groups.sql', UserID(id));
   return { permission_groups: returnArray(data), statusCode: 200 };
 };
 
@@ -228,6 +229,11 @@ const removeVKTOFromHierarchyGroup = async (groupId, vkto) => {
   return { message: 'VKTO removed from hierarchy group!', statusCode: 200 };
 };
 
+const getAllVKTOs = async () => {
+  const { data } = await executeQueryAndHandleErrors('get_vkto_all.sql');
+  return { vktos: returnArray(data), statusCode: 200 };
+};
+
 module.exports = {
   getGroups,
   getGroup,
@@ -259,4 +265,5 @@ module.exports = {
   addVKTOToHierarchyGroup,
   removeVKTOFromHierarchyGroup,
   getHierarchyGroups,
+  getAllVKTOs,
 };

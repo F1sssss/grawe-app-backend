@@ -10,15 +10,23 @@ BEGIN
     THROW 50000, 'Hierarchy group not found', 1;
 END
 
--- Check if user is already in the group
-IF EXISTS (SELECT 1 FROM gr_user_hierarchy_groups WHERE user_id = @userId AND group_id = @groupId)
+BEGIN TRANSACTION
+
+-- Check if user is already in a group
+IF EXISTS (SELECT 1 FROM gr_user_hierarchy_groups WHERE user_id = @userId)
 BEGIN
-    THROW 50000, 'User is already in this group', 1;
+
+    DELETE FROM gr_user_hierarchy_groups
+    WHERE user_id = @userId
+
 END
 
 -- Add user to hierarchy group
 INSERT INTO gr_user_hierarchy_groups (user_id, group_id)
 VALUES (@userId, @groupId)
+
+
+COMMIT TRANSACTION
 
 -- Return the added mapping
 SELECT * FROM gr_user_hierarchy_groups

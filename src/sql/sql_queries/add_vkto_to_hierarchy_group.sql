@@ -1,4 +1,4 @@
-IF NOT EXISTS (SELECT 1 FROM mitarbeiter WHERE ma_vkto = @vkto)
+IF NOT EXISTS (SELECT 1 FROM vertrag WHERE vtg_pol_vkto = @vkto)
 BEGIN
     THROW 50000, 'VKTO not found', 1;
 END
@@ -10,9 +10,9 @@ BEGIN
 END
 
 
-IF EXISTS (SELECT 1 FROM gr_hierarchy_vkto_mapping WHERE group_id = @groupId AND vkto = @vkto)
+IF EXISTS (SELECT 1 FROM gr_hierarchy_vkto_mapping WHERE vkto = @vkto)
 BEGIN
-    THROW 50000, 'VKTO is already in this group', 1;
+    THROW 50000, 'VKTO is already in a group', 1;
 END
 
 

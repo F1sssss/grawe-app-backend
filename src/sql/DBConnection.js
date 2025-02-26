@@ -3,6 +3,7 @@ const { ConnectionPool } = require('mssql');
 const AppError = require('../utils/AppError');
 const logger = require('../logging/winstonSetup');
 const loadSqlQueries = require('./sql_queries/loadSQLQueries');
+const { getUserContext } = require('../middlewares/userContext');
 
 module.exports = class DBConnection {
   constructor(config) {
@@ -23,6 +24,7 @@ module.exports = class DBConnection {
       throw new AppError('Error connecting to MSSQL database' + err.message, 500, 'error-connecting-to-db');
     }
   }
+
   async close() {
     try {
       await this.pool.close();
@@ -42,9 +44,13 @@ module.exports = class DBConnection {
         query = await loadSqlQueries(query);
       }
 
-      // Add parameters to the request
+      const userContext = getUserContext();
+      if (userContext && userContext.userId) {
+        request.input('currentUserId', userContext.userId);
+      }
+
       params.forEach((param) => {
-        request.input(param.name, param.value);
+        request.input(param.name, param.type, param.value);
       });
 
       request.multiple = multipleResultSets;
@@ -64,7 +70,11 @@ module.exports = class DBConnection {
     try {
       const request = await this.pool.request();
 
-      // Add parameters to the request
+      const userContext = getUserContext();
+      if (userContext && userContext.userId) {
+        request.input('currentUserId', userContext.userId);
+      }
+
       params.forEach((param) => {
         request.input(param.name, param.type, param.value);
       });
