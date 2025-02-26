@@ -1,5 +1,3 @@
-// Descripton: This file is the main file of the application. It contains all the middlewares and the global middlewares. It also contains security middlewares like CORS, helmet, cookie-parser, xss-clean, compression.
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -7,10 +5,11 @@ const cookieParser = require('cookie-parser');
 const xss = require('xss-clean');
 const compression = require('compression');
 const morgan = require('morgan');
-
+const config = require('./src/config/config');
 const errorHandler = require('./src/controllers/errorController');
 const logger = require('./src/logging/winstonSetup');
 
+// Routes
 const userRouter = require('./src/routes/userRouter');
 const policyRouter = require('./src/routes/policyRouter');
 const reportsRouter = require('./src/routes/reportsRouter');
@@ -23,38 +22,92 @@ const dashboardRouter = require('./src/routes/dashboardRouter');
 //start express app
 const app = express();
 
-app.use(
-  morgan(
-    function (tokens, req, res) {
-      return JSON.stringify({
-        method: tokens.method(req, res),
-        url: tokens.url(req, res),
-        status: Number.parseFloat(tokens.status(req, res)),
-        content_length: tokens.res(req, res, 'content-length'),
-        response_time: Number.parseFloat(tokens['response-time'](req, res)),
-      });
-    },
-    {
-      stream: {
-        write: (message) => {
-          const data = JSON.parse(message);
-          logger.http('Express request', data);
+if (config.isProduction) {
+  app.enable('trust proxy');
+}
+
+if (config.isDevelopment) {
+  // More detailed logging in development
+  app.use(
+    morgan(
+      function (tokens, req, res) {
+        return JSON.stringify({
+          method: tokens.method(req, res),
+          url: tokens.url(req, res),
+          status: Number.parseFloat(tokens.status(req, res)),
+          content_length: tokens.res(req, res, 'content-length'),
+          response_time: Number.parseFloat(tokens['response-time'](req, res)),
+        });
+      },
+      {
+        stream: {
+          write: (message) => {
+            const data = JSON.parse(message);
+            logger.http('Express request', data);
+          },
         },
       },
-    },
-  ),
-);
+    ),
+  );
+} else {
+  // Simpler logging in production
+  app.use(
+    morgan('combined', {
+      stream: {
+        write: (message) => {
+          logger.http(message.trim());
+        },
+      },
+    }),
+  );
+}
 
-app.enable('trust proxy');
-
-//Global Middlewares
+const corsOptions = {
+  origin: config.isProduction
+    ? [config.frontend.url] // Restrict to specific origins in production
+    : '*', // Allow all origins in development
+  credentials: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
 
 //Implement CORS
 app.use(cors());
 app.options('*', cors());
 
-//Set security HTTP headers
-app.use(helmet());
+// Security HTTP headers
+// Apply stricter security in production
+if (config.isProduction) {
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"], // Adjust as needed
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'self'"],
+        },
+      },
+      referrerPolicy: { policy: 'same-origin' },
+      xssFilter: true,
+      noSniff: true,
+      hsts: {
+        maxAge: 15552000, // 180 days
+        includeSubDomains: true,
+        preload: true,
+      },
+    }),
+  );
+} else {
+  // Simpler helmet config for development
+  app.use(helmet());
+}
 
 //Body parser, reading data from body into req.body
 
@@ -78,6 +131,14 @@ app.use(`/api/${process.env.API_VERSION}/search`, searchRouter);
 app.use(`/api/${process.env.API_VERSION}/errors`, employeeErrorRouter);
 app.use(`/api/${process.env.API_VERSION}/permissions`, permissionRouter);
 app.use(`/api/${process.env.API_VERSION}/dashboard`, dashboardRouter);
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    environment: config.env,
+    timestamp: new Date().toISOString(),
+  });
+});
 
 //Error handling middleware
 app.use(errorHandler);

@@ -10,7 +10,10 @@ const server = app.listen(DB_CONFIG.port, async () => {
   console.log(`🌐 App running on port  ${DB_CONFIG.port}...`);
   try {
     await connection.connect();
-    await cachingService.connectToRedis();
+
+    if (process.env.NODE_ENV !== 'test') {
+      await cachingService.connectToRedis();
+    }
   } catch (err) {
     console.log(err);
     process.exit(1);

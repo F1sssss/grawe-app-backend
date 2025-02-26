@@ -16,8 +16,6 @@ RUN apt-get update && apt-get install -y \
     odbcinst \
     libodbc1
 
-
-
 # Set environment variables for MSSQL drivers
 ENV ACCEPT_EULA=Y
 ENV PATH="/opt/mssql-tools/bin:${PATH}"
@@ -34,15 +32,15 @@ RUN pip install \
     xlrd \
     redis
 
-# Copy the docker-init.sh script to the container
+# Copy configuration files
 COPY ./superset/docker-init.sh /app/docker-init.sh
 COPY ./superset/superset_config.py /app/
+
+# Set the configuration path
 ENV SUPERSET_CONFIG_PATH /app/superset_config.py
+
+# Make the initialization script executable
+RUN chmod +x /app/docker-init.sh
 
 # Set the entrypoint to run the docker-init.sh script
 ENTRYPOINT ["bash", "/app/docker-init.sh"]
-
-
-
-# Set the command to run the Superset web server
-#CMD ["superset", "run", "-p", "8088", "-h"]

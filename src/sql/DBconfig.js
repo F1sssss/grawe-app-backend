@@ -1,56 +1,26 @@
 'use strict';
 
-const assert = require('assert');
-const dotenv = require('dotenv');
+const config = require('../config/config');
 
-dotenv.config({
-  path: '.env',
-});
-
-// capture the environment variables the application needs
-const {
-  PORT,
-  HOST,
-  HOST_URL,
-  COOKIE_ENCRYPT_PWD,
-  SQL_SERVER,
-  SQL_DATABASE,
-  SQL_USER,
-  SQL_PASSWORD,
-  JWT_ENCRYPT_PWD,
-  JWT_EXPIRES_IN,
-  SENDGRID_API_KEY,
-} = process.env;
-
-const isEncrypt = process.env.SQL_ENCRYPT === 'true';
-
-// validate the required configuration information
-[PORT, HOST, HOST_URL, COOKIE_ENCRYPT_PWD, SQL_SERVER, SQL_DATABASE, SQL_USER, SQL_PASSWORD].map((item) => {
-  assert(item, `${item} configuration is required.`);
-});
-
-// export the configuration information
+// Export the configuration information
 module.exports = {
-  port: PORT,
-  host: HOST,
-  url: HOST_URL,
-  cookiePwd: COOKIE_ENCRYPT_PWD,
-  encrypt: JWT_ENCRYPT_PWD,
-  expiresIn: JWT_EXPIRES_IN,
-  mailAPI: SENDGRID_API_KEY,
+  port: config.server.port,
+  host: config.server.host,
+  url: config.server.url,
+  cookiePwd: config.auth.cookie.secret,
+  encrypt: config.auth.jwt.secret,
+  expiresIn: config.auth.jwt.expiresIn,
+  mailAPI: config.email.apiKey,
   sql: {
-    server: SQL_SERVER,
-    database: SQL_DATABASE,
-    user: SQL_USER,
-    password: SQL_PASSWORD,
-    pool: {
-      max: 20,
-      min: 0,
-      idleTimeoutMillis: 30000,
-    },
+    server: config.database.connection.server,
+    database: config.database.connection.database,
+    user: config.database.connection.user,
+    password: config.database.connection.password,
+    port: config.database.connection.port,
+    pool: config.database.connection.pool,
     options: {
-      encrypt: isEncrypt,
-      requestTimeout: 1200000,
+      encrypt: config.database.connection.encrypt,
+      requestTimeout: config.database.connection.options.requestTimeout,
     },
   },
 };
