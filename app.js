@@ -7,7 +7,9 @@ const compression = require('compression');
 const morgan = require('morgan');
 const config = require('./src/config/config');
 const errorHandler = require('./src/controllers/errorController');
-const logger = require('./src/logging/winstonSetup');
+const initializeLogging = require('./src/logging');
+const { requestContextMiddleware } = require('./src/middlewares/requestContext'); // New import
+const requestLogger = require('./src/middlewares/requestLogger'); // New import
 
 // Routes
 const userRouter = require('./src/routes/userRouter');
@@ -26,41 +28,9 @@ if (config.isProduction) {
   app.enable('trust proxy');
 }
 
-if (config.isDevelopment) {
-  // More detailed logging in development
-  app.use(
-    morgan(
-      function (tokens, req, res) {
-        return JSON.stringify({
-          method: tokens.method(req, res),
-          url: tokens.url(req, res),
-          status: Number.parseFloat(tokens.status(req, res)),
-          content_length: tokens.res(req, res, 'content-length'),
-          response_time: Number.parseFloat(tokens['response-time'](req, res)),
-        });
-      },
-      {
-        stream: {
-          write: (message) => {
-            const data = JSON.parse(message);
-            logger.http('Express request', data);
-          },
-        },
-      },
-    ),
-  );
-} else {
-  // Simpler logging in production
-  app.use(
-    morgan('combined', {
-      stream: {
-        write: (message) => {
-          logger.http(message.trim());
-        },
-      },
-    }),
-  );
-}
+const { logger, performanceMonitor } = initializeLogging();
+app.use(requestContextMiddleware);
+app.use(requestLogger);
 
 const corsOptions = {
   origin: config.isProduction

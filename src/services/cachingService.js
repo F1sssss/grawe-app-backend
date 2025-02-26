@@ -28,7 +28,6 @@ function createClient() {
   });
 
   client.on('connect', () => {
-    console.log('💰 Connected to Redis server');
     logger.info('Connected to Redis server');
   });
 

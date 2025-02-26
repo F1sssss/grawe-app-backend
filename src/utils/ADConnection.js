@@ -21,7 +21,7 @@ async function authenticateUser(username, password) {
   return new Promise((resolve, reject) => {
     ad.authenticate(userPrincipalName, password, async (err, auth) => {
       if (err) {
-        logger.error(`Error authenticating user from AD ${username}: ${err}`);
+        logger.warn(`Error authenticating user from AD ${username}: ${err}`);
         return reject(err);
       }
 
