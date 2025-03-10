@@ -2,6 +2,9 @@ FROM mcr.microsoft.com/mssql/server:2019-latest
 
 USER root
 
+ENV ACCEPT_EULA=Y
+ENV MSSQL_PID=Developer
+
 RUN apt-get update
 RUN apt-get install -yq gnupg gnupg2 gnupg1 curl apt-transport-https
 

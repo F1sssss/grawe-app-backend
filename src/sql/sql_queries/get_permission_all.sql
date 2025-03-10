@@ -1,5 +1,5 @@
 select distinct
-    permission_id as id,
+    permission_id,
     route,
     method,
     visibility,

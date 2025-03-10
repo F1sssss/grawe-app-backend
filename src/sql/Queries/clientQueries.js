@@ -3,12 +3,10 @@ const { executeQueryAndHandleErrors, returnArray } = require('../executeQuery');
 
 const getClientInfo = async (id) => {
   const { data, statusCode } = await executeQueryAndHandleErrors('get_client_info.sql', Client(id));
-  const policies = await executeQueryAndHandleErrors('get_client_policies.sql', Client(id));
 
   return {
     client: {
       ...data,
-      policies: returnArray(policies['data']) !== null && returnArray(policies['data']) !== undefined ? returnArray(policies['data']) : [],
     },
     statusCode,
   };
@@ -42,7 +40,10 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
       dani_kasnjenja,
       klijent_ukupna_potrazivanja,
       klijent_dospjela_potrazivanja,
-      policies: returnArray(policies['client']) !== null && returnArray(policies['client']) !== undefined,
+      policies:
+        Array.isArray(policies['data']) && policies['data'] !== null && policies['data'] !== undefined
+          ? policies['data']?.map((obj) => Object.values(obj)[0]) ?? []
+          : [],
     },
     statusCode,
   };

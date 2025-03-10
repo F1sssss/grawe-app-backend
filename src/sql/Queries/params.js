@@ -180,6 +180,14 @@ const PermissionProperties = (id_permission, id_permission_group) => {
   return [new SQLParam('id_permission', id_permission, sql.Int), new SQLParam('id_permission_group', id_permission_group, sql.Int)];
 };
 
+const PermissionProperty = (permission_id, property_id) => {
+  return [new SQLParam('permission_id', permission_id, sql.Int), new SQLParam('property_id', property_id, sql.Int)];
+};
+
+const PropertyPath = (property_path) => {
+  return [new SQLParam('property_path', property_path, sql.VarChar)];
+};
+
 const HierarchyGroup = (name, levelType, parentId) => {
   return [new SQLParam('name', name, sql.VarChar), new SQLParam('levelType', levelType, sql.Int), new SQLParam('parentId', parentId, sql.Int)];
 };
@@ -246,4 +254,6 @@ module.exports = {
   HierarchyGroupUser,
   HierarchyGroupVKTO,
   UserID,
+  PermissionProperty,
+  PropertyPath,
 };

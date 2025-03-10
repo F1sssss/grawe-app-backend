@@ -1,7 +1,7 @@
 if (@id_permission_group is null or @id_permission_group=0)
     begin
         select distinct
-            permission_id as id,
+            permission_id,
             route,
             method,
             name,
@@ -17,7 +17,7 @@ if (@id_permission_group is null or @id_permission_group=0)
 else
     begin
         select distinct
-            permission_id as id,
+            permission_id,
             route,
             method,
             name,

@@ -1,27 +1,13 @@
-FROM node:19
-
-
-
+FROM node:19-alpine
 
 WORKDIR /usr/src/app
+
 
 COPY package*.json ./
 
 
-WORKDIR /usr/src/app
-RUN npm install -g nodemon
+RUN npm install -g nodemon && \
+    npm install
 
-
-WORKDIR /usr/src/app
-RUN npm install @types/node
-
-WORKDIR /usr/src/app
-RUN npm install @sendgrid/mail
-
-WORKDIR /usr/src/app
-RUN npm install
-
-
-COPY . .
 
 CMD [ "npm", "start" ]

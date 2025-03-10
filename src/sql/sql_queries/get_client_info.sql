@@ -1,7 +1,7 @@
 SELECT TOP 1
     [klijent],
     convert(varchar,[datum_rodjenja], 104) as [datum_rodjenja],
-    [embg/pib],
+    [embg/pib]          as [jmbg_pib],
     ISNULL([adresa], '') as [adresa],
     ISNULL([mjesto], '') as [mjesto],
     ISNULL([telefon1], '') as [telefon1],

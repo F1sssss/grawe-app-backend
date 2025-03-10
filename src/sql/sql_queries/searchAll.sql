@@ -64,6 +64,11 @@ LEFT JOIN
     CTE_Branche b ON b.bra_vertragid = v.vtg_vertragid
 */
 
-select * from gr_clients_all
+select
+distinct
+klijent,
+[embg/pib],
+polisa
+from gr_clients_all
 
 --	select * from gr_v_clients_all

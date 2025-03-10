@@ -86,7 +86,7 @@ GROUP BY polisa;
 
 
 DECLARE @ClientInfo TABLE (
-                              polisa INT PRIMARY KEY,
+                              polisa INT ,
                               klijent NVARCHAR(100),
                               datum_rodjenja DATE,
                               [embg/pib] VARCHAR(20),
@@ -115,7 +115,7 @@ DECLARE @klijent_neto_polisirana_premija DECIMAL(18,2) = 0;
 DECLARE @klijent_dospjela_potrazivanja DECIMAL(18,2) = 0;
 
 INSERT INTO @ClientInfo
-SELECT
+SELECT DISTINCT
     gc.polisa,
     gc.klijent,
     gc.datum_rodjenja,

@@ -18,6 +18,8 @@ const {
   HierarchyGroupUser,
   HierarchyGroupVKTO,
   UserID,
+  PropertyPath,
+  PermissionProperty,
 } = require('./params');
 
 const getPermissions = async () => {
@@ -99,6 +101,31 @@ const getGroup = async (id) => {
 const createGroup = async (group) => {
   const { data } = await executeQueryAndHandleErrors('add_permission_group.sql', PermissionGroupName(group));
   return { permission_group: data, statusCode: 201 };
+};
+
+const getProperties = async () => {
+  const { data } = await executeQueryAndHandleErrors('get_properties.sql');
+  return { properties: returnArray(data), statusCode: 200 };
+};
+
+const getPermissionProperties = async (permissionId) => {
+  const { data } = await executeQueryAndHandleErrors('get_permission_properties.sql', PermissionID(permissionId));
+  return { properties: returnArray(data), statusCode: 200 };
+};
+
+const addProperty = async (propertyPath) => {
+  const { data } = await executeQueryAndHandleErrors('add_permission_property.sql', PropertyPath(propertyPath));
+  return { property: data, statusCode: 201 };
+};
+
+const addPermissionProperty = async (permissionId, propertyId) => {
+  const { data } = await executeQueryAndHandleErrors('add_permission_property.sql', PermissionProperty(permissionId, propertyId));
+  return { property: data, statusCode: 201 };
+};
+
+const deletePermissionProperty = async (permissionId, propertyId) => {
+  await executeQueryAndHandleErrors('delete_permission_property.sql', PermissionProperty(permissionId, propertyId));
+  return { message: 'Permission property deleted!', statusCode: 200 };
 };
 
 const updateGroup = async (id, group) => {
@@ -251,6 +278,11 @@ module.exports = {
   getUsersGroups,
   createPermissionProperties,
   addUserToGroup,
+  getProperties,
+  getPermissionProperties,
+  addProperty,
+  addPermissionProperty,
+  deletePermissionProperty,
   removeUserFromGroup,
   createHierarchyGroup,
   updateHierarchyGroup,
