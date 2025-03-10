@@ -19,5 +19,5 @@ left join kunde k1 (nolock) on k1.kun_kundenkz=v.vtg_kundenkz_2
 left join vertrag_kunde vk(nolock) on vk.vtk_obnr=b.bra_obnr and vk.vtk_kundenkz=k.kun_kundenkz and vk.vtk_kundenrolle='PA'  --Ugovarac
 left join vertrag_kunde vk1(nolock) on vk.vtk_obnr=b.bra_obnr and vk1.vtk_kundenkz=k1.kun_kundenkz and vk.vtk_kundenrolle='VN' --Osiguranik
 where  bra_obnr=@policy
-
+--and gc.vkto in (SELECT cast(vkto as int) FROM [dbo].[fn_get_user_accessible_vktos](@userID))
 

@@ -1,6 +1,4 @@
-
 WITH user_base_groups AS (
-    -- Get the specific group the user is assigned to
     SELECT
         id,
         name,
@@ -11,7 +9,6 @@ WITH user_base_groups AS (
     WHERE ug.user_id = @id
 ),
 recursive_child_groups AS (
-    -- Start with the user's base groups
     SELECT
         g.id,
         g.name,
@@ -23,7 +20,6 @@ recursive_child_groups AS (
 
     UNION ALL
 
-    -- Recursively get all descendant groups
     SELECT
         g.id,
         g.name,
@@ -32,7 +28,7 @@ recursive_child_groups AS (
         rc.depth + 1
     FROM gr_hierarchy_groups g
     JOIN recursive_child_groups rc ON g.parent_id = rc.id
-    WHERE rc.depth < 10  -- Prevent infinite recursion
+    WHERE rc.depth < 10
 )
 SELECT DISTINCT
     rg.id,

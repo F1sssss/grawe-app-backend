@@ -8,10 +8,7 @@ const getClientInfo = async (id) => {
   return {
     client: {
       ...data,
-      policies:
-        Array.isArray(policies['client']) && policies['client'] !== null && policies['client'] !== undefined
-          ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? []
-          : [],
+      policies: returnArray(policies['data']) !== null && returnArray(policies['data']) !== undefined ? returnArray(policies['data']) : [],
     },
     statusCode,
   };
@@ -26,7 +23,7 @@ const getClientHistory = async (id, dateFrom, dateTo) => {
 };
 
 const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
-  let { data, statusCode } = await executeQueryAndHandleErrors('get_client_all.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
+  let { data, statusCode } = await executeQueryAndHandleErrors('get_client_analytical_info.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
   data = returnArray(data);
   const policies = await executeQueryAndHandleErrors('get_client_active_policies.sql', Client_dateFrom_dateTo(id, dateFrom, dateTo));
 
@@ -45,10 +42,7 @@ const getClientAnalyticalInfo = async (id, dateFrom, dateTo) => {
       dani_kasnjenja,
       klijent_ukupna_potrazivanja,
       klijent_dospjela_potrazivanja,
-      policies:
-        Array.isArray(policies['client']) && policies['client'] !== null && policies['client'] !== undefined
-          ? policies['client']?.map((obj) => Object.values(obj)[0]) ?? []
-          : [],
+      policies: returnArray(policies['client']) !== null && returnArray(policies['client']) !== undefined,
     },
     statusCode,
   };

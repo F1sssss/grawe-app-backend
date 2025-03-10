@@ -9,8 +9,12 @@ begin
 end
 
 
-insert into gr_permission_groups (name)
-values (@name);
+insert into gr_permission_groups (
+                                  name
+)
+values (
+        @name
+       );
 
 
 select id, name from gr_permission_groups where id = @@identity;

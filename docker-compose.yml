@@ -9,7 +9,7 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=development
-      - DB_HOST=localhost
+      - DB_HOST=${SQL_SERVER}
       - DB_USER=SA
       - DB_PASSWORD=${SQL_PASSWORD}
       - REDIS_HOST=172.23.0.22
@@ -28,16 +28,20 @@ services:
     command: ["sh", "-c", "sleep 30 && npm start"]
 
   mssql-server:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    build:
+      context: .
+      dockerfile: sqlserver.Dockerfile
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=${SQL_PASSWORD}
+      - MSSQL_PID=Developer
     ports:
       - '1433:1433'
     volumes:
       - ./mssql-data/data:/var/opt/mssql/data
       - ./mssql-data/log:/var/opt/mssql/log
       - ./mssql-data/secrets:/var/opt/mssql/secrets
+      - ./migrations:/usr/src/sql
     networks:
       mynetwork:
         ipv4_address: 172.23.0.20
@@ -64,7 +68,6 @@ services:
     build:
       context: .
       dockerfile: ./superset/Dockerfile
-    image: apache/superset:latest
     ports:
       - '8088:8088'
     depends_on:
