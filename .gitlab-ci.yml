@@ -1,21 +1,21 @@
-stages:
-  - smoke_test
-
-variables:
-  COMPOSE_PROJECT_NAME: grawe_ci
-
 smoke-test:
   stage: smoke_test
   image: docker:24.0
   tags:
     - windows
   services:
-    - docker:24.0-dind
+    - name: docker:24.0-dind
+      alias: docker
+      command: ["--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   before_script:
     - apk add --no-cache docker-compose
   script:
+    - docker info  # Verify Docker daemon connection
     - docker-compose up -d
-    - sleep 20
+    - sleep 30  # Increased sleep time for services to start
     - docker-compose ps
     - docker-compose logs --tail=50 server
   after_script:
