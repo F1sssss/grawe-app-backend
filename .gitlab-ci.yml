@@ -14,6 +14,8 @@ before_script:
 
 smoke-test:
   stage: smoke_test
+  tags:
+    - windows
   script:
     - docker-compose up -d
     - sleep 30  # Wait for services to initialize
