@@ -6,6 +6,8 @@ variables:
 smoke-test:
   stage: smoke_test
   image: docker:24.0
+  tags:
+    - windows
   services:
     - docker:24.0-dind
   variables:
