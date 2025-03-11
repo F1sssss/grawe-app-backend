@@ -1,5 +1,6 @@
 stages:
   - build_test
+
 build-test:
   stage: build_test
   image: docker:24.0
@@ -14,39 +15,91 @@ build-test:
     GIT_DEPTH: 0  # Full clone
   before_script:
     - apk add --no-cache docker-compose curl bash git
-  script:
-    # Verify local files
-    - echo "Local Project Files:"
+    # Debug - show current directory contents
+    - echo "Current directory contents:"
     - ls -la
-
-    # Detailed Docker build log
-    - docker-compose build server --no-cache
-
-    # Start services
-    - docker-compose up -d
-    - sleep 60
-
-    # Extensive container file investigation
+  script:
+    # Create a modified docker-compose file that doesn't use volume mounts
     - |
-      docker-compose exec server sh -c "
-        echo '--- Current Directory ---';
-        pwd;
-        echo '--- Root Directory Contents ---';
-        ls -la /;
-        echo '--- Working Directory Contents ---';
-        ls -la /usr/src/app;
-        echo '--- Detailed File Tree ---';
-        find /usr/src/app | sort
-      "
-
-    # Detailed container inspection
-    - docker inspect grawe_ci-server-1
-
-    # Docker build logs
-    - docker history grawe_ci-server
-
-    # Additional logging
-    - docker-compose logs server
+      cat > docker-compose.ci.yml << EOF
+      version: '3'
+      
+      services:
+        server:
+          build:
+            context: .
+            dockerfile: Dockerfile.ci
+          ports:
+            - '3000:3000'
+          environment:
+            - NODE_ENV=development
+            - DB_HOST=mssql-server
+            - DB_USER=SA
+            - DB_PASSWORD=${SQL_PASSWORD}
+            - REDIS_HOST=cache
+            - REDIS_PORT=6379
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
+          restart: on-failure
+          depends_on:
+            - mssql-server
+            - cache
+      
+        mssql-server:
+          image: mcr.microsoft.com/mssql/server:2019-latest
+          environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=${SQL_PASSWORD}
+            - MSSQL_PID=Developer
+          ports:
+            - '1433:1433'
+      
+        cache:
+          image: redis:7.2-alpine
+          ports:
+            - '6379:6379'
+          environment:
+            - ProtectedMode=no
+      EOF
+    
+    # Create a special Dockerfile for CI that copies files instead of mounting them
+    - |
+      cat > Dockerfile.ci << EOF
+      FROM node:19.9
+      
+      WORKDIR /usr/src/app
+      
+      # Copy all source files (not using volume mounts)
+      COPY . .
+      
+      # Install dependencies
+      RUN npm install
+      
+      # Expose the application port
+      EXPOSE 3000
+      
+      # Start the application
+      CMD ["npm", "start"]
+      EOF
+    
+    # Build and start the containers
+    - docker-compose -f docker-compose.ci.yml build
+    - docker-compose -f docker-compose.ci.yml up -d
+    - sleep 30
+    
+    # Check if server is running
+    - docker-compose -f docker-compose.ci.yml ps
+    - docker-compose -f docker-compose.ci.yml logs server
+    
+    # Run a health check
+    - |
+      CONTAINER_ID=$(docker-compose -f docker-compose.ci.yml ps -q server)
+      if [ -z "$CONTAINER_ID" ]; then
+        echo "Server container is not running!"
+        exit 1
+      else
+        echo "Server container is running: $CONTAINER_ID"
+        docker exec $CONTAINER_ID ls -la /usr/src/app
+      fi
   after_script:
-    - docker-compose down -v
+    - docker-compose -f docker-compose.ci.yml down -v
   when: manual
