@@ -9,25 +9,38 @@ build-test:
   services:
     - docker:24.0-dind
   variables:
-    #DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TLS_CERTDIR: ''
     DOCKER_DRIVER: overlay2
     COMPOSE_PROJECT_NAME: grawe_ci
-
+    GIT_DEPTH: 0  # Full clone
   before_script:
-    - apk add --no-cache docker-compose curl bash
-
+    - apk add --no-cache docker-compose curl bash git
   script:
-    - docker-compose config
+    # Extensive file diagnostics
+    - echo "Local Project Files:"
+    - ls -la
+    - echo "Git Clone Information:"
+    - git log -1
 
+    # Build with no cache to ensure fresh copy
+    - docker-compose build --no-cache server
+
+    # Start services
     - docker-compose up -d
 
+    # Extended diagnostics
     - sleep 60
-    - docker-compose ps
-    - docker-compose logs server
+    - |
+      docker-compose exec server sh -c "
+        echo 'Project Root Contents:';
+        ls -la /usr/src/app;
+        echo '---';
+        echo 'Detailed File Tree:';
+        find /usr/src/app -type f | sort
+      "
 
+    # Additional logging
+    - docker-compose logs server
   after_script:
     - docker-compose down -v
-
-
   when: manual
