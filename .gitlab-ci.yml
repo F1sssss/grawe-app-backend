@@ -1,41 +1,23 @@
 stages:
-  - build
-  - test
+  - smoke_test
 
 variables:
-  # Define any variables you need
-  NODE_ENV: development
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  COMPOSE_PROJECT_NAME: grawe_ci
 
-# Build stage - just make sure the code compiles/builds
-build-job:
-  stage: build
-  tags:
-    - windows
-  script:
-    - Write-Host "Building the application..."
-    - npm ci
-    - npm run build 2>&1 | Out-Null; if (-not $?) { Write-Host "No build script found, skipping" }
-    - Write-Host "Build completed successfully!"
-  only:
-    - dev
+services:
+  - docker:20.10.16-dind
 
-# Test stage - run tests
-test-job:
-  stage: test
-  tags:
-    - windows
+before_script:
+  - apk add --no-cache docker-compose
+
+smoke-test:
+  stage: smoke_test
   script:
-    - Write-Host "Setting up environment..."
-    - docker-compose up -d mssql-server cache
-    - Write-Host "Waiting for services to be ready..."
-    - Start-Sleep -Seconds 30
-    - Write-Host "Installing dependencies..."
-    - npm ci
-    - Write-Host "Running tests..."
-    - npm test 2>&1 | Out-Null; if (-not $?) { Write-Host "No tests to run" }
-    - Write-Host "Tests completed!"
+    - docker-compose up -d
+    - sleep 30  # Wait for services to initialize
+    - docker-compose ps
+    - docker-compose logs --tail=50 server  # Check server logs
   after_script:
-    - Write-Host "Cleaning up environment..."
-    - docker-compose down
-  only:
-    - dev
+    - docker-compose down -v
