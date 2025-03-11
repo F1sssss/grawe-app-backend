@@ -1,3 +1,9 @@
+stages:
+  - smoke_test
+
+variables:
+  COMPOSE_PROJECT_NAME: grawe_ci
+
 smoke-test:
   stage: smoke_test
   image: docker:24.0
