@@ -1,10 +1,8 @@
 stages:
-  - smoke_test
+  - build_test
 
-variables:
-  COMPOSE_PROJECT_NAME: grawe_ci
-smoke-test:
-  stage: smoke_test
+build-test:
+  stage: build_test
   image: docker:24.0
   tags:
     - windows
@@ -20,27 +18,10 @@ smoke-test:
     - apk add --no-cache docker-compose curl bash
 
   script:
-    # Debugging and verification steps
-    - dockerd --version
-    - docker version
-    - docker info
-    - docker-compose version
-
-    # Additional system diagnostics
-    - echo "System Info:"
-    - uname -a
-    - echo "Network Configuration:"
-    - ip addr
-    - echo "Docker Socket Permissions:"
-    - ls -l /var/run/docker.sock
-
-    # Validate Docker Compose configuration
     - docker-compose config
 
-    # Run services
     - docker-compose up -d
 
-    # Extended service check
     - sleep 60
     - docker-compose ps
     - docker-compose logs server
