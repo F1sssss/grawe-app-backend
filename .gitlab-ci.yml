@@ -2,24 +2,21 @@ stages:
   - smoke_test
 
 variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_DRIVER: overlay2
   COMPOSE_PROJECT_NAME: grawe_ci
-
-services:
-  - docker:20.10.16-dind
-
-before_script:
-  - apk add --no-cache docker-compose
 
 smoke-test:
   stage: smoke_test
+  image: docker:24.0
   tags:
     - windows
+  services:
+    - docker:24.0-dind
+  before_script:
+    - apk add --no-cache docker-compose
   script:
     - docker-compose up -d
-    - sleep 30  # Wait for services to initialize
+    - sleep 20
     - docker-compose ps
-    - docker-compose logs --tail=50 server  # Check server logs
+    - docker-compose logs --tail=50 server
   after_script:
     - docker-compose down -v
