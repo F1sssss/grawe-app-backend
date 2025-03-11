@@ -3,61 +3,48 @@ stages:
 
 variables:
   COMPOSE_PROJECT_NAME: grawe_ci
-
 smoke-test:
   stage: smoke_test
   image: docker:24.0
-  tags:
-    - windows
   services:
-    - name: docker:24.0-dind
-      alias: docker
-      command: ["--tls=false", "--experimental"]
+    - docker:24.0-dind
   variables:
-    # Docker configuration
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     DOCKER_DRIVER: overlay2
-    
-    # Compose project name
     COMPOSE_PROJECT_NAME: grawe_ci
 
   before_script:
-    - apk add --no-cache docker-compose
-    - |
-      # Detailed Docker daemon connection troubleshooting
-      echo "Attempting to connect to Docker daemon..."
-      timeout 60 sh -c '
-        while ! docker info >/dev/null 2>&1; do 
-          echo "Waiting for Docker daemon to start...";
-          sleep 3;
-        done
-      ' || {
-        echo "Docker daemon failed to start within 60 seconds";
-        echo "Service logs:";
-        docker logs $(docker ps -f name=docker -q);
-        exit 1;
-      }
+    - apk add --no-cache docker-compose curl bash
 
   script:
-    # Extensive debugging
+    # Debugging and verification steps
+    - dockerd --version
     - docker version
     - docker info
     - docker-compose version
-    
-    # Validate compose configuration
+
+    # Additional system diagnostics
+    - echo "System Info:"
+    - uname -a
+    - echo "Network Configuration:"
+    - ip addr
+    - echo "Docker Socket Permissions:"
+    - ls -l /var/run/docker.sock
+
+    # Validate Docker Compose configuration
     - docker-compose config
-    
-    # Run services with extended logging
-    - docker-compose up -d --verbose
-    
-    # Extended wait and status check
-    - sleep 90
+
+    # Run services
+    - docker-compose up -d
+
+    # Extended service check
+    - sleep 60
     - docker-compose ps
     - docker-compose logs server
 
   after_script:
     - docker-compose down -v
-  
-  # Manual trigger for easier debugging
+
+
   when: manual
