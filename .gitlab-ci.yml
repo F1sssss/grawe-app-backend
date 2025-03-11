@@ -1,23 +1,54 @@
 stages:
-  - smoke_test
+  - build_test
 
-variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_DRIVER: overlay2
-  COMPOSE_PROJECT_NAME: grawe_ci
-
-services:
-  - docker:20.10.16-dind
-
-before_script:
-  - apk add --no-cache docker-compose
-
-smoke-test:
-  stage: smoke_test
+build-test:
+  stage: build_test
+  image: docker:24.0
+  tags:
+    - windows
+  services:
+    - docker:24.0-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ''
+    DOCKER_DRIVER: overlay2
+    COMPOSE_PROJECT_NAME: grawe_ci
+  before_script:
+    - apk add --no-cache docker-compose curl bash git
   script:
-    - docker-compose up -d
-    - sleep 30  # Wait for services to initialize
-    - docker-compose ps
-    - docker-compose logs --tail=50 server  # Check server logs
+    # Build and start containers using the CI Docker Compose file
+    - docker-compose -f docker-compose.ci.yml build
+    - docker-compose -f docker-compose.ci.yml up -d
+    - sleep 30
+
+    # Check if the containers are running
+    - docker-compose -f docker-compose.ci.yml ps
+
+    # Check the application logs
+    - docker-compose -f docker-compose.ci.yml logs server
+
+    # Verify the server is running
+    - |
+      CONTAINER_ID=$(docker-compose -f docker-compose.ci.yml ps -q server)
+      if [ -z "$CONTAINER_ID" ]; then
+        echo "Server container is not running!"
+        exit 1
+      else
+        echo "Server container is running: $CONTAINER_ID"
+        # Check if the application is actually running
+        echo "Checking if the application is up..."
+      
+        # Wait a bit more for the application to fully start
+        sleep 10
+      
+        # Try to access the application
+        if docker exec $CONTAINER_ID curl -s http://localhost:3000/api/v1/health; then
+          echo "Application is up and running!"
+        else
+          echo "Application is not responding. Checking logs:"
+          docker-compose -f docker-compose.ci.yml logs server
+          exit 1
+        fi
+      fi
   after_script:
-    - docker-compose down -v
+    - docker-compose -f docker-compose.ci.yml down -v
+  when: manual
