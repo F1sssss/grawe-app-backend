@@ -198,6 +198,8 @@ const createHierarchyGroupService = async (group) => {
 const updateHierarchyGroupService = async (id, group) => {
   await delKey('hierarchy-groups');
   await delKey(`hierarchy-group-${id}`);
+  await delKey(`group-vktos-${id}`);
+  await delKey(`vkto`);
   const { permission_group, statusCode } = await accessControlQueries.updateHierarchyGroup(id, group);
   return { permission_group, statusCode };
 };
@@ -232,6 +234,8 @@ const getUsersInHierarchyGroupService = async (groupId) => {
 const addVKTOToHierarchyGroupService = async (groupId, vkto) => {
   await delKey('hierarchy-groups');
   await delKey(`group-vktos-${groupId}`);
+  await delKey(`group-vktos-${groupId}`);
+  await delKey(`vkto`);
   const { message, statusCode } = await accessControlQueries.addVKTOToHierarchyGroup(groupId, vkto);
   return { message, statusCode };
 };
@@ -239,6 +243,7 @@ const addVKTOToHierarchyGroupService = async (groupId, vkto) => {
 const removeVKTOFromHierarchyGroupService = async (groupId, vkto) => {
   await delKey('hierarchy-groups');
   await delKey(`group-vktos-${groupId}`);
+  await delKey(`vkto`);
   const { message, statusCode } = await accessControlQueries.removeVKTOFromHierarchyGroup(groupId, vkto);
   return { message, statusCode };
 };

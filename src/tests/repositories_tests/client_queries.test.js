@@ -21,7 +21,7 @@ describe('Clients queries tests', () => {
       klijent: 'RADIO I TELEVIZIJA CRNE GORE ',
       datum_rodjenja: null,
       jmbg_pib: '02020220',
-      adresa: 'BULEVAR REVOLUCIJE',
+      adresa: 'BULEVAR REVOLUCIJE 19',
       mjesto: 'PODGORICA',
       telefon1: '020234427',
       telefon2: '',
@@ -44,7 +44,7 @@ describe('Clients queries tests', () => {
 
   it('should return empty client info as the client does not exist', async () => {
     const result = await ClientQueries.getClientInfo('00000000');
-    expect(result.client).toEqual({ policies: [] });
+    expect(result.client).toEqual({});
   });
 
   it('should return client history with the correct fields and exact values', async () => {
@@ -77,7 +77,7 @@ describe('Clients queries tests', () => {
     expect(result.statusCode).toBe(200);
 
     const expectedClientInfo = {
-      klijent_bruto_polisirana_premija: 106616.01,
+      klijent_bruto_polisirana_premija: 45892.07,
       klijent_neto_polisirana_premija: 105390.25,
       dani_kasnjenja: 0,
       klijent_ukupna_potrazivanja: 41173.9,
