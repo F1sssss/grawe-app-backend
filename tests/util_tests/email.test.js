@@ -1,4 +1,4 @@
-const Email = require('../../utils/Email/Email');
+const Email = require('../../src/utils/Email/Email');
 const sgMail = require('@sendgrid/mail');
 const logger = require('../../logging/winstonSetup');
 
