@@ -10,5 +10,5 @@ where (case when len(FORMAT(kun_yu_persnr, '0'))=12 then '0'+kun_yu_persnr else 
 or  kun_zuname like '%' + @search + '%'
 or  kun_vorname like '%' + @search + '%'
 or  cast(b.bra_obnr as varchar) like '%' + @search + '%'
-) --and v.vtg_pol_vkto IN (SELECT cast(vkto as int) FROM [dbo].[fn_get_user_accessible_vktos](1))
+) and v.vtg_pol_vkto IN (SELECT cast(vkto as int) FROM [dbo].[fn_get_user_accessible_vktos](@currentUserID))
 

@@ -4,7 +4,6 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const xss = require('xss-clean');
 const compression = require('compression');
-const morgan = require('morgan');
 const config = require('./src/config/config');
 const errorHandler = require('./src/controllers/errorController');
 const initializeLogging = require('./src/logging');
@@ -28,7 +27,6 @@ if (config.isProduction) {
   app.enable('trust proxy');
 }
 
-const { logger, performanceMonitor } = initializeLogging();
 app.use(requestContextMiddleware);
 app.use(requestLogger);
 
@@ -102,7 +100,7 @@ app.use(`/api/${process.env.API_VERSION}/errors`, employeeErrorRouter);
 app.use(`/api/${process.env.API_VERSION}/permissions`, permissionRouter);
 app.use(`/api/${process.env.API_VERSION}/dashboard`, dashboardRouter);
 
-app.get('/health', (req, res) => {
+app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
   res.status(200).json({
     status: 'ok',
     environment: config.env,

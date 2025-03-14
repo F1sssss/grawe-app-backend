@@ -1,0 +1,71 @@
+stages:
+  - test
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+test_app:
+  image: docker:24.0
+  services:
+    - name: docker:dind
+      alias: docker
+      command: ["--tls=false"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  stage: test
+  before_script:
+    - apk add --no-cache docker-compose curl bash
+    - |
+      # Wait for Docker daemon to be ready
+      for i in $(seq 1 30); do
+        docker info && break
+        sleep 1
+      done
+  script:
+    - echo "Building and starting services..."
+    - docker-compose -f docker-compose.ci.yml build
+    - docker-compose -f docker-compose.ci.yml up -d
+    
+    # Display service status
+    - docker-compose -f docker-compose.ci.yml ps
+    
+    # Wait for everything to initialize
+    - echo "Waiting for services to start..."
+    - sleep 20
+    
+    # Testing health check connectivity
+    - |
+      APP_CONTAINER=$(docker-compose -f docker-compose.ci.yml ps -q app)
+      echo "Testing app connectivity..."
+      for i in {1..10}; do
+        echo "Attempt $i/10..."
+        if docker exec $APP_CONTAINER curl -s http://localhost:3000/api/v1/health; then
+          echo "✅ Application is responding!"
+          break
+        else
+          if [ $i -eq 10 ]; then
+            echo "❌ Application failed to respond after all attempts"
+            docker-compose -f docker-compose.ci.yml logs app
+            exit 1
+          fi
+          echo "Not responding yet, waiting..."
+          sleep 10
+        fi
+      done
+    
+    - echo "Running application tests..."
+    - mkdir -p test-results
+    - |
+      if docker exec $APP_CONTAINER sh -c "npm test > /tmp/test-output.txt 2>&1"; then
+        echo "✅ Tests passed successfully!"
+        docker exec $APP_CONTAINER sh -c "tail -n 15 /tmp/test-output.txt"
+      else
+        echo "❌ Tests failed"
+        docker exec $APP_CONTAINER sh -c "tail -n 25 /tmp/test-output.txt"
+        exit 1
+      fi
+    - echo "All tests completed successfully"
+  after_script:
+    - docker-compose -f docker-compose.ci.yml down -v
+  when: manual

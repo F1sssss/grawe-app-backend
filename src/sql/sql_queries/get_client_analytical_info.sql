@@ -1,76 +1,73 @@
-if OBJECT_ID('tempdb..#temp') is not null
-drop table #temp
 
+DECLARE @ClientPolicies TABLE (
+                                  polisa int PRIMARY KEY,
+                                  status_polise VARCHAR(50),
+                                  dani_kasnjenja INT
+                              );
 
-select
-b.bra_obnr															[polisa],
-dbo.Bruto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [bruto_polisirana_premija],
-dbo.Neto_polisirana_premija_polisa(b.bra_obnr,@dateTo)			    [neto_polisirana_premija],
-cast(0 as integer)													[dani_kasnjenja],
-isnull(cast(((select top 1  p.pko_wertedatumsaldo
-from praemienkonto p (nolock)
-where pko_wertedatum <= @dateTo and
-p.pko_obnr=b.bra_obnr 
-order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)	[dospjelo_potrazivanje],
-bra_bran																[bransa],
-kun_kundenkz,
-bra_vertragid
-into #temp
-from kunde k(nolock)
-join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
-join branche b (nolock) on b.bra_vertragid=v.vtg_vertragid
-where case when kun_steuer_nr is not null and  kun_steuer_nr<>'' then cast(kun_steuer_nr as varchar)
-      else
-      case when STR(kun_yu_persnr,12,0)<>'************'
-      	then '0' + STR(kun_yu_persnr,12,0)
-      else STR(kun_yu_persnr,13,0) end
-      end		=@id
-and
-(exists (select 1 from praemienkonto pk where pk.pko_obnr=b.bra_obnr  and pko_wertedatum between @dateFrom and @dateTo) or
-isnull(cast(((select top 1 p.pko_wertedatumsaldo from praemienkonto p (nolock) where pko_wertedatum <= @dateTo and p.pko_obnr=b.bra_obnr order by pko_wertedatum desc,pko_buch_nr desc )) as decimal(18,2)),0)<>0)
-OPTION(MAXDOP 8)
+INSERT INTO @ClientPolicies
+SELECT
+    gc.polisa,
+    gc.status_polise,
+    0 AS dani_kasnjenja
+FROM gr_clients_all gc WITH (NOLOCK)
+JOIN vertrag v WITH (NOLOCK) ON gc.polisa = v.vtg_obnr
+WHERE gc.[embg/pib] = @id
+--AND gc.vkto IN (SELECT vkto FROM dbo.fn_get_user_accessible_vktos(@currentUserID))
 
 
 
+DECLARE @LastBalance TABLE (
+                               polisa int,
+                               dospjela_potrazivanja DECIMAL(18,2),
+                               ukupno_zaduzeno DECIMAL(18,2),
+                               ukupno_placeno DECIMAL(18,2),
+                               dani_kasnjenja INT,
+                               status_polise VARCHAR(50)
+                           );
 
-create clustered index #tempIndx1
-on #temp(polisa)
-
-
-
-
-if OBJECT_ID('tempdb..#praemienkonto') is not null
-drop table #praemienkonto
-
-
-select *,convert(date,p.pko_wertedatum,104) wertedatum into #praemienkonto from praemienkonto p (nolock)
-where p.pko_obnr in (select distinct polisa from #temp)
-and p.pko_wertedatum <= @dateTo
-
-
-
-CREATE NONCLUSTERED INDEX #indx1
-ON #praemienkonto (pko_obnr,wertedatum asc,pko_buch_nr desc)
-INCLUDE (
-pko_betragsoll,
-pko_betraghaben,
-pko_wertedatumsaldo
+INSERT INTO @LastBalance
+SELECT
+    p.pko_obnr AS polisa,
+    p.pko_wertedatumsaldo * -1 AS dospjela_potrazivanja,
+    SUM(p.pko_betragsoll) AS ukupno_zaduzeno,
+    SUM(p.pko_betraghaben) AS ukupno_placeno,
+    MAX(cp.dani_kasnjenja) AS dani_kasnjenja,
+    MAX(cp.status_polise) AS status_polise
+FROM praemienkonto p WITH (NOLOCK)
+         JOIN @ClientPolicies cp ON p.pko_obnr = cp.polisa
+WHERE p.pko_wertedatum <= @dateTo
+  -- Join to get only the latest date for each policy
+  AND p.pko_wertedatum = (
+    SELECT MAX(p2.pko_wertedatum)
+    FROM praemienkonto p2 WITH (NOLOCK)
+    WHERE p2.pko_obnr = p.pko_obnr
+      AND p2.pko_wertedatum <= @dateTo
 )
-
-CREATE CLUSTERED INDEX #pko_clustered_inx_obnr
-ON #praemienkonto (pko_obnr)
+GROUP BY p.pko_obnr, p.pko_wertedatumsaldo;
 
 
-
-delete from #temp
-where not exists (select 1 from vertrag v where v.vtg_pol_bran=#temp.bransa and v.vtg_vertragid=#temp.bra_vertragid);
-
-
-
-select
-sum(bruto_polisirana_premija)	klijent_bruto_polisirana_premija,
-sum(neto_polisirana_premija)	klijent_neto_polisirana_premija,
-max(Dani_Kasnjenja)				klijent_dani_Kasnjenja,
-sum([dospjelo_potrazivanje]*-1)	klijent_dospjelo_potrazivanje,
-'-'								klijent_status_polise
-from #temp t
+-- Final query
+IF EXISTS (SELECT 1 FROM @LastBalance)
+    BEGIN
+        SELECT
+            SUM(dbo.Bruto_polisirana_premija_polisa(polisa, @dateTo)) AS klijent_bruto_polisirana_premija,
+            SUM(dbo.Neto_polisirana_premija_polisa(polisa, @dateTo)) AS klijent_neto_polisirana_premija,
+            SUM(dospjela_potrazivanja) AS klijent_dospjela_potrazivanja,
+            SUM(0) AS klijent_ukupna_potrazivanja,
+            MAX(dani_kasnjenja) dani_kasnjenja,
+            MAX(status_polise) status_polise
+        FROM @LastBalance;
+    END
+ELSE
+    BEGIN
+        -- Return empty result with correct structure
+        SELECT
+            CAST(NULL AS DECIMAL(18,2)) AS klijent_bruto_polisirana_premija,
+            CAST(NULL AS DECIMAL(18,2)) AS klijent_neto_polisirana_premija,
+            CAST(NULL AS DECIMAL(18,2)) AS klijent_dospjela_potrazivanja,
+            CAST(NULL AS DECIMAL(18,2)) AS klijent_ukupna_potrazivanja,
+            CAST(NULL AS INT) AS dani_kasnjenja,
+            CAST(NULL AS VARCHAR(50)) AS status_polise
+        WHERE 1 = 0;
+    END

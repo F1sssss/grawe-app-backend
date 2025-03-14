@@ -80,6 +80,32 @@ const deletePermission = CatchAsync(async (req, res) => {
   });
 });
 
+const getProperties = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getPropertiesService(), res);
+});
+
+const getPermissionProperties = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.getPermissionPropertiesService(req.params.id), res);
+});
+
+const addProperty = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.addPropertyService(req.body.property_path), res, {
+    statusCode: 201,
+  });
+});
+
+const addPermissionProperty = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.addPermissionPropertyService(req.params.id, req.body.property_id), res, {
+    statusCode: 201,
+  });
+});
+
+const deletePermissionProperty = CatchAsync(async (req, res) => {
+  await ResponseHandler(accessControlService.deletePermissionPropertyService(req.params.id, req.query.property_id), res, {
+    statusCode: 200,
+  });
+});
+
 const getUsersGroups = CatchAsync(async (req, res) => {
   await ResponseHandler(accessControlService.getUsersGroupsService(req.params.id), res, {
     statusCode: 200,
@@ -168,6 +194,11 @@ module.exports = {
   deleteGroup,
   updatePermissionRights,
   addPermissionToGroup,
+  getProperties,
+  getPermissionProperties,
+  addProperty,
+  addPermissionProperty,
+  deletePermissionProperty,
   removePermissionFromGroup,
   deletePermission,
   getUsersGroups,

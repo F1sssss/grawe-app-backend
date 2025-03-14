@@ -11,4 +11,5 @@ from
 praemienkonto (nolock)
 where pko_obnr=@policy
 and pko_wertedatum between @dateFrom and @dateTo
-order by pko_wertedatum asc
+--and gc.vkto in (SELECT cast(vkto as int) FROM [dbo].[fn_get_user_accessible_vktos](@userID))
+order by pko_wertedatum asc, pko_buch_nr asc

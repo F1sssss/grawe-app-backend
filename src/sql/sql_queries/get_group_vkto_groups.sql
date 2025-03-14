@@ -1,12 +1,10 @@
 WITH recursive_groups AS (
-    -- Start with the specified group
     SELECT id, name, level_type, parent_id
     FROM gr_hierarchy_groups
     WHERE id = @id
 
     UNION ALL
 
-    -- Recursively get all child groups
     SELECT g.id, g.name, g.level_type, g.parent_id
     FROM gr_hierarchy_groups g
     JOIN recursive_groups rg ON g.parent_id = rg.id

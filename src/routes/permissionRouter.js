@@ -38,6 +38,12 @@ router.patch('/properties/:id/rights', accessControlController.updatePermissionR
 //router.put('/groups/properties/', accessControlController.addPermissionToGroup);
 router.delete('/properties/:id', accessControlController.deletePermission);
 
+router.get('/property-list', accessControlController.getProperties);
+router.post('/property-list', accessControlController.addProperty);
+router.get('/properties/:id/property-items', accessControlController.getPermissionProperties);
+router.post('/properties/:id/property-items', accessControlController.addPermissionProperty);
+router.delete('/properties/:id/property-items', accessControlController.deletePermissionProperty);
+
 router.get('/users/:id/groups', accessControlController.getUsersGroups);
 
 module.exports = router;
