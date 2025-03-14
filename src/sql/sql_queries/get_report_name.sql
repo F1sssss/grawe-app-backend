@@ -21,6 +21,9 @@ select distinct
 [procedure_name]
 from #temp
 
-select [order],param_name,type,length,
-isnull((select sql from reports_param_options o where o.procedure_id=t.procedure_id and o.order_param=t.[order] and o.report_id=t.report_id),'') sql_query
+select [order],
+       param_name,
+       type,
+       length,
+       isnull((select sql from reports_param_options o where o.procedure_id=t.procedure_id and o.order_param=t.[order] and o.report_id=t.report_id),'') sql_query
 from #temp t

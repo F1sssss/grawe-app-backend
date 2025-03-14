@@ -1,7 +1,15 @@
-select polisa
-from gr_clients_all a
-where
-(exists (select 1 from praemienkonto pk where pk.pko_obnr=a.polisa and pko_wertedatum between @dateFrom and @dateTo) or
-isnull((select top 1 p.pko_wertedatumsaldo from praemienkonto p (nolock) where pko_wertedatum <= @dateTo and p.pko_obnr=a.polisa order by pko_wertedatum desc,pko_buch_nr desc),0)<>0)
-and a.[embg/pib]=@id
-group by polisa
+SELECT DISTINCT a.polisa
+FROM gr_clients_all a WITH (NOLOCK)
+INNER JOIN praemienkonto pk WITH (NOLOCK) ON pk.pko_obnr = a.polisa
+WHERE a.[embg/pib] = @id
+AND (
+    (pk.pko_wertedatum BETWEEN @dateFrom AND @dateTo) 
+    OR EXISTS (
+        SELECT 1 
+        FROM praemienkonto p WITH (NOLOCK)
+        WHERE p.pko_obnr = a.polisa
+        AND p.pko_wertedatum <= @dateTo
+        AND p.pko_wertedatumsaldo <> 0
+    )
+)
+--AND a.vkto IN (SELECT vkto FROM dbo.fn_get_user_accessible_vktos(@currentuserID))

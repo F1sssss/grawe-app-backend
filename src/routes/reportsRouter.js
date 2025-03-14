@@ -2,6 +2,7 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const reportsController = require('../controllers/reportsController');
 const cachingService = require('../services/cachingService');
+const accessControlMiddleware = require('../middlewares/accessControl');
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.get('/param/', reportsController.getParamValues);
 router.get('/procedure/', reportsController.searchProcedure);
 router.get('/generate/:id/', reportsController.generateReport);
 router.get('/:id/', reportsController.getReportById);
-router.get('/', reportsController.getReports);
+router.get('/', accessControlMiddleware, reportsController.getReports);
 router.get('/xls/:id/', reportsController.downloadReport);
 
 router.post('/*', cachingService.del);

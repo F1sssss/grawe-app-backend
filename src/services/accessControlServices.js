@@ -109,6 +109,40 @@ const deletePermissionService = async (id) => {
   return { message, statusCode };
 };
 
+const getPropertiesService = async () => {
+  const cacheKey = 'properties';
+  const { properties, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getProperties());
+  return { properties, statusCode };
+};
+
+const getPermissionPropertiesService = async (permissionId) => {
+  const cacheKey = `permission-properties-${permissionId}`;
+  const { properties, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getPermissionProperties(permissionId));
+  return { properties, statusCode };
+};
+
+const addPropertyService = async (propertyPath) => {
+  await delKey('properties');
+  const { property, statusCode } = await accessControlQueries.addProperty(propertyPath);
+  return { property, statusCode };
+};
+
+const addPermissionPropertyService = async (permissionId, propertyId) => {
+  await delKey('permissions');
+  await delKey('properties');
+  await delKey(`permission-properties-${permissionId}`);
+  const { property, statusCode } = await accessControlQueries.addPermissionProperty(permissionId, propertyId);
+  return { property, statusCode };
+};
+
+const deletePermissionPropertyService = async (permissionId, propertyId) => {
+  await delKey('permissions');
+  await delKey('properties');
+  await delKey(`permission-properties-${permissionId}`);
+  const { message, statusCode } = await accessControlQueries.deletePermissionProperty(permissionId, propertyId);
+  return { message, statusCode };
+};
+
 const getUsersGroupsService = async (id) => {
   const cacheKey = `permission-groups-user-${id}`;
   const { permissions, statusCode } = await cacheQuery(cacheKey, accessControlQueries.getUsersGroups(id));
@@ -226,6 +260,11 @@ module.exports = {
   updatePermissionService,
   deleteGroupService,
   updatePermissionRightsService,
+  getPropertiesService,
+  getPermissionPropertiesService,
+  addPropertyService,
+  addPermissionPropertyService,
+  deletePermissionPropertyService,
   addPermissionToGroupService,
   removePermissionFromGroupService,
   deletePermissionService,

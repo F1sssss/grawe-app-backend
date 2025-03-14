@@ -30,7 +30,8 @@ RUN pip install \
     psycopg2 \
     ldap3 \
     xlrd \
-    redis
+    redis \
+    flask-cors
 
 # Copy configuration files
 COPY ./superset/docker-init.sh /app/docker-init.sh

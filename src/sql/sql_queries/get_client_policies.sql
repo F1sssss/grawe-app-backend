@@ -1,12 +1,7 @@
-select
-b.bra_obnr
-from kunde k(nolock)
-left join vertrag v (nolock) on k.kun_kundenkz=v.vtg_kundenkz_1
-left join branche b (nolock) on b.bra_vertragid=v.vtg_vertragid
-where case when kun_steuer_nr is not null and kun_steuer_nr<>'' then cast(kun_steuer_nr as varchar)
-else
-case when STR(kun_yu_persnr,12,0)<>'************'
-	then '0' + STR(kun_yu_persnr,12,0)
-else STR(kun_yu_persnr,13,0) end
-end			=@id
-GROUP BY b.bra_obnr
+SELECT
+    gc.polisa
+FROM gr_clients_all gc WITH (NOLOCK)
+JOIN vertrag v WITH (NOLOCK) ON gc.polisa = v.vtg_obnr
+WHERE gc.[embg/pib] = @id
+--AND gc.vkto IN (SELECT vkto FROM dbo.fn_get_user_accessible_vktos(@currentUserID))
+GROUP BY gc.polisa

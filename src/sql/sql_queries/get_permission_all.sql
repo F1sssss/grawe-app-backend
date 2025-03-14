@@ -1,11 +1,9 @@
 select distinct
-p.id permission_id,
-p.route,
-p.method,
-p.visibility,
-p.name,
-p.description
-
-from gr_permission p
-
+    permission_id,
+    route,
+    method,
+    visibility,
+    name,
+    description
+from vw_all_permissions
 order by permission_id

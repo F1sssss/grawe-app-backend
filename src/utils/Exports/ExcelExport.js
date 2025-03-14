@@ -1,22 +1,31 @@
-const xlsx = require('xlsx');
+const ExcelJS = require('exceljs');
 const AppError = require('../AppError');
 const logger = require('../../logging/winstonSetup');
 
 module.exports = generateExcelFile = async (data) => {
-  const wb = xlsx.utils.book_new();
-  const ws = xlsx.utils.json_to_sheet(data);
+  try {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sheet1');
 
-  xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
+    // Add headers
+    if (data.length > 0) {
+      worksheet.columns = Object.keys(data[0]).map((key) => ({ header: key, key }));
+    }
 
-  logger.info('Excel file generated', { label: 'ExcelExport' });
+    // Add rows
+    worksheet.addRows(data);
 
-  if (!xlsx.write(wb, { bookType: 'xlsx', type: 'buffer' })) {
-    logger.error('Error generating excel file', { label: 'ExcelExport' });
+    logger.info('Excel file generated', { label: 'ExcelExport' });
+
+    // Generate buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    return {
+      excelBuffer: buffer,
+      statusCode: 200,
+    };
+  } catch (error) {
+    logger.error('Error generating excel file', { label: 'ExcelExport', error });
     throw new AppError('Error generating excel file', 500, 'error-generating-excel-file');
   }
-
-  return {
-    excelBuffer: xlsx.write(wb, { bookType: 'xlsx', type: 'buffer' }),
-    statusCode: 200,
-  };
 };

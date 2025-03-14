@@ -5,7 +5,6 @@ module.exports = errorHandler = (err, req, res, next) => {
   const handled_err = handleOtherErrors(err);
   const error = handled_err || err;
 
-  console.log('Test Error log', error);
   res.status(error.statusCode || 500).json({
     status: error.status,
     statusMessage:

@@ -14,8 +14,20 @@ begin
 end
 
 
-insert into gr_permission (route, method, name , description, visibility)
-values (@route, @method, @name, @description, @visibility)
+insert into gr_permission (
+                           route,
+                           method,
+                           name ,
+                           description,
+                           visibility
+)
+values (
+        @route,
+        @method,
+        @name,
+        @description,
+        @visibility
+       )
 
 
 select * from gr_permission (nolock)
