@@ -1,104 +1,51 @@
 services:
-  server:
+  app:
     build:
       context: .
       dockerfile: Dockerfile.ci
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
-      # Environment
       - NODE_ENV=development
-
-      # Server configuration
       - PORT=3000
       - HOST=localhost
-      - HOST_URL=http://localhost:3000
       - API_VERSION=v1
-
-      # Authentication
-      - JWT_ENCRYPT_PWD=superAwesomePasswordStringThatIsAtLeast32CharactersLong9128370128937120893712089ulasjhasldjhas!
-      - JWT_EXPIRES_IN=1h
-      - COOKIE_ENCRYPT_PWD=superAwesomePasswordStringThatIsAtLeast32CharactersLong9128370128937120893712089ulasjhasldjhas!
-
       # SQL Server connection
-      - SQL_USER=SA
+      - SQL_USER=sa
       - SQL_PASSWORD=Grawe123$
-      - SQL_DATABASE=GRAWE_WEBAPP
-      - SQL_SERVER=mssql-server
+      - SQL_DATABASE=GRAWE_DEV
+      - SQL_SERVER=172.28.1.2
       - SQL_ENCRYPT=false
-      - SQL_DATABASE_TEST=GRAWE_WEBAPP_TEST
-
-      # Redis connection
-      - REDIS_ENABLED=true
-      - REDIS_HOST=cache
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=Grawe123$
-
-      # SendGrid email service
-      - EMAIL_SERVICE=SendGrid
-      - EMAIL_FROM=filip.stankovic@prvabankacg.com
-      - EMAIL_FROM_NAME='Filip Stankovic'
-      - SENDGRID_API_KEY=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
-
-      # LDAP configuration
-      - LDAP_URL=ldaps://atrzdc1.grawe.at:636
-      - LDAP_BASE_DN=DC=grawe,DC=at
-      - LDAP_USERNAME=SRV_ME_RepApp_ldap@grawe.at
-      - LDAP_PASSWORD=0cyKIHm5eJqzjv
-
-      # Frontend URL
-      - FRONTEND_URL=http://localhost:5173
-
-      # CLIENT_IP
-      - CLIENT_IP=192.168.192.1
-
-      # Superset secrets and authentication
-      - SUPERSET_SECRET_KEY=G6@W3123!@*
-      - SECRET_KEY=27893u1298sj189sj1298uej29m3u13p12mp31283u129083m1
-      - SUPERSET_ADMIN_USERNAME=admin
-      - SUPERSET_ADMIN_PASSWORD=admin
-      - SUPERSET_ADMIN_EMAIL=admin@superset.com
-      - SUPERSET_ADMIN_FIRSTNAME=Test
-      - SUPERSET_ADMIN_LASTNAME=Test
-
-      # Superset server configuration
-      - SUPERSET_URL=http://superset:8088/api/v1/
-      - SUPERSET_PORT=8088
-      - SUPERSET_ENV=development
-      - SUPERSET_LOAD_EXAMPLES=no
-      - SUPERSET_FEATURE_EMBEDDED_SUPERSET=true
-      - MAPBOX_API_KEY=''
-      - SUPERSET_USERNAME=admin
-      - SUPERSET_PASSWORD=admin
-
-      # Superset database configuration
-      - POSTGRES_DB=superset
-      - POSTGRES_USER=superset
-      - POSTGRES_PASSWORD=superset
-      - DATABASE_DIALECT=postgresql
-      - SQLALCHEMY_DATABASE_URI=postgresql://superset:superset@superset-db:5432/superset
-
-      # Superset Redis cache configuration
-      - SUPERSET_REDIS_HOST=cache
-      - SUPERSET_REDIS_PORT=6379
-      - SUPERSET_REDIS_PASSWORD=Grawe123$
-      - SUPERSET_REDIS_DB=1
-    restart: on-failure
+      # Authentication
+      - JWT_ENCRYPT_PWD=CiEncrypt!
+      - JWT_EXPIRES_IN=1h
+      - COOKIE_ENCRYPT_PWD=CiEncrypt!
+    networks:
+      app-network:
+        ipv4_address: 172.28.1.3
+    command: ["sh", "-c", "sleep 30 && npm start"]
     depends_on:
       - mssql-server
-      - cache
 
   mssql-server:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    build:
+      context: .
+      dockerfile: mssql/sqlserver.ci.Dockerfile
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Grawe123$
       - MSSQL_PID=Developer
     ports:
       - '1433:1433'
+    networks:
+      app-network:
+        ipv4_address: 172.28.1.2
 
-  cache:
-    image: redis:7.2-alpine
-    command: redis-server --requirepass Grawe123$
-    ports:
-      - '6379:6379'
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.0/24
