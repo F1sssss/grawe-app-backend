@@ -22,7 +22,7 @@ RUN rm -rf /var/lib/apt/lists
 
 RUN mkdir -p /docker-entrypoint-initdb.d
 
-COPY mssql-entrypoint.sh /
+COPY ./mssql/mssql-entrypoint.sh /mssql-entrypoint.sh
 RUN chmod +x /mssql-entrypoint.sh
 
-ENTRYPOINT ["/mssql-entrypoint.sh"]
+ENTRYPOINT ["bash","/mssql-entrypoint.sh"]

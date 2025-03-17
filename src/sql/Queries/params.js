@@ -128,7 +128,7 @@ const Exception = (policy, id, exception, user) => {
 const Permission = (permission) => {
   return [
     new SQLParam('route', permission.route, sql.VarChar),
-    new SQLParam('visibility', permission.visibility, sql.VarChar),
+    new SQLParam('visibility', permission.visibility, sql.Int),
     new SQLParam('method', permission.method, sql.VarChar),
     new SQLParam('name', permission.name, sql.VarChar),
     new SQLParam('description', permission.description, sql.VarChar),

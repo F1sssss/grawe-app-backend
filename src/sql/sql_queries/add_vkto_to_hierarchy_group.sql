@@ -12,7 +12,10 @@ END
 
 IF EXISTS (SELECT 1 FROM gr_hierarchy_vkto_mapping WHERE vkto = @vkto)
 BEGIN
-    THROW 50000, 'VKTO is already in a group', 1;
+
+    DELETE FROM gr_hierarchy_vkto_mapping
+    WHERE vkto = @vkto;
+
 END
 
 

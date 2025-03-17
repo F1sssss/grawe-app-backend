@@ -68,7 +68,7 @@ const removePermissionFromGroup = async (group, permission) => {
 };
 
 const getUsersGroups = async (id) => {
-  const { data } = await executeQueryAndHandleErrors('get_permission_group_for_user.sql', Client(id));
+  const { data } = await executeQueryAndHandleErrors('get_permission_group_for_user.sql', UserID(id));
   return { permissions: returnArray(data), statusCode: 200 };
 };
 
@@ -89,7 +89,7 @@ const getGroups = async () => {
 };
 
 const getPermissionsByGroup = async (id) => {
-  const { data, statusCode } = await executeQueryAndHandleErrors('get_permission_group.sql', PermissionGroupID(id));
+  const { data, statusCode } = await executeQueryAndHandleErrors('get_permission_by_group.sql', PermissionGroupID(id));
   return { permissions: data, statusCode };
 };
 

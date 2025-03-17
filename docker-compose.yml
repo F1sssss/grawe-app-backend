@@ -38,7 +38,7 @@ services:
       - ./mssql-data/data:/var/opt/mssql/data
       - ./mssql-data/log:/var/opt/mssql/log
       - ./mssql-data/secrets:/var/opt/mssql/secrets
-      - ./migrations:/usr/src/sql
+      - ./mssql/migrations:/usr/src/sql
     networks:
       mynetwork:
         ipv4_address: 172.23.0.20

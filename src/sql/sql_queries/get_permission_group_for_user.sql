@@ -3,4 +3,4 @@ select distinct
     id,
     name
 from vw_user_permission_groups
-where user_id = 1
+where user_id = @id

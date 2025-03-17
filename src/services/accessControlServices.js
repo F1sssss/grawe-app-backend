@@ -214,6 +214,7 @@ const deleteHierarchyGroupService = async (id) => {
 const addUserToHierarchyGroupService = async (groupId, userId) => {
   await delKey('hierarchy-groups');
   await delKey(`user-hierarchy-groups-${userId}`);
+  await delKey(`hierarchy-group-users-${groupId}`);
   const { message, statusCode } = await accessControlQueries.addUserToHierarchyGroup(groupId, userId);
   return { message, statusCode };
 };
@@ -221,6 +222,7 @@ const addUserToHierarchyGroupService = async (groupId, userId) => {
 const removeUserFromHierarchyGroupService = async (groupId, userId) => {
   await delKey('hierarchy-groups');
   await delKey(`user-hierarchy-groups-${userId}`);
+  await delKey(`hierarchy-group-users-${groupId}`);
   const { message, statusCode } = await accessControlQueries.removeUserFromHierarchyGroup(groupId, userId);
   return { message, statusCode };
 };

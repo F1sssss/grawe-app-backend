@@ -7,4 +7,4 @@ select distinct
     read_right,
     write_right
 from vw_user_all_permissions
-where ID = 1
+where ID = @id

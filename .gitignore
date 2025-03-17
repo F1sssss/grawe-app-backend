@@ -153,4 +153,3 @@ src/tests/testing_values/*
 src/tests/testing_values
 
 superset/data/
-/migrations/
